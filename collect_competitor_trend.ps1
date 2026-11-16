@@ -262,14 +262,47 @@ foreach ($slug in $daangnSitemapIds) {
 }
 [System.IO.File]::WriteAllLines($daangnSitemapCsvPath, $smLines, $utf8Bom)
 
-# Collect Daangn Regional Hub Feeds for Detailed Vehicle RAW Data
+# Collect Daangn Regional Hub Feeds across all 17 Provinces/Cities (46 Core Hubs)
 $daangnHubs = @(
-    @{ id="6035"; sido=(U "\uC11C\uC6B8") },
-    @{ id="355";  sido=(U "\uC11C\uC6B8") },
-    @{ id="1573"; sido=(U "\uACBD\uAE30") },
-    @{ id="1766"; sido=(U "\uACBD\uAE30") },
-    @{ id="6543"; sido=(U "\uC778\uCC9C") },
-    @{ id="3662"; sido=(U "\uACBD\uB0A8") }
+    # Seoul (8)
+    @{ id="6035"; sido=(U "\uC11C\uC6B8") }, @{ id="6128"; sido=(U "\uC11C\uC6B8") },
+    @{ id="6188"; sido=(U "\uC11C\uC6B8") }, @{ id="6052"; sido=(U "\uC11C\uC6B8") },
+    @{ id="6073"; sido=(U "\uC11C\uC6B8") }, @{ id="230";  sido=(U "\uC11C\uC6B8") },
+    @{ id="6216"; sido=(U "\uC11C\uC6B8") }, @{ id="355";  sido=(U "\uC11C\uC6B8") },
+    # Gyeonggi (11)
+    @{ id="1573"; sido=(U "\uACBD\uAE30") }, @{ id="1291"; sido=(U "\uACBD\uAE30") },
+    @{ id="1339"; sido=(U "\uACBD\uAE30") }, @{ id="4416"; sido=(U "\uACBD\uAE30") },
+    @{ id="4719"; sido=(U "\uACBD\uAE30") }, @{ id="1420"; sido=(U "\uACBD\uAE30") },
+    @{ id="1766"; sido=(U "\uACBD\uAE30") }, @{ id="4470"; sido=(U "\uACBD\uAE30") },
+    @{ id="4245"; sido=(U "\uACBD\uAE30") }, @{ id="11139"; sido=(U "\uACBD\uAE30") },
+    @{ id="4656"; sido=(U "\uACBD\uAE30") },
+    # Incheon (3)
+    @{ id="6543"; sido=(U "\uC778\uCC9C") }, @{ id="6519"; sido=(U "\uC778\uCC9C") },
+    @{ id="6541"; sido=(U "\uC778\uCC9C") },
+    # Busan (2)
+    @{ id="6026"; sido=(U "\uBD80\uC0B0") }, @{ id="5918"; sido=(U "\uBD80\uC0B0") },
+    # Daegu (2)
+    @{ id="5663"; sido=(U "\uB300\uAD6C") }, @{ id="817";  sido=(U "\uB300\uAD6C") },
+    # Daejeon (2)
+    @{ id="5793"; sido=(U "\uB300\uC804") }, @{ id="4238"; sido=(U "\uB300\uC804") },
+    # Gwangju & Jeonnam (3)
+    @{ id="1015"; sido=(U "\uAD11\uC8FC") }, @{ id="1051"; sido=(U "\uAD11\uC8FC") },
+    @{ id="6707"; sido=(U "\uC804\uB0A8") },
+    # Ulsan (1) & Sejong (1)
+    @{ id="1201"; sido=(U "\uC6B8\uC0B0") }, @{ id="6416"; sido=(U "\uC138\uC885") },
+    # Gangwon (2)
+    @{ id="1925"; sido=(U "\uAC15\uC6D0") }, @{ id="1898"; sido=(U "\uAC15\uC6D0") },
+    # Chungbuk (2) & Chungnam (2)
+    @{ id="7201"; sido=(U "\uCCAD\uBD81") }, @{ id="2134"; sido=(U "\uCCAD\uBD81") },
+    @{ id="2292"; sido=(U "\uCCAD\uB0A8") }, @{ id="2333"; sido=(U "\uCCAD\uB0A8") },
+    # Jeonbuk (1)
+    @{ id="6941"; sido=(U "\uC804\uBD81") },
+    # Gyeongbuk (2) & Gyeongnam (3)
+    @{ id="3121"; sido=(U "\uACBD\uBD81") }, @{ id="5209"; sido=(U "\uACBD\uBD81") },
+    @{ id="3478"; sido=(U "\uACBD\uB0A8") }, @{ id="4862"; sido=(U "\uACBD\uB0A8") },
+    @{ id="3662"; sido=(U "\uACBD\uB0A8") },
+    # Jeju (1)
+    @{ id="3835"; sido=(U "\uC81C\uC8FC") }
 )
 $daangnPostsMap = @{}
 foreach ($hub in $daangnHubs) {
@@ -342,8 +375,8 @@ $daangnOnSaleEst = [int][math]::Round($daangnTotal * $daangnOnSaleRatio)
 $daangnTradedEst = $daangnTotal - $daangnOnSaleEst
 
 $daangnSnap = Compare-And-SaveSnapshot "daangn" $daangnSitemapIds.ToArray()
-$daangnNewToday = if ($null -ne $daangnSnap.NewFromDiff) { $daangnSnap.NewFromDiff } else { $daangnSampleNewToday }
-$daangnSoldToday = if ($null -ne $daangnSnap.SoldFromDiff -and $daangnSnap.SoldFromDiff -gt 0) { $daangnSnap.SoldFromDiff } else { $daangnSampleTraded }
+$daangnNewToday = if ($null -ne $daangnSnap.NewFromDiff -and $daangnSnap.NewFromDiff -gt $daangnSampleNewToday) { $daangnSnap.NewFromDiff } else { $daangnSampleNewToday }
+$daangnSoldToday = if ($null -ne $daangnSnap.SoldFromDiff -and $daangnSnap.SoldFromDiff -gt $daangnSampleTraded) { $daangnSnap.SoldFromDiff } else { $daangnSampleTraded }
 $daangnTurnoverPct = if ($daangnOnSaleEst -gt 0) { [math]::Round(($daangnSoldToday / $daangnOnSaleEst) * 100, 2) } else { 0 }
 
 # ==============================================================================
