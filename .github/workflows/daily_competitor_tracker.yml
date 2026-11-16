@@ -1,8 +1,6 @@
-name: Daily 4-Platform C2C Competitor Tracker & GitHub Pages Deploy
+name: Daily 4-Platform C2C Competitor Tracker (Cloud 09:00 KST)
 
 on:
-  push:
-    branches: [ main, master ]
   schedule:
     # 한국시간(KST) 매일 오전 09:00 정각 자동 실행 (UTC 00:00)
     - cron: '0 0 * * *'
@@ -10,50 +8,26 @@ on:
 
 permissions:
   contents: write
-  pages: write
-  id-token: write
-
-concurrency:
-  group: "pages"
-  cancel-in-progress: false
 
 jobs:
-  collect-and-publish:
+  collect-and-commit:
     runs-on: windows-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Run 4-Platform RAW & Portfolio Collector (on Schedule or Manual Run)
-        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+      - name: Run 4-Platform RAW & Portfolio Collector
         shell: powershell
         run: |
-          $env:TZ = "Asia/Seoul"
           tzutil /s "Korea Standard Time"
           powershell.exe -NoProfile -ExecutionPolicy Bypass -File "./collect_competitor_trend.ps1"
 
       - name: Commit & Push Updated RAW Data & Dashboard Bundle
-        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
         shell: powershell
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add competitor_trend.json competitor_trend.csv competitor_trend_data.js snapshots/ raw_data/
           git diff --staged --quiet || (git commit -m "chore(data): daily C2C competitor trend & RAW data ($(Get-Date -Format 'yyyy-MM-dd'))" ; git push)
-
-      - name: Setup GitHub Pages
-        uses: actions/configure-pages@v5
-
-      - name: Upload Pages Artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: '.'
-
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
