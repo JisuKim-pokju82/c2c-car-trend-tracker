@@ -330,6 +330,25 @@
       color: #cbd5e1;
       padding: 0 4px;
     }
+    .search-submit-btn {
+      border: none;
+      background: #ff6f0f;
+      color: #ffffff;
+      padding: 11px 24px;
+      border-radius: 9px;
+      font-size: 16px;
+      font-weight: 800;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 4px 12px rgba(255, 111, 15, 0.35);
+      transition: all 0.15s;
+    }
+    .search-submit-btn:hover {
+      background: #ea580c;
+      transform: translateY(-1px);
+    }
     .quick-date-btn {
       border: 1px solid rgba(255, 255, 255, 0.28);
       background: rgba(255, 255, 255, 0.12);
@@ -343,104 +362,9 @@
     }
     .quick-date-btn:hover { background: rgba(255, 255, 255, 0.24); }
     .quick-date-btn.active {
-      background: #ff6f0f;
-      border-color: #ff6f0f;
-      color: #ffffff;
-    }
-
-    /* 시각적 월간 달력 위젯 */
-    .visual-calendar-wrap {
-      background: rgba(255, 255, 255, 0.06);
-      border: 1px solid rgba(255, 255, 255, 0.14);
-      border-radius: 12px;
-      padding: 16px 20px;
-    }
-    .cal-month-bar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 12px;
-      flex-wrap: wrap;
-      gap: 10px;
-    }
-    .cal-month-nav {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-    .cal-nav-btn {
-      background: rgba(255, 255, 255, 0.16);
-      border: none;
-      color: #fff;
-      width: 34px;
-      height: 34px;
-      border-radius: 8px;
-      font-size: 16px;
-      font-weight: 800;
-      cursor: pointer;
-    }
-    .cal-nav-btn:hover { background: rgba(255, 255, 255, 0.28); }
-    .cal-month-title {
-      font-size: 18px;
-      font-weight: 800;
-      color: #ffffff;
-    }
-    .cal-grid {
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      gap: 6px;
-      text-align: center;
-    }
-    .cal-dow {
-      font-size: 13px;
-      font-weight: 800;
-      color: #94a3b8;
-      padding-bottom: 4px;
-    }
-    .cal-day {
-      padding: 9px 4px;
-      border-radius: 8px;
-      font-size: 14.5px;
-      font-weight: 700;
-      color: #cbd5e1;
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid transparent;
-      cursor: pointer;
-      position: relative;
-      transition: all 0.12s;
-    }
-    .cal-day:hover {
-      background: rgba(255, 255, 255, 0.18);
-      color: #fff;
-    }
-    .cal-day.empty {
-      background: transparent;
-      cursor: default;
-    }
-    .cal-day.has-data {
-      color: #ffffff;
-      border-color: rgba(16, 185, 129, 0.55);
-      background: rgba(16, 185, 129, 0.14);
-    }
-    .cal-day.has-data::after {
-      content: '●';
-      font-size: 8px;
-      color: #34d399;
-      display: block;
-      line-height: 1;
-      margin-top: 2px;
-    }
-    .cal-day.in-range {
-      background: rgba(255, 111, 15, 0.32);
-      border-color: #ff6f0f;
-      color: #ffffff;
-    }
-    .cal-day.selected-edge {
-      background: #ff6f0f;
+      background: #ffffff;
       border-color: #ffffff;
-      color: #ffffff;
-      font-weight: 800;
-      box-shadow: 0 2px 10px rgba(255, 111, 15, 0.45);
+      color: #0f172a;
     }
 
     /* Ⅱ. 조회기간 연동 결과 카드 & 막대그래프 */
@@ -618,40 +542,26 @@
     </section>
 
     <!-- =================================================================== -->
-    <!-- 달력 기반 조회기간 설정 배너 (달력에서 날짜 클릭 또는 시작일~종료일 지정) -->
+    <!-- 달력 기반 조회기간 설정 배너 (시작일~종료일 달력 입력 + 조회 버튼) -->
     <!-- =================================================================== -->
     <section class="calendar-control-banner">
       <div class="cal-banner-top">
         <div>
-          <div class="cal-banner-title">📅 조회일자 / 기간 달력 선택 (하단 신규등록 · 판매완료 결과 연동)</div>
-          <div class="cal-banner-sub" id="selectedPeriodNotice">달력에서 원하는 날짜를 클릭하거나 시작일~종료일을 지정해 조회하세요.</div>
+          <div class="cal-banner-title">📅 조회기간 설정 (하단 신규등록 · 판매완료 결과 연동)</div>
+          <div class="cal-banner-sub" id="selectedPeriodNotice">시작일과 종료일을 선택한 뒤 [조회하기] 버튼을 누르면 아래 결과가 변경됩니다.</div>
         </div>
 
         <div class="date-picker-group">
           <span class="date-input-label">시작일</span>
-          <input type="date" id="startDateInput" class="date-input" />
+          <input type="date" id="startDateInput" class="date-input" onclick="this.showPicker && this.showPicker()" />
           <span class="date-sep">~</span>
           <span class="date-input-label">종료일</span>
-          <input type="date" id="endDateInput" class="date-input" />
-          <button type="button" class="quick-date-btn active" id="presetLatestDayBtn">전일/최신일 (1일)</button>
+          <input type="date" id="endDateInput" class="date-input" onclick="this.showPicker && this.showPicker()" />
+          <button type="button" class="search-submit-btn" id="executeSearchBtn">🔍 조회하기</button>
+          <button type="button" class="quick-date-btn active" id="presetLatestDayBtn">전일 (1일)</button>
           <button type="button" class="quick-date-btn" id="preset7DaysBtn">최근 7일</button>
           <button type="button" class="quick-date-btn" id="preset30DaysBtn">최근 30일</button>
         </div>
-      </div>
-
-      <!-- 직접 클릭 가능한 월간 달력 그리드 -->
-      <div class="visual-calendar-wrap">
-        <div class="cal-month-bar">
-          <div class="cal-month-nav">
-            <button type="button" class="cal-nav-btn" id="calPrevMonthBtn" title="이전 달">◀</button>
-            <span class="cal-month-title" id="calMonthTitle">2026년 11월</span>
-            <button type="button" class="cal-nav-btn" id="calNextMonthBtn" title="다음 달">▶</button>
-          </div>
-          <div style="font-size:14px;color:#cbd5e1;">
-            <span style="color:#34d399;font-weight:800;">● 녹색 표시일</span>: 데이터 수집 완료일 · 날짜 1번 클릭 시 <strong>해당 일자(1일)</strong> 조회, 다른 날짜 추가 클릭 시 <strong>구간 합산</strong> 조회
-          </div>
-        </div>
-        <div class="cal-grid" id="visualCalendarGrid"></div>
       </div>
     </section>
 
@@ -960,7 +870,6 @@
           <div class="flow-card">
             <div class="flow-card-title">
               <span style="color:${it.color};">${it.name}</span>
-              <span style="font-size:13.5px;color:#64748b;">모수 ${fmt(it.d.total)}대</span>
             </div>
 
             <div class="flow-metric-row">
@@ -1128,45 +1037,15 @@
       endDateStr = s <= e ? e : s;
       document.getElementById('startDateInput').value = startDateStr;
       document.getElementById('endDateInput').value = endDateStr;
-      renderVisualCalendar();
       renderFlowSection();
     }
 
-    // 이벤트 연결
-    document.getElementById('startDateInput').addEventListener('change', e => {
+    // [조회하기] 버튼 클릭 시 하단 결과 갱신
+    document.getElementById('executeSearchBtn').addEventListener('click', () => {
       document.querySelectorAll('.quick-date-btn').forEach(b => b.classList.remove('active'));
-      applyDateRange(e.target.value, document.getElementById('endDateInput').value);
-    });
-
-    document.getElementById('endDateInput').addEventListener('change', e => {
-      document.querySelectorAll('.quick-date-btn').forEach(b => b.classList.remove('active'));
-      applyDateRange(document.getElementById('startDateInput').value, e.target.value);
-    });
-
-    document.getElementById('visualCalendarGrid').addEventListener('click', e => {
-      const cell = e.target.closest('.cal-day');
-      if (!cell || cell.classList.contains('empty') || !cell.dataset.date) return;
-      document.querySelectorAll('.quick-date-btn').forEach(b => b.classList.remove('active'));
-      const clickedDate = cell.dataset.date;
-      if (clickStage === 0) {
-        clickStage = 1;
-        applyDateRange(clickedDate, clickedDate);
-      } else {
-        clickStage = 0;
-        applyDateRange(startDateStr, clickedDate);
-      }
-    });
-
-    document.getElementById('calPrevMonthBtn').addEventListener('click', () => {
-      calMonth--;
-      if (calMonth < 1) { calMonth = 12; calYear--; }
-      renderVisualCalendar();
-    });
-
-    document.getElementById('calNextMonthBtn').addEventListener('click', () => {
-      calMonth++;
-      if (calMonth > 12) { calMonth = 1; calYear++; }
-      renderVisualCalendar();
+      const s = document.getElementById('startDateInput').value;
+      const e = document.getElementById('endDateInput').value;
+      if (s && e) applyDateRange(s, e);
     });
 
     document.getElementById('presetLatestDayBtn').addEventListener('click', function() {
@@ -1174,7 +1053,6 @@
       this.classList.add('active');
       const records = getRecords();
       const latest = records.length ? records[records.length - 1].date : new Date().toISOString().slice(0, 10);
-      clickStage = 0;
       applyDateRange(latest, latest);
     });
 
@@ -1185,7 +1063,6 @@
       const latest = records.length ? records[records.length - 1].date : new Date().toISOString().slice(0, 10);
       const d = new Date(latest + 'T00:00:00');
       d.setDate(d.getDate() - 6);
-      clickStage = 0;
       applyDateRange(d.toISOString().slice(0, 10), latest);
     });
 
@@ -1196,7 +1073,6 @@
       const latest = records.length ? records[records.length - 1].date : new Date().toISOString().slice(0, 10);
       const d = new Date(latest + 'T00:00:00');
       d.setDate(d.getDate() - 29);
-      clickStage = 0;
       applyDateRange(d.toISOString().slice(0, 10), latest);
     });
 
@@ -1219,7 +1095,6 @@
     });
 
     initDefaultDates();
-    renderVisualCalendar();
     renderStockSection();
     renderFlowSection();
     renderPortfolioSection();
