@@ -342,7 +342,7 @@ $daangnOnSaleEst = [int][math]::Round($daangnTotal * $daangnOnSaleRatio)
 $daangnTradedEst = $daangnTotal - $daangnOnSaleEst
 
 $daangnSnap = Compare-And-SaveSnapshot "daangn" $daangnSitemapIds.ToArray()
-$daangnNewToday = if ($null -ne $daangnSnap.NewFromDiff) { $daangnSnap.NewFromDiff } else { [int][math]::Round($daangnTotal * ($daangnSampleNewToday / [Math]::Max(1, $daangnSampleTotal))) }
+$daangnNewToday = if ($null -ne $daangnSnap.NewFromDiff) { $daangnSnap.NewFromDiff } else { $daangnSampleNewToday }
 $daangnSoldToday = if ($null -ne $daangnSnap.SoldFromDiff -and $daangnSnap.SoldFromDiff -gt 0) { $daangnSnap.SoldFromDiff } else { $daangnSampleTraded }
 $daangnTurnoverPct = if ($daangnOnSaleEst -gt 0) { [math]::Round(($daangnSoldToday / $daangnOnSaleEst) * 100, 2) } else { 0 }
 

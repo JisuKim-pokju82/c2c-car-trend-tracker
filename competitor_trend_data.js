@@ -10,7 +10,7 @@ window.COMPETITOR_TREND_DATA = [
         "daangnImportedCount":  17141,
         "daangnOnSaleCount":  34370,
         "daangnTradedCount":  3138,
-        "daangnNewCount":  7238,
+        "daangnNewCount":  286,
         "daangnSoldCount":  124,
         "daangnTurnoverPct":  0.36,
         "daangnAvgPrice":  2061,
