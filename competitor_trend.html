@@ -584,7 +584,7 @@
           <thead>
             <tr>
               <th>구분 항목 (선택 날짜/기간 기준)</th>
-              <th style="color:#c2410c;">1. 당근중고차 (직거래)</th>
+              <th style="color:#c2410c;">1. 당근중고차 (직거래·추정)</th>
               <th style="color:#1e3a8a;">2. 케이카 (안심직거래)</th>
               <th style="color:#dc2626;">3. 엔카닷컴 (개인)</th>
               <th style="color:#b45309;">4. KB차차차 (개인직거래)</th>
@@ -763,7 +763,7 @@
 
       const platforms = [
         {
-          cls: 'daangn', name: '1. 당근중고차', badge: '개인 직거래', color: '#ff6f0f',
+          cls: 'daangn', name: '1. 당근중고차 (추정)', badge: '개인 직거래 (추정)', color: '#ff6f0f',
           total: latest.daangnCarsCount, dom: latest.daangnDomesticCount, imp: latest.daangnImportedCount,
           diff: latest.daangnDiff, valKey: 'daangnCarsCount', domKey: 'daangnDomesticCount', impKey: 'daangnImportedCount'
         },
@@ -923,7 +923,7 @@
       };
 
       const items = [
-        { name: '1. 당근중고차', color: '#ff6f0f', d: agg.daangn },
+        { name: '1. 당근중고차 (추정)', color: '#ff6f0f', d: agg.daangn },
         { name: '2. 케이카 직거래', color: '#1e3a8a', d: agg.kcar },
         { name: '3. 엔카닷컴 개인', color: '#dc2626', d: agg.encar },
         { name: '4. KB차차차 개인', color: '#d97706', d: agg.kb }
@@ -1008,7 +1008,7 @@
     function renderPortfolioSection() {
       const pf = window.COMPETITOR_PORTFOLIO_DATA || {};
       const companies = [
-        { key: 'daangn', title: '1. 당근중고차', color: '#ff6f0f', data: pf.daangn },
+        { key: 'daangn', title: '1. 당근중고차 (추정)', color: '#ff6f0f', data: pf.daangn },
         { key: 'kcar',   title: '2. 케이카 직거래', color: '#1e3a8a', data: pf.kcar },
         { key: 'encar',  title: '3. 엔카닷컴 개인', color: '#dc2626', data: pf.encar },
         { key: 'kb',     title: '4. KB차차차 개인', color: '#d97706', data: pf.kb }
