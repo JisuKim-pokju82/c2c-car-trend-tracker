@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>4대 플랫폼 C2C 직거래 Apple-to-Apple 경쟁사 동향 & 포트폴리오 대시보드</title>
+  <style>
+    :root {
+      --bg: #f3f5f8;
+      --surface: #ffffff;
+      --text: #0f172a;
+      --text-sub: #475569;
+      --border: #e2e8f0;
+      --daangn: #ff6f0f;
+      --kcar: #1e293b;
+      --encar: #dc2626;
+      --kb: #d97706;
+      --up: #e11d48;
+      --down: #2563eb;
+      --radius: 14px;
+      --shadow: 0 4px 20px rgba(15, 23, 42, 0.05);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Pretendard", "Malgun Gothic", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      padding-bottom: 80px;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      background: rgba(255, 255, 255, 0.94);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: 14px 24px;
+    }
+    .topbar-inner {
+      max-width: 1440px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+    .brand-area { display: flex; align-items: center; gap: 10px; }
+    .brand-badge {
+      background: #0f172a;
+      color: #fff;
+      font-weight: 800;
+      font-size: 12px;
+      padding: 5px 10px;
+      border-radius: 7px;
+    }
+    .brand-title { font-size: 18px; font-weight: 800; letter-spacing: -0.02em; }
+
+    .top-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 13px;
+      border-radius: 9px;
+      font-size: 12.5px;
+      font-weight: 700;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.15s;
+    }
+    .btn:hover { background: #f1f5f9; }
+    .btn-primary { background: #0f172a; color: #fff; border-color: #0f172a; }
+    .btn-primary:hover { background: #1e293b; }
+    .btn-accent { background: var(--daangn); color: #fff; border-color: var(--daangn); }
+    .btn-accent:hover { opacity: 0.92; }
+
+    .container {
+      max-width: 1440px;
+      margin: 22px auto 0;
+      padding: 0 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 22px;
+    }
+
+    /* Filter & Control Bar */
+    .control-bar {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 14px;
+      box-shadow: var(--shadow);
+    }
+    .control-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .control-label {
+      font-size: 12.5px;
+      font-weight: 800;
+      color: var(--text-sub);
+      margin-right: 4px;
+    }
+    .seg-group {
+      display: inline-flex;
+      background: #f1f5f9;
+      padding: 3px;
+      border-radius: 9px;
+      gap: 2px;
+    }
+    .seg-btn {
+      border: none;
+      background: transparent;
+      padding: 6px 13px;
+      border-radius: 7px;
+      font-size: 12.5px;
+      font-weight: 700;
+      color: var(--text-sub);
+      cursor: pointer;
+    }
+    .seg-btn.active {
+      background: #fff;
+      color: var(--text);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    }
+
+    /* Apple-to-Apple 4 Company Cards */
+    .company-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+    }
+    @media (max-width: 1200px) { .company-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 640px) { .company-grid { grid-template-columns: 1fr; } }
+
+    .c-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .c-card.daangn { border-top: 4px solid var(--daangn); }
+    .c-card.kcar   { border-top: 4px solid var(--kcar); }
+    .c-card.encar  { border-top: 4px solid var(--encar); }
+    .c-card.kb     { border-top: 4px solid var(--kb); }
+
+    .c-head { display: flex; align-items: center; justify-content: space-between; }
+    .c-title { font-size: 15.5px; font-weight: 800; }
+    .c-tag {
+      font-size: 11px;
+      font-weight: 800;
+      padding: 3px 8px;
+      border-radius: 6px;
+    }
+    .c-tag.daangn { background: rgba(255,111,15,0.12); color: #c2410c; }
+    .c-tag.kcar   { background: #e2e8f0; color: #0f172a; }
+    .c-tag.encar  { background: rgba(220,38,38,0.10); color: #dc2626; }
+    .c-tag.kb     { background: rgba(217,119,6,0.14); color: #b45309; }
+
+    .c-total-box {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+    }
+    .c-total-num {
+      font-size: 30px;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      font-variant-numeric: tabular-nums;
+    }
+    .c-total-unit { font-size: 13.5px; color: var(--text-sub); font-weight: 700; }
+    .diff-badge {
+      font-size: 11.5px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 5px;
+    }
+    .diff-badge.up { background: rgba(225,29,72,0.1); color: var(--up); }
+    .diff-badge.down { background: rgba(37,99,235,0.1); color: var(--down); }
+    .diff-badge.flat { background: #f1f5f9; color: var(--text-sub); }
+
+    /* Standardized Apple-to-Apple Rows inside Card */
+    .a2a-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12.5px;
+      margin-top: 2px;
+    }
+    .a2a-table td {
+      padding: 6px 4px;
+      border-bottom: 1px dashed var(--border);
+      font-variant-numeric: tabular-nums;
+    }
+    .a2a-table tr:last-child td { border-bottom: none; }
+    .a2a-label { color: var(--text-sub); font-weight: 600; text-align: left !important; }
+    .a2a-val { font-weight: 800; text-align: right !important; }
+
+    /* Cards & Tables */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 22px;
+      box-shadow: var(--shadow);
+    }
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .card-title { font-size: 17px; font-weight: 800; letter-spacing: -0.02em; }
+    .card-subtitle { font-size: 13px; color: var(--text-sub); margin-top: 2px; }
+
+    .table-wrap {
+      overflow-x: auto;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+    }
+    table.data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12.5px;
+      font-variant-numeric: tabular-nums;
+    }
+    table.data-table th, table.data-table td {
+      padding: 10px 11px;
+      text-align: right;
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+    table.data-table th:first-child, table.data-table td:first-child {
+      text-align: left;
+      position: sticky;
+      left: 0;
+      background: #fff;
+      z-index: 2;
+    }
+    table.data-table th {
+      background: #f8fafc;
+      font-weight: 800;
+      color: var(--text-sub);
+    }
+    .group-th { text-align: center !important; border-left: 2px solid var(--border); }
+    .col-sep { border-left: 2px solid var(--border); }
+
+    /* Portfolio Comparison Grid */
+    .portfolio-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+    }
+    @media (max-width: 1200px) { .portfolio-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 640px) { .portfolio-grid { grid-template-columns: 1fr; } }
+
+    .pf-col {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      background: #fafbfc;
+    }
+    .pf-col-title {
+      font-size: 14px;
+      font-weight: 800;
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+    }
+    .bar-row {
+      margin-bottom: 9px;
+      font-size: 12px;
+    }
+    .bar-head {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 3px;
+      font-weight: 600;
+    }
+    .bar-track {
+      height: 8px;
+      background: #e2e8f0;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .bar-fill {
+      height: 100%;
+      border-radius: 4px;
+    }
+
+    /* Filter Bar for RAW Table */
+    .raw-filter-bar {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+    .raw-filter-bar select, .raw-filter-bar input {
+      padding: 8px 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 13px;
+      background: #fff;
+    }
+  </style>
+</head>
+<body>
+
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand-area">
+        <span class="brand-badge">APPLE-TO-APPLE C2C TRACKER</span>
+        <h1 class="brand-title">4대 중고차 플랫폼 직거래(개인) 표준 비교 & RAW 데이터 센터</h1>
+      </div>
+      <div class="top-actions">
+        <a href="index.html" class="btn">← MOVO 마켓</a>
+        <a href="raw_data/raw_vehicles_latest.csv" download class="btn btn-accent">⬇ 전체 매물 RAW 데이터(CSV) 다운로드</a>
+        <a href="competitor_trend.csv" download class="btn btn-primary">⬇ 일자별 요약(CSV) 다운로드</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- 상단 조회기간(Daily/Weekly/Monthly) 및 국산/수입 필터 컨트롤 바 -->
+    <section class="control-bar">
+      <div class="control-group">
+        <span class="control-label">조회 기간 단위:</span>
+        <div class="seg-group" id="periodTabs">
+          <button type="button" class="seg-btn active" data-period="daily">Daily (일간)</button>
+          <button type="button" class="seg-btn" data-period="weekly">Weekly (주간 합산/평균)</button>
+          <button type="button" class="seg-btn" data-period="monthly">Monthly (월간 합산/평균)</button>
+        </div>
+
+        <span class="control-label" style="margin-left:14px;">국산/수입 기준:</span>
+        <div class="seg-group" id="originTabs">
+          <button type="button" class="seg-btn active" data-origin="all">전체 (국산+수입)</button>
+          <button type="button" class="seg-btn" data-origin="dom">국산차만 비교</button>
+          <button type="button" class="seg-btn" data-origin="imp">수입차만 비교</button>
+        </div>
+      </div>
+
+      <div style="font-size:12.5px;color:var(--text-sub);" id="lastUpdatedInfo">
+        수집 시각: 불러오는 중...
+      </div>
+    </section>
+
+    <!-- 1. 회사별 직거래 총등록대수 및 Apple-to-Apple 표준 비교 카드 -->
+    <section class="company-grid" id="appleCardsContainer"></section>
+
+    <!-- 2. 데일리 / 위클리 / 먼슬리 등록대수 · 신규등록 · 신규판매 추이 표 -->
+    <section class="card">
+      <div class="card-header">
+        <div>
+          <h2 class="card-title" id="tableSectionTitle">일자별(Daily) 4개사 Apple-to-Apple 등록·신규·판매 비교표</h2>
+          <p class="card-subtitle">모든 플랫폼을 동일한 기준(전체 / 국산 / 수입 / 판매중 / 신규등록 / 신규판매 / 회전율 / 평균가)으로 비교합니다.</p>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th rowspan="2">기준 기간</th>
+              <th colspan="6" class="group-th" style="color:#c2410c;">1. 당근중고차 (직거래)</th>
+              <th colspan="6" class="group-th" style="color:#0f172a;">2. 케이카 (안심직거래)</th>
+              <th colspan="6" class="group-th" style="color:#dc2626;">3. 엔카닷컴 (개인)</th>
+              <th colspan="6" class="group-th" style="color:#b45309;">4. KB차차차 (개인직거래)</th>
+            </tr>
+            <tr>
+              <th class="col-sep">총등록</th>
+              <th>국산</th>
+              <th>수입</th>
+              <th>신규등록</th>
+              <th>신규판매</th>
+              <th>평균가</th>
+
+              <th class="col-sep">총등록</th>
+              <th>국산</th>
+              <th>수입</th>
+              <th>신규등록</th>
+              <th>신규판매</th>
+              <th>평균가</th>
+
+              <th class="col-sep">총등록</th>
+              <th>국산</th>
+              <th>수입</th>
+              <th>신규등록</th>
+              <th>신규판매</th>
+              <th>평균가</th>
+
+              <th class="col-sep">총등록</th>
+              <th>국산</th>
+              <th>수입</th>
+              <th>신규등록</th>
+              <th>신규판매</th>
+              <th>평균가</th>
+            </tr>
+          </thead>
+          <tbody id="periodTableBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- 3. 4개사 포트폴리오 Apple-to-Apple 비교 (국산/수입, 판매가격대, 지역, 인기모델) -->
+    <section class="card">
+      <div class="card-header">
+        <div>
+          <h2 class="card-title">회사별 포트폴리오 Apple-to-Apple 심층 비교</h2>
+          <p class="card-subtitle">수집된 개별 매물 RAW 데이터를 기반으로 국산/수입 비중, 가격대 분포, 핵심 지역, 인기 모델 Top 10을 비교합니다.</p>
+        </div>
+        <div class="seg-group" id="portfolioCategoryTabs">
+          <button type="button" class="seg-btn active" data-pf="origin">① 국산 vs 수입 비중</button>
+          <button type="button" class="seg-btn" data-pf="price">② 판매가격대 분포</button>
+          <button type="button" class="seg-btn" data-pf="region">③ 지역(시/도) 분포</button>
+          <button type="button" class="seg-btn" data-pf="model">④ 인기 모델 Top 10</button>
+          <button type="button" class="seg-btn" data-pf="brand">⑤ 인기 브랜드 Top 8</button>
+        </div>
+      </div>
+      <div class="portfolio-grid" id="portfolioGridContainer"></div>
+    </section>
+
+    <!-- 4. 수집된 개별 차량 RAW 데이터 즉시 검색 & 검증 테이블 -->
+    <section class="card">
+      <div class="card-header">
+        <div>
+          <h2 class="card-title">개별 매물 RAW 데이터 브라우저</h2>
+          <p class="card-subtitle" id="rawCountSubtitle">오늘 수집된 개별 차량 RAW 데이터를 플랫폼·국산/수입·키워드별로 즉시 조회합니다.</p>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <a href="raw_data/raw_vehicles_latest.csv" download class="btn btn-accent">전체 차량 RAW CSV 다운로드</a>
+        </div>
+      </div>
+
+      <div class="raw-filter-bar">
+        <select id="rawPlatformFilter">
+          <option value="ALL">전체 플랫폼</option>
+          <option value="당근중고차">당근중고차</option>
+          <option value="케이카직거래">케이카직거래</option>
+          <option value="엔카닷컴개인">엔카닷컴개인</option>
+          <option value="KB차차차개인">KB차차차개인</option>
+        </select>
+        <select id="rawOriginFilter">
+          <option value="ALL">국산 + 수입 전체</option>
+          <option value="국산">국산차만</option>
+          <option value="수입">수입차만</option>
+        </select>
+        <input type="search" id="rawSearchInput" placeholder="차량명, 제조사, 지역 검색 (예: 그랜저, 서울, BMW)..." style="min-width:260px;" />
+      </div>
+
+      <div class="table-wrap" style="max-height:460px;overflow-y:auto;">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>플랫폼</th>
+              <th>매물ID</th>
+              <th>국산/수입</th>
+              <th>제조사</th>
+              <th>모델명</th>
+              <th>전체 차량명</th>
+              <th>연식</th>
+              <th>주행거리</th>
+              <th>판매가격</th>
+              <th>가격대 구간</th>
+              <th>지역</th>
+              <th>판매상태</th>
+              <th>원본링크</th>
+            </tr>
+          </thead>
+          <tbody id="rawTableBody"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <script src="competitor_trend_data.js"></script>
+  <script>
+    let currentPeriod = 'daily';
+    let currentOrigin = 'all';
+    let currentPfMode = 'origin';
+
+    function fmt(n) { return Number(n || 0).toLocaleString(); }
+
+    function getWeekKey(dateStr) {
+      const d = new Date(dateStr + 'T00:00:00');
+      const day = d.getDay() || 7;
+      d.setDate(d.getDate() + 4 - day);
+      const yearStart = new Date(d.getFullYear(), 0, 1);
+      const weekNo = Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+      return `${d.getFullYear()}-W${String(weekNo).padStart(2, '0')}`;
+    }
+
+    function aggregateRecords(records, mode) {
+      if (mode === 'daily') {
+        return records.map(r => ({ ...r, periodLabel: r.date }));
+      }
+      const groups = new Map();
+      records.forEach(r => {
+        const key = mode === 'weekly' ? getWeekKey(r.date) : r.date.slice(0, 7);
+        if (!groups.has(key)) groups.set(key, []);
+        groups.get(key).push(r);
+      });
+
+      const result = [];
+      for (const [key, list] of groups.entries()) {
+        const last = list[list.length - 1];
+        const sum = field => list.reduce((acc, x) => acc + Number(x[field] || 0), 0);
+        result.push({
+          ...last,
+          periodLabel: `${key} (${list.length}일)`,
+          daangnNewCount: sum('daangnNewCount'),
+          daangnSoldCount: sum('daangnSoldCount'),
+          kcarNewCount: sum('kcarNewCount'),
+          kcarSoldCount: sum('kcarSoldCount'),
+          encarNewCount: sum('encarNewCount'),
+          encarSoldCount: sum('encarSoldCount'),
+          kbNewCount: sum('kbNewCount'),
+          kbSoldCount: sum('kbSoldCount')
+        });
+      }
+      return result;
+    }
+
+    function renderAppleCards() {
+      const records = Array.isArray(window.COMPETITOR_TREND_DATA) ? window.COMPETITOR_TREND_DATA : [];
+      const latest = records[records.length - 1] || {};
+      const pf = window.COMPETITOR_PORTFOLIO_DATA || {};
+
+      document.getElementById('lastUpdatedInfo').textContent =
+        `마지막 수집 시각: ${latest.updatedAt || window.COMPETITOR_TREND_LAST_UPDATED || '-'} | 개별 RAW 수집: ${fmt(window.COMPETITOR_RAW_TOTAL_COUNT)}대`;
+
+      const configs = [
+        {
+          cls: 'daangn',
+          name: '1. 당근중고차 (직거래)',
+          tag: '당근중고차',
+          total: latest.daangnCarsCount,
+          dom: latest.daangnDomesticCount,
+          imp: latest.daangnImportedCount,
+          onSale: latest.daangnOnSaleCount,
+          tradedOrRes: `거래완료 ${fmt(latest.daangnTradedCount)}대`,
+          newCnt: latest.daangnNewCount,
+          soldCnt: latest.daangnSoldCount,
+          turn: latest.daangnTurnoverPct,
+          avgPrice: latest.daangnAvgPrice,
+          diff: latest.daangnDiff
+        },
+        {
+          cls: 'kcar',
+          name: '2. 케이카 (안심직거래)',
+          tag: 'K Car 직거래',
+          total: latest.kcarDirectCount,
+          dom: latest.kcarDomesticCount,
+          imp: latest.kcarImportedCount,
+          onSale: latest.kcarOnSaleCount,
+          tradedOrRes: `예약/계약 ${fmt(latest.kcarReservedCount)}대`,
+          newCnt: latest.kcarNewCount,
+          soldCnt: latest.kcarSoldCount,
+          turn: latest.kcarTurnoverPct,
+          avgPrice: latest.kcarAvgPrice,
+          diff: latest.kcarDiff
+        },
+        {
+          cls: 'encar',
+          name: '3. 엔카닷컴 (판매구분: 개인)',
+          tag: '엔카 개인',
+          total: latest.encarPersonalCount,
+          dom: latest.encarPersonalDomestic,
+          imp: latest.encarPersonalImported,
+          onSale: latest.encarOnSaleCount,
+          tradedOrRes: `전체대비 ${((latest.encarPersonalCount / Math.max(1, latest.encarTotalCount)) * 100).toFixed(2)}%`,
+          newCnt: latest.encarNewCount,
+          soldCnt: latest.encarSoldCount,
+          turn: latest.encarTurnoverPct,
+          avgPrice: latest.encarAvgPrice,
+          diff: latest.encarPersonalDiff
+        },
+        {
+          cls: 'kb',
+          name: '4. KB차차차 (직거래 개인)',
+          tag: 'KB 직거래',
+          total: latest.kbDirectCount,
+          dom: latest.kbDomesticCount,
+          imp: latest.kbImportedCount,
+          onSale: latest.kbOnSaleCount,
+          tradedOrRes: `전체 ${fmt(latest.kbTotalCount)}대 중`,
+          newCnt: latest.kbNewCount,
+          soldCnt: latest.kbSoldCount,
+          turn: latest.kbTurnoverPct,
+          avgPrice: latest.kbAvgPrice,
+          diff: latest.kbDiff
+        }
+      ];
+
+      const container = document.getElementById('appleCardsContainer');
+      container.innerHTML = configs.map(c => {
+        const mainVal = currentOrigin === 'dom' ? c.dom : currentOrigin === 'imp' ? c.imp : c.total;
+        const domPct = c.total > 0 ? ((c.dom / c.total) * 100).toFixed(1) : '0.0';
+        const impPct = c.total > 0 ? ((c.imp / c.total) * 100).toFixed(1) : '0.0';
+        const dNum = Number(c.diff || 0);
+        const dCls = dNum > 0 ? 'up' : dNum < 0 ? 'down' : 'flat';
+        const dTxt = dNum > 0 ? `▲ +${fmt(dNum)}` : dNum < 0 ? `▼ ${fmt(dNum)}` : `- 0`;
+
+        return `
+          <article class="c-card ${c.cls}">
+            <div class="c-head">
+              <span class="c-title">${c.name}</span>
+              <span class="c-tag ${c.cls}">${c.tag}</span>
+            </div>
+            <div class="c-total-box">
+              <span class="c-total-num">${fmt(mainVal)}</span>
+              <span class="c-total-unit">대 (${currentOrigin === 'dom' ? '국산' : currentOrigin === 'imp' ? '수입' : '전체'})</span>
+              <span class="diff-badge ${dCls}">${dTxt}</span>
+            </div>
+            <table class="a2a-table">
+              <tr>
+                <td class="a2a-label">국산 / 수입 분리</td>
+                <td class="a2a-val">국산 ${fmt(c.dom)}대 (${domPct}%) · 수입 ${fmt(c.imp)}대 (${impPct}%)</td>
+              </tr>
+              <tr>
+                <td class="a2a-label">판매중 / 부가상태</td>
+                <td class="a2a-val">${fmt(c.onSale)}대 (${c.tradedOrRes})</td>
+              </tr>
+              <tr>
+                <td class="a2a-label">금일 신규등록 / 신규판매</td>
+                <td class="a2a-val"><span style="color:#e11d48;">+${fmt(c.newCnt)}대</span> / <span style="color:#2563eb;">${fmt(c.soldCnt)}대</span></td>
+              </tr>
+              <tr>
+                <td class="a2a-label">일 판매회전율 / 평균가</td>
+                <td class="a2a-val">${c.turn || 0}% · 평균 ${fmt(c.avgPrice)}만원</td>
+              </tr>
+            </table>
+          </article>
+        `;
+      }).join('');
+    }
+
+    function renderPeriodTable() {
+      const baseRecords = Array.isArray(window.COMPETITOR_TREND_DATA) ? window.COMPETITOR_TREND_DATA : [];
+      const agg = aggregateRecords(baseRecords, currentPeriod);
+      const titles = {
+        daily: '일자별(Daily) 4개사 Apple-to-Apple 등록·신규·판매 비교표',
+        weekly: '주간별(Weekly) 4개사 Apple-to-Apple 등록·신규·판매 비교표',
+        monthly: '월간별(Monthly) 4개사 Apple-to-Apple 등록·신규·판매 비교표'
+      };
+      document.getElementById('tableSectionTitle').textContent = titles[currentPeriod];
+
+      const tbody = document.getElementById('periodTableBody');
+      tbody.innerHTML = [...agg].reverse().map(r => `
+        <tr>
+          <td><strong>${r.periodLabel}</strong></td>
+          <td class="col-sep" style="font-weight:800;color:#c2410c;">${fmt(r.daangnCarsCount)}</td>
+          <td>${fmt(r.daangnDomesticCount)}</td>
+          <td>${fmt(r.daangnImportedCount)}</td>
+          <td style="color:#e11d48;font-weight:700;">+${fmt(r.daangnNewCount)}</td>
+          <td style="color:#2563eb;font-weight:700;">${fmt(r.daangnSoldCount)} (${r.daangnTurnoverPct || 0}%)</td>
+          <td>${fmt(r.daangnAvgPrice)}만</td>
+
+          <td class="col-sep" style="font-weight:800;color:#0f172a;">${fmt(r.kcarDirectCount)}</td>
+          <td>${fmt(r.kcarDomesticCount)}</td>
+          <td>${fmt(r.kcarImportedCount)}</td>
+          <td style="color:#e11d48;font-weight:700;">+${fmt(r.kcarNewCount)}</td>
+          <td style="color:#2563eb;font-weight:700;">${fmt(r.kcarSoldCount)} (${r.kcarTurnoverPct || 0}%)</td>
+          <td>${fmt(r.kcarAvgPrice)}만</td>
+
+          <td class="col-sep" style="font-weight:800;color:#dc2626;">${fmt(r.encarPersonalCount)}</td>
+          <td>${fmt(r.encarPersonalDomestic)}</td>
+          <td>${fmt(r.encarPersonalImported)}</td>
+          <td style="color:#e11d48;font-weight:700;">+${fmt(r.encarNewCount)}</td>
+          <td style="color:#2563eb;font-weight:700;">${fmt(r.encarSoldCount)} (${r.encarTurnoverPct || 0}%)</td>
+          <td>${fmt(r.encarAvgPrice)}만</td>
+
+          <td class="col-sep" style="font-weight:800;color:#b45309;">${fmt(r.kbDirectCount)}</td>
+          <td>${fmt(r.kbDomesticCount)}</td>
+          <td>${fmt(r.kbImportedCount)}</td>
+          <td style="color:#e11d48;font-weight:700;">+${fmt(r.kbNewCount)}</td>
+          <td style="color:#2563eb;font-weight:700;">${fmt(r.kbSoldCount)} (${r.kbTurnoverPct || 0}%)</td>
+          <td>${fmt(r.kbAvgPrice)}만</td>
+        </tr>
+      `).join('');
+    }
+
+    function renderPortfolioSection() {
+      const pf = window.COMPETITOR_PORTFOLIO_DATA || {};
+      const companies = [
+        { key: 'daangn', title: '1. 당근중고차', color: '#ff6f0f', data: pf.daangn },
+        { key: 'kcar',   title: '2. 케이카 직거래', color: '#1e293b', data: pf.kcar },
+        { key: 'encar',  title: '3. 엔카닷컴 개인', color: '#dc2626', data: pf.encar },
+        { key: 'kb',     title: '4. KB차차차 개인', color: '#d97706', data: pf.kb }
+      ];
+
+      const container = document.getElementById('portfolioGridContainer');
+      container.innerHTML = companies.map(c => {
+        const d = c.data || {};
+        const sampleSize = Math.max(1, Number(d.sampleSize || 1));
+        let rowsHtml = '';
+
+        if (currentPfMode === 'origin') {
+          const items = [
+            { label: '국산차', cnt: d.domesticCount || 0, pct: d.domesticRatio || 0 },
+            { label: '수입차', cnt: d.importedCount || 0, pct: d.importedRatio || 0 }
+          ];
+          rowsHtml = items.map(it => `
+            <div class="bar-row">
+              <div class="bar-head"><span>${it.label}</span><span>${fmt(it.cnt)}대 (${it.pct}%)</span></div>
+              <div class="bar-track"><div class="bar-fill" style="width:${it.pct}%;background:${c.color};"></div></div>
+            </div>
+          `).join('') + `<div style="margin-top:12px;font-size:12px;color:#475569;">평균 판매가: <strong>${fmt(d.avgPriceManwon)}만원</strong></div>`;
+        } else if (currentPfMode === 'price') {
+          const bands = d.priceBands || {};
+          rowsHtml = Object.entries(bands).map(([k, v]) => {
+            const pct = ((Number(v || 0) / sampleSize) * 100).toFixed(1);
+            return `
+              <div class="bar-row">
+                <div class="bar-head"><span>${k}</span><span>${fmt(v)}대 (${pct}%)</span></div>
+                <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${c.color};"></div></div>
+              </div>
+            `;
+          }).join('');
+        } else if (currentPfMode === 'region') {
+          const list = d.topRegions || [];
+          rowsHtml = list.map(it => {
+            const pct = ((Number(it.count || 0) / sampleSize) * 100).toFixed(1);
+            return `
+              <div class="bar-row">
+                <div class="bar-head"><span>${it.name}</span><span>${fmt(it.count)}대 (${pct}%)</span></div>
+                <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${c.color};"></div></div>
+              </div>
+            `;
+          }).join('');
+        } else if (currentPfMode === 'model') {
+          const list = d.topModels || [];
+          rowsHtml = list.map((it, idx) => {
+            const pct = ((Number(it.count || 0) / sampleSize) * 100).toFixed(1);
+            return `
+              <div class="bar-row">
+                <div class="bar-head"><span>${idx + 1}. ${it.name}</span><span>${fmt(it.count)}대 (${pct}%)</span></div>
+                <div class="bar-track"><div class="bar-fill" style="width:${Math.min(100, pct * 3)}%;background:${c.color};"></div></div>
+              </div>
+            `;
+          }).join('');
+        } else if (currentPfMode === 'brand') {
+          const list = d.topBrands || [];
+          rowsHtml = list.map((it, idx) => {
+            const pct = ((Number(it.count || 0) / sampleSize) * 100).toFixed(1);
+            return `
+              <div class="bar-row">
+                <div class="bar-head"><span>${idx + 1}. ${it.name}</span><span>${fmt(it.count)}대 (${pct}%)</span></div>
+                <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${c.color};"></div></div>
+              </div>
+            `;
+          }).join('');
+        }
+
+        return `
+          <div class="pf-col">
+            <div class="pf-col-title">
+              <span style="color:${c.color};">${c.title}</span>
+              <span style="font-size:11.5px;color:#64748b;">표본 ${fmt(d.sampleSize)}대</span>
+            </div>
+            ${rowsHtml}
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderRawTable() {
+      const list = Array.isArray(window.COMPETITOR_RAW_PREVIEW) ? window.COMPETITOR_RAW_PREVIEW : [];
+      const pFilter = document.getElementById('rawPlatformFilter').value;
+      const oFilter = document.getElementById('rawOriginFilter').value;
+      const q = document.getElementById('rawSearchInput').value.trim().toLowerCase();
+
+      const filtered = list.filter(v => {
+        if (pFilter !== 'ALL' && v.platform !== pFilter) return false;
+        if (oFilter !== 'ALL' && v.originType !== oFilter) return false;
+        if (q) {
+          const hay = `${v.platform} ${v.manufacturer} ${v.model} ${v.fullTitle} ${v.region}`.toLowerCase();
+          if (!hay.includes(q)) return false;
+        }
+        return true;
+      });
+
+      document.getElementById('rawCountSubtitle').textContent =
+        `전체 수집된 개별 매물 ${fmt(window.COMPETITOR_RAW_TOTAL_COUNT)}대 중 브라우저 프리뷰 ${fmt(filtered.length)}건 표시 중 (전체 데이터는 상단 RAW CSV 다운로드 클릭)`;
+
+      const tbody = document.getElementById('rawTableBody');
+      tbody.innerHTML = filtered.slice(0, 200).map(v => `
+        <tr>
+          <td><strong>${v.platform}</strong></td>
+          <td><code>${v.carId}</code></td>
+          <td>${v.originType}</td>
+          <td>${v.manufacturer}</td>
+          <td><strong>${v.model}</strong></td>
+          <td style="text-align:left;max-width:260px;overflow:hidden;text-overflow:ellipsis;">${v.fullTitle}</td>
+          <td>${v.year}</td>
+          <td>${fmt(v.mileageKm)}km</td>
+          <td style="font-weight:800;">${fmt(v.priceManwon)}만원</td>
+          <td>${v.priceBand}</td>
+          <td>${v.region}</td>
+          <td>${v.status}</td>
+          <td><a href="${v.url}" target="_blank" rel="noopener" style="color:#2563eb;text-decoration:none;font-weight:700;">매물보기 ↗</a></td>
+        </tr>
+      `).join('');
+    }
+
+    document.getElementById('periodTabs').addEventListener('click', e => {
+      const btn = e.target.closest('.seg-btn');
+      if (!btn) return;
+      document.querySelectorAll('#periodTabs .seg-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentPeriod = btn.dataset.period;
+      renderPeriodTable();
+    });
+
+    document.getElementById('originTabs').addEventListener('click', e => {
+      const btn = e.target.closest('.seg-btn');
+      if (!btn) return;
+      document.querySelectorAll('#originTabs .seg-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentOrigin = btn.dataset.origin;
+      renderAppleCards();
+    });
+
+    document.getElementById('portfolioCategoryTabs').addEventListener('click', e => {
+      const btn = e.target.closest('.seg-btn');
+      if (!btn) return;
+      document.querySelectorAll('#portfolioCategoryTabs .seg-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentPfMode = btn.dataset.pf;
+      renderPortfolioSection();
+    });
+
+    ['rawPlatformFilter', 'rawOriginFilter', 'rawSearchInput'].forEach(id => {
+      document.getElementById(id).addEventListener('input', renderRawTable);
+      document.getElementById(id).addEventListener('change', renderRawTable);
+    });
+
+    renderAppleCards();
+    renderPeriodTable();
+    renderPortfolioSection();
+    renderRawTable();
+  </script>
+</body>
+</html>

@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="text-scale" content="scale" />
+  <title>MOVO (모보) — 이동의 모든 순간을 거래하다 | C2C 모빌리티 마켓</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <!-- 1. Sticky Frosted Glass Global Navigation -->
+  <header class="global-header">
+    <div class="header-inner">
+      <div class="brand-group">
+        <a href="#" class="brand-logo" id="brandResetLink" aria-label="MOVO 홈으로 초기화">
+          <span class="brand-mark">M</span>
+          <span>MOVO</span>
+        </a>
+        <span class="brand-sub">Mobility C2C Market</span>
+
+        <!-- Daangn-Style Neighborhood Selector -->
+        <div class="location-selector" title="내 동네 설정">
+          <span class="location-dot"></span>
+          <select id="neighborhoodSelect" class="location-select-native" aria-label="거래 동네 선택">
+            <!-- JS Populated -->
+          </select>
+        </div>
+      </div>
+
+      <!-- Quick Header Search -->
+      <div class="header-search-wrap">
+        <svg class="header-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"></circle>
+          <path d="m21 21-4.3-4.3"></path>
+        </svg>
+        <input
+          type="search"
+          id="headerSearchInput"
+          class="header-search-input"
+          placeholder="자연어로 검색 (예: 출퇴근용 전기자전거 200만원 이하)"
+          autocomplete="off"
+        />
+        <span class="header-search-kbd">⌘K</span>
+      </div>
+
+      <!-- Right Action Buttons -->
+      <div class="header-actions">
+        <a href="competitor_trend.html" class="nav-icon-btn" title="당근중고차·엔카 개인 경쟁사 동향 트래커" style="text-decoration:none;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 3v18h18"/>
+            <path d="m19 9-5 5-4-4-3 3"/>
+          </svg>
+          <span>경쟁사 동향</span>
+        </a>
+
+        <button type="button" class="nav-icon-btn" id="wishlistFilterBtn" title="찜한 모빌리티 모아보기">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>
+          </svg>
+          <span>찜</span>
+          <span class="badge-count" id="wishCountBadge">0</span>
+        </button>
+
+        <button type="button" class="nav-icon-btn" id="openChatModalBtn" title="모빌리티 당근채팅 열기">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+          </svg>
+          <span>채팅</span>
+          <span class="badge-count" id="unreadChatBadge">1</span>
+        </button>
+
+        <button type="button" class="btn-register-primary" id="openRegisterModalBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
+            <path d="M12 5v14M5 12h14"/>
+          </svg>
+          <span>내 모빌리티 팔기</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- 2. Apple-Style Minimal Hero & Natural Language Search Engine -->
+  <section class="hero-section">
+    <div class="hero-eyebrow">
+      <span>동네 인증 기반 C2C 모빌리티 직거래</span>
+      <span>·</span>
+      <strong>매너온도 & 실주행 스펙 보증</strong>
+    </div>
+    <h1 class="hero-title">
+      이동의 모든 순간을 <span class="gradient-text">거래하다.</span>
+    </h1>
+    <p class="hero-subtitle">
+      전기자전거부터 베스파, 테슬라, 하이엔드 기어까지. 가까운 이웃과 시승하고 가장 투명하게 거래하세요.
+    </p>
+
+    <!-- Natural Language Search Spotlight -->
+    <form id="nlpSearchForm" class="nlp-spotlight-box" role="search">
+      <span class="nlp-ai-badge">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+          <path d="M12 2L15 9l7 3-7 3-3 7-3-7-7-3 7-3 3-7Z"/>
+        </svg>
+        자연어 검색
+      </span>
+      <input
+        type="text"
+        id="nlpMainInput"
+        class="nlp-main-input"
+        placeholder="찾으시는 이동수단, 용도, 예산, 동네를 편하게 말해 보세요..."
+        autocomplete="off"
+      />
+      <button type="button" id="nlpClearBtn" class="nlp-clear-btn" aria-label="검색어 지우기">✕</button>
+      <button type="submit" class="nlp-submit-btn">탐색하기</button>
+    </form>
+
+    <!-- Natural Language Suggestion Chips -->
+    <div class="nlp-chips-row" id="nlpChipsRow">
+      <span class="nlp-chip-label">추천 자연어 검색</span>
+      <!-- JS Populated -->
+    </div>
+
+    <!-- Parsed Natural Language Insight Banner -->
+    <div class="nlp-insight-banner" id="nlpInsightBanner" aria-live="polite">
+      <div class="nlp-parsed-tags" id="nlpParsedTags">
+        <!-- JS Populated -->
+      </div>
+      <button type="button" class="nlp-reset-link" id="nlpResetBtn">검색 필터 초기화</button>
+    </div>
+  </section>
+
+  <!-- 3. Apple Product Dock Style Category Navigation -->
+  <nav class="category-section" aria-label="모빌리티 카테고리 분류">
+    <div class="category-dock" id="categoryDock">
+      <!-- JS Populated -->
+    </div>
+  </nav>
+
+  <!-- 4. Marketplace Listings & Controls -->
+  <main class="marketplace-main">
+    <div class="toolbar-bar">
+      <div class="toolbar-left">
+        <h2 class="section-heading">
+          <span id="currentCategoryTitle">전체 모빌리티</span>
+          <span class="result-count" id="resultCountText">10대</span>
+        </h2>
+
+        <label class="filter-pill-check">
+          <input type="checkbox" id="filterAvailableOnly" />
+          <span>거래가능만 보기</span>
+        </label>
+
+        <label class="filter-pill-check">
+          <input type="checkbox" id="filterTestRideOnly" />
+          <span>시승가능 매물</span>
+        </label>
+
+        <label class="filter-pill-check">
+          <input type="checkbox" id="filterNegotiableOnly" />
+          <span>가격제안 가능</span>
+        </label>
+      </div>
+
+      <div class="toolbar-right">
+        <select id="sortSelect" class="sort-select" aria-label="정렬 기준">
+          <option value="latest">최신 등록순</option>
+          <option value="popular">인기 · 찜 많은순</option>
+          <option value="price-asc">낮은 가격순</option>
+          <option value="price-desc">높은 가격순</option>
+          <option value="mileage-asc">짧은 주행거리순</option>
+        </select>
+
+        <div class="view-mode-toggle" role="group" aria-label="화면 보기 방식 전환">
+          <button type="button" class="view-btn active" id="viewGridBtn" title="사진 중심 썸네일 그리드">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/>
+              <rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>
+            </svg>
+            <span>썸네일형</span>
+          </button>
+          <button type="button" class="view-btn" id="viewListBtn" title="당근 가로 리스트형">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
+              <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+            </svg>
+            <span>리스트형</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Photo-First Thumbnail Cards Grid -->
+    <div class="items-container" id="itemsContainer">
+      <!-- JS Populated -->
+    </div>
+  </main>
+
+  <!-- ========================================================================
+       Modal 1: Product Detail Dialog (상세 스펙 · 시세 비교 · 매너온도 · 채팅)
+       ======================================================================== -->
+  <dialog class="apple-modal" id="detailDialog" closedby="any">
+    <div class="modal-header">
+      <span class="modal-title" id="detailModalCategoryHeader">모빌리티 상세 정보</span>
+      <button type="button" class="modal-close-btn" data-close-dialog="detailDialog" aria-label="닫기">✕</button>
+    </div>
+    <div class="modal-body-scroll" id="detailModalContent">
+      <!-- JS Populated -->
+    </div>
+  </dialog>
+
+  <!-- ========================================================================
+       Modal 2: Item Registration Dialog (내 모빌리티 등록하기)
+       ======================================================================== -->
+  <dialog class="apple-modal" id="registerDialog" closedby="any" style="max-width: 680px;">
+    <div class="modal-header">
+      <span class="modal-title">내 모빌리티 등록하기</span>
+      <button type="button" class="modal-close-btn" data-close-dialog="registerDialog" aria-label="닫기">✕</button>
+    </div>
+    <div class="modal-body-scroll">
+      <form id="registerForm" class="form-grid">
+        <!-- 1. Photo Upload Section -->
+        <div class="form-group">
+          <div class="form-label">
+            <span>모빌리티 사진 등록 (썸네일 대표 사진)</span>
+            <button type="button" class="preset-photo-btn" id="addPresetPhotoBtn">+ 카테고리 고화질 샘플 사진 자동 채우기</button>
+          </div>
+          <div class="photo-uploader-zone" id="photoUploaderZone">
+            <label class="photo-upload-trigger" for="photoFileInput">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+                <circle cx="12" cy="13" r="4"/>
+              </svg>
+              <span id="photoCountLabel">0 / 5</span>
+            </label>
+            <input type="file" id="photoFileInput" accept="image/*" multiple hidden />
+            <div id="photoPreviewList" style="display:flex; gap:10px;"></div>
+          </div>
+        </div>
+
+        <!-- 2. Category & Neighborhood -->
+        <div class="form-row-2">
+          <div class="form-group">
+            <label class="form-label" for="regCategory">모빌리티 카테고리 *</label>
+            <select id="regCategory" class="form-select" required>
+              <option value="ev-car">전기차 · 자동차</option>
+              <option value="moto">바이크 · 스쿠터</option>
+              <option value="cycle" selected>자전거 · E-바이크</option>
+              <option value="personal">퍼스널 모빌리티 (킥보드·휠)</option>
+              <option value="parts-gear">모빌리티 기어 · 파츠</option>
+              <option value="aero-marine">드론 · 워터 · 레저</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="regNeighborhood">거래 희망 동네 *</label>
+            <select id="regNeighborhood" class="form-select" required>
+              <option value="성수동">성수동</option>
+              <option value="한남동">한남동</option>
+              <option value="압구정동">압구정동</option>
+              <option value="역삼동">역삼동</option>
+              <option value="판교동">판교동</option>
+              <option value="여의도동">여의도동</option>
+              <option value="연남동">연남동</option>
+              <option value="잠실동">잠실동</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- 3. Title -->
+        <div class="form-group">
+          <label class="form-label" for="regTitle">상품 제목 (모델명 · 핵심 특징) *</label>
+          <input
+            type="text"
+            id="regTitle"
+            class="form-input"
+            placeholder="예: 브롬톤 P라인 4단 미드나잇 블랙 (실주행 150km · 실내보관)"
+            required
+          />
+        </div>
+
+        <!-- 4. Selling Price & Daangn Benchmarks -->
+        <div class="form-group">
+          <div class="form-label">
+            <label for="regPrice">판매가격 (원) *</label>
+            <label style="display:inline-flex; align-items:center; gap:6px; font-weight:600; cursor:pointer;">
+              <input type="checkbox" id="regNegotiable" checked style="accent-color:var(--accent-blue);" />
+              <span>가격 제안 받기 (네고 가능)</span>
+            </label>
+          </div>
+          <input
+            type="number"
+            id="regPrice"
+            class="form-input"
+            placeholder="가격을 숫자만 입력하세요 (예: 2450000)"
+            min="0"
+            step="1000"
+            required
+          />
+          <div class="price-helper-row">
+            <span id="koreanPricePreview">₩ 0원</span>
+            <span id="marketGuideHint">카테고리 평균 시세 자동 비교 지원</span>
+          </div>
+        </div>
+
+        <!-- 5. Mobility Key Specs -->
+        <div class="form-row-3">
+          <div class="form-group">
+            <label class="form-label" for="regYear">연식 (출고연도)</label>
+            <input type="number" id="regYear" class="form-input" value="2025" min="2010" max="2027" />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="regMileage">주행거리 (km)</label>
+            <input type="number" id="regMileage" class="form-input" placeholder="예: 350" min="0" />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="regBattery">배터리 효율 (%)</label>
+            <input type="number" id="regBattery" class="form-input" placeholder="해당 시 입력 (예: 98)" min="50" max="100" />
+          </div>
+        </div>
+
+        <div class="form-row-2">
+          <div class="form-group">
+            <label class="form-label" for="regCondition">외관 · 구동계 상태 등급</label>
+            <select id="regCondition" class="form-select">
+              <option value="S급">S급 (신품급 · 무하자)</option>
+              <option value="A급">A급 (생활감 적음 · 관리 우수)</option>
+              <option value="B급">B급 (사용감 있음 · 기능 완벽)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="regTestRide">직거래 시승 가능 여부</label>
+            <select id="regTestRide" class="form-select">
+              <option value="true">직거래 시승 및 점검 환영</option>
+              <option value="false">단순 직거래 / 택배 거래</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- 6. Natural Language Search Tags & Description -->
+        <div class="form-group">
+          <label class="form-label" for="regTags">자연어 검색 태그 (쉼표로 구분)</label>
+          <input
+            type="text"
+            id="regTags"
+            class="form-input"
+            placeholder="예: 출퇴근용, 입문용, 접이식, 한강라이딩, 무사고"
+          />
+        </div>
+
+        <div class="form-group">
+          <div class="form-label">
+            <label for="regDesc">상세 설명 *</label>
+            <button type="button" class="preset-photo-btn" id="aiDraftDescBtn">✨ 모빌리티 스펙 기반 설명 자동 작성</button>
+          </div>
+          <textarea
+            id="regDesc"
+            class="form-textarea"
+            rows="4"
+            placeholder="구매 시기, 관리 상태, 튜닝/정품 파츠 포함 여부, 직거래 희망 장소를 자세히 적어주세요."
+            required
+          ></textarea>
+        </div>
+
+        <button type="submit" class="btn-chat-primary" style="width:100%; height:50px;">
+          모빌리티 장터에 등록 완료하기
+        </button>
+      </form>
+    </div>
+  </dialog>
+
+  <!-- ========================================================================
+       Modal 3: Price Offer Dialog (당근 스타일 가격 제안하기)
+       ======================================================================== -->
+  <dialog class="apple-modal" id="offerDialog" closedby="any" style="max-width: 440px;">
+    <div class="modal-header">
+      <span class="modal-title">가격 제안하기</span>
+      <button type="button" class="modal-close-btn" data-close-dialog="offerDialog" aria-label="닫기">✕</button>
+    </div>
+    <div class="modal-body-scroll">
+      <form id="offerForm" class="form-grid">
+        <div id="offerTargetSummary" style="padding:12px; border-radius:12px; background:var(--bg-canvas); font-size:0.86rem;"></div>
+        <div class="form-group">
+          <label class="form-label" for="offerPriceInput">제안하실 구매 희망가 (원)</label>
+          <input type="number" id="offerPriceInput" class="form-input" step="1000" required />
+          <div style="display:flex; gap:8px; margin-top:6px;">
+            <button type="button" class="nlp-chip" data-discount="0.97">-3% 제안</button>
+            <button type="button" class="nlp-chip" data-discount="0.95">-5% 제안</button>
+            <button type="button" class="nlp-chip" data-discount="0.92">-8% 제안</button>
+          </div>
+        </div>
+        <button type="submit" class="btn-chat-primary" style="width:100%;">
+          채팅방으로 가격 제안 보내기
+        </button>
+      </form>
+    </div>
+  </dialog>
+
+  <!-- ========================================================================
+       Modal 4: Real-Time Mobility Chat Dialog (모빌리티 당근채팅)
+       ======================================================================== -->
+  <dialog class="apple-modal" id="chatDialog" closedby="any" style="max-width: 880px;">
+    <div class="modal-header">
+      <span class="modal-title">MOVO 모빌리티 채팅</span>
+      <button type="button" class="modal-close-btn" data-close-dialog="chatDialog" aria-label="닫기">✕</button>
+    </div>
+    <div class="chat-modal-layout">
+      <!-- Left: Chat Room List -->
+      <aside class="chat-room-list" id="chatRoomList">
+        <!-- JS Populated -->
+      </aside>
+
+      <!-- Right: Active Chat Conversation -->
+      <section class="chat-conversation-panel">
+        <div class="chat-item-banner" id="chatItemBanner">
+          <!-- JS Populated -->
+        </div>
+
+        <div class="chat-messages-area" id="chatMessagesArea">
+          <!-- JS Populated -->
+        </div>
+
+        <div class="chat-quick-chips" id="chatQuickChips">
+          <button type="button" class="chat-quick-chip" data-msg="안녕하세요! 아직 구매 가능할까요?">구매 가능할까요?</button>
+          <button type="button" class="chat-quick-chip" data-msg="주행거리 실키로수인지, 슬립이나 사고 이력 없는지 궁금합니다.">실키로수·무사고 확인</button>
+          <button type="button" class="chat-quick-chip" data-msg="오늘 저녁 동네에서 직접 시승해보고 직거래 가능할까요?">오늘 저녁 시승 문의</button>
+          <button type="button" class="chat-quick-chip" data-msg="쿨거래 시 네고 조금 가능하실까요?">쿨거래 네고 문의</button>
+          <button type="button" class="chat-quick-chip" data-msg="배터리 효율 상태와 충전기 포함 여부가 궁금해요.">배터리·충전기 문의</button>
+        </div>
+
+        <form id="chatSendForm" class="chat-input-bar">
+          <input
+            type="text"
+            id="chatTextInput"
+            class="chat-text-input"
+            placeholder="메시지를 입력하세요 (시승 문의, 직거래 장소 약속 등)..."
+            autocomplete="off"
+          />
+          <button type="submit" class="chat-send-btn">전송</button>
+        </form>
+      </section>
+    </div>
+  </dialog>
+
+  <!-- Toast Notification Container -->
+  <div class="toast-container" id="toastContainer" aria-live="polite"></div>
+
+  <!-- Minimal Apple-Style Footer -->
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <div>
+        <strong>MOVO (모보)</strong> — 이동의 모든 순간을 거래하는 C2C 모빌리티 마켓플레이스
+      </div>
+      <div>
+        동네 직거래 인증 · 시승 예약 시스템 · 모빌리티 안심페이 지원
+      </div>
+    </div>
+  </footer>
+
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
