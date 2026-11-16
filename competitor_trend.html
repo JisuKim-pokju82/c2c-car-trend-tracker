@@ -499,6 +499,88 @@
       height: 100%;
       border-radius: 6px;
     }
+
+    /* PC / 모바일 모드 스위치 및 모바일 최적화 스타일 */
+    .view-mode-switch {
+      display: inline-flex;
+      background: #e2e8f0;
+      padding: 4px;
+      border-radius: 10px;
+      gap: 3px;
+    }
+    .view-mode-btn {
+      border: none;
+      background: transparent;
+      padding: 8px 14px;
+      border-radius: 7px;
+      font-size: 14px;
+      font-weight: 800;
+      color: #475569;
+      cursor: pointer;
+    }
+    .view-mode-btn.active {
+      background: #0f172a;
+      color: #fff;
+    }
+
+    .mobile-raw-cards {
+      display: none;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .m-raw-card {
+      background: #f8fafc;
+      border: 1px solid var(--border-soft);
+      border-radius: 12px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    body.mobile-mode .container {
+      max-width: 480px;
+      padding: 0 14px;
+      margin-top: 16px;
+      gap: 18px;
+    }
+    body.mobile-mode .topbar { padding: 12px 14px; }
+    body.mobile-mode .brand-title { font-size: 18px; }
+    body.mobile-mode .section-block { padding: 18px 16px; }
+    body.mobile-mode .section-title { font-size: 19px; }
+    body.mobile-mode .stock-grid,
+    body.mobile-mode .trend-chart-grid,
+    body.mobile-mode .flow-grid,
+    body.mobile-mode .pf-grid {
+      grid-template-columns: 1fr !important;
+    }
+    body.mobile-mode .stock-num { font-size: 32px; }
+    body.mobile-mode .big-tab { padding: 9px 14px; font-size: 14px; flex: 1 1 auto; text-align: center; }
+    body.mobile-mode .calendar-control-banner { padding: 18px 16px; }
+    body.mobile-mode .date-picker-group { width: 100%; justify-content: space-between; }
+    body.mobile-mode .date-input { width: 44%; font-size: 14px; padding: 9px 10px; }
+    body.mobile-mode .search-submit-btn { width: 100%; justify-content: center; margin-top: 6px; }
+    body.mobile-mode .quick-date-btn { flex: 1; text-align: center; padding: 9px 8px; font-size: 13.5px; }
+    body.mobile-mode #pcRawTableWrap { display: none; }
+    body.mobile-mode #mobileRawCardsWrap { display: flex; }
+
+    @media (max-width: 768px) {
+      .container { padding: 0 14px; margin-top: 16px; gap: 18px; }
+      .topbar { padding: 12px 14px; }
+      .brand-title { font-size: 18px; }
+      .section-block { padding: 18px 16px; }
+      .section-title { font-size: 19px; }
+      .stock-grid, .trend-chart-grid, .flow-grid, .pf-grid { grid-template-columns: 1fr !important; }
+      .stock-num { font-size: 32px; }
+      .big-tab { padding: 9px 14px; font-size: 14px; flex: 1 1 auto; text-align: center; }
+      .calendar-control-banner { padding: 18px 16px; }
+      .date-picker-group { width: 100%; justify-content: space-between; }
+      .date-input { width: 44%; font-size: 14px; padding: 9px 10px; }
+      .search-submit-btn { width: 100%; justify-content: center; margin-top: 6px; }
+      .quick-date-btn { flex: 1; text-align: center; padding: 9px 8px; font-size: 13.5px; }
+      #pcRawTableWrap { display: none; }
+      #mobileRawCardsWrap { display: flex; }
+    }
   </style>
 </head>
 <body>
@@ -512,8 +594,12 @@
         <span class="brand-meta" id="lastUpdatedInfo">기준일시: -</span>
       </div>
       <div class="top-actions">
-        <a href="raw_data/raw_vehicles_latest.csv" download class="btn btn-accent">⬇ 개별 매물 RAW 데이터(엑셀) 다운로드</a>
-        <a href="competitor_trend.csv" download class="btn btn-primary">⬇ 일자별 요약 데이터(엑셀) 다운로드</a>
+        <div class="view-mode-switch" id="viewModeSwitch">
+          <button type="button" class="view-mode-btn active" data-mode="pc">💻 PC 버전</button>
+          <button type="button" class="view-mode-btn" data-mode="mobile">📱 모바일 버전</button>
+        </div>
+        <a href="database/c2c_vehicle_master_db.csv" download class="btn btn-accent">⬇ 누적 마스터 DB(엑셀)</a>
+        <a href="database/c2c_daily_summary_db.csv" download class="btn btn-primary">⬇ 일자별 요약 DB(엑셀)</a>
       </div>
     </div>
   </header>
@@ -675,7 +761,7 @@
         <button type="button" class="btn" id="rawDownloadFilteredBtn">⬇ 현재 검색결과 엑셀(CSV) 저장</button>
       </div>
 
-      <div class="table-wrap" style="max-height:580px;overflow-y:auto;">
+      <div class="table-wrap" id="pcRawTableWrap" style="max-height:580px;overflow-y:auto;">
         <table class="exec-table">
           <thead>
             <tr>
@@ -697,8 +783,44 @@
         </table>
       </div>
 
+      <!-- 모바일 버전 전용 매물 카드 리스트 -->
+      <div class="mobile-raw-cards" id="mobileRawCardsWrap"></div>
+
       <div style="margin-top:16px;text-align:center;" id="rawLoadMoreWrap">
         <button type="button" class="btn" id="rawLoadMoreBtn" style="padding:12px 32px;font-size:15.5px;">더 많은 매물 보기 (+200건)</button>
+      </div>
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- Ⅴ. 일자별 수집 CSV 아카이브 & 누적 마스터 DB 저장소 -->
+    <!-- =================================================================== -->
+    <section class="section-block">
+      <div class="section-header">
+        <div>
+          <div class="section-eyebrow">Ⅴ. 데이터 영구 보관소 (Daily CSV Archive & Cumulative Master DB)</div>
+          <h2 class="section-title">🗄️ 일자별 수집 CSV 저장소 및 통합 누적 DB</h2>
+          <p class="section-desc">매일 오전 08:00 자동 수집되는 데이터가 날짜별 개별 CSV 파일과 통합 누적 마스터 DB(`database/`)에 영구 축적됩니다.</p>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          <a href="database/c2c_vehicle_master_db.csv" download class="btn btn-accent">⬇ 전체 누적 매물 마스터 DB (c2c_vehicle_master_db.csv)</a>
+          <a href="database/c2c_daily_summary_db.csv" download class="btn btn-primary">⬇ 전체 누적 일별 요약 DB (c2c_daily_summary_db.csv)</a>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table class="exec-table">
+          <thead>
+            <tr>
+              <th>수집 일자</th>
+              <th style="text-align:center;">수집 시각</th>
+              <th>총 상세 수집 건수</th>
+              <th>당근 / 케이카 / 엔카 / KB</th>
+              <th style="text-align:center;">일자별 상세 매물 CSV 다운로드</th>
+              <th style="text-align:center;">당근 전국 URL DB 다운로드</th>
+            </tr>
+          </thead>
+          <tbody id="dbArchiveTableBody"></tbody>
+        </table>
       </div>
     </section>
 
@@ -1325,8 +1447,62 @@
         </tr>
       `).join('');
 
+      document.getElementById('mobileRawCardsWrap').innerHTML = slice.map(v => `
+        <div class="m-raw-card">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <span style="padding:4px 9px;border-radius:6px;font-size:12.5px;font-weight:800;${badgeColorMap[v.platform] || ''}">${v.platform} · ${v.originType}</span>
+            <span style="font-size:18px;font-weight:800;color:#0f172a;">${fmt(v.priceManwon)}만원</span>
+          </div>
+          <div style="font-size:16px;font-weight:800;color:#0f172a;">[${v.manufacturer}] ${v.fullTitle}</div>
+          <div style="display:flex;justify-content:space-between;align-items:center;font-size:13.5px;color:#475569;">
+            <span>${v.year}년식 · ${fmt(v.mileageKm)}km · ${v.region} (${v.status})</span>
+            <a href="${v.url}" target="_blank" rel="noopener" style="padding:6px 12px;border-radius:7px;background:#eff6ff;color:#2563eb;text-decoration:none;font-weight:800;">매물 보기 ↗</a>
+          </div>
+        </div>
+      `).join('');
+
       document.getElementById('rawLoadMoreWrap').style.display =
         lastFilteredRawList.length > rawVisibleLimit ? 'block' : 'none';
+    }
+
+    function renderDbArchiveSection() {
+      const archives = Array.isArray(window.COMPETITOR_DB_ARCHIVE) ? window.COMPETITOR_DB_ARCHIVE : [];
+      const tbody = document.getElementById('dbArchiveTableBody');
+      if (!tbody) return;
+      tbody.innerHTML = [...archives].reverse().map(a => `
+        <tr>
+          <td><strong>${a.date}</strong></td>
+          <td style="text-align:center;color:#475569;">${a.updatedAt || '-'}</td>
+          <td style="font-weight:800;color:#0f172a;">${fmt(a.vehicleCount)}건</td>
+          <td>당근 ${fmt(a.daangnCount)} · 케이카 ${fmt(a.kcarCount)} · 엔카 ${fmt(a.encarCount)} · KB ${fmt(a.kbCount)}</td>
+          <td style="text-align:center;">
+            <a href="${a.rawCsvPath}" download class="btn" style="padding:6px 14px;font-size:13.5px;">⬇ ${a.date} 상세 CSV</a>
+          </td>
+          <td style="text-align:center;">
+            <a href="${a.daangnUrlPath}" download class="btn" style="padding:6px 14px;font-size:13.5px;">⬇ 당근 전국 URL CSV</a>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    // PC / 모바일 화면 전환 스위치
+    document.getElementById('viewModeSwitch').addEventListener('click', e => {
+      const btn = e.target.closest('.view-mode-btn');
+      if (!btn) return;
+      document.querySelectorAll('#viewModeSwitch .view-mode-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      if (btn.dataset.mode === 'mobile') {
+        document.body.classList.add('mobile-mode');
+      } else {
+        document.body.classList.remove('mobile-mode');
+      }
+    });
+
+    if (window.innerWidth <= 768) {
+      document.body.classList.add('mobile-mode');
+      document.querySelectorAll('#viewModeSwitch .view-mode-btn').forEach(b => {
+        b.classList.toggle('active', b.dataset.mode === 'mobile');
+      });
     }
 
     document.getElementById('rawPlatformTabs').addEventListener('click', e => {
@@ -1382,6 +1558,7 @@
     renderPortfolioSection();
     updateRawTabCounts();
     filterAndRenderRawTable(true);
+    renderDbArchiveSection();
   </script>
 </body>
 </html>

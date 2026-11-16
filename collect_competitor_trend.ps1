@@ -798,6 +798,54 @@ foreach ($r in $sortedRecords) {
 }
 [System.IO.File]::WriteAllLines($CsvPath, $csvLines, $utf8Bom)
 
+# Update Cumulative Master DB Folder (database/)
+$DbDir = Join-Path $WorkDir "database"
+if (-not (Test-Path $DbDir)) { New-Item -ItemType Directory -Path $DbDir -Force | Out-Null }
+$SummaryDbPath = Join-Path $DbDir "c2c_daily_summary_db.csv"
+$VehicleDbPath = Join-Path $DbDir "c2c_vehicle_master_db.csv"
+$ManifestPath  = Join-Path $DbDir "db_manifest.json"
+
+[System.IO.File]::WriteAllLines($SummaryDbPath, $csvLines, $utf8Bom)
+if (-not (Test-Path $VehicleDbPath)) {
+    [System.IO.File]::WriteAllLines($VehicleDbPath, $rawLines, $utf8Bom)
+} else {
+    $existingDbLines = [System.IO.File]::ReadAllLines($VehicleDbPath, [System.Text.Encoding]::UTF8)
+    $keptLines = New-Object System.Collections.Generic.List[string]
+    foreach ($ln in $existingDbLines) {
+        if (-not $ln.StartsWith("$TodayDate,")) { $keptLines.Add($ln) }
+    }
+    if ($keptLines.Count -eq 0) { $keptLines.Add($rawHeader) }
+    foreach ($ln in ($rawLines | Select-Object -Skip 1)) { $keptLines.Add($ln) }
+    [System.IO.File]::WriteAllLines($VehicleDbPath, $keptLines, $utf8Bom)
+}
+
+$manifestList = @()
+if (Test-Path $ManifestPath) {
+    try {
+        $mParsed = [System.IO.File]::ReadAllText($ManifestPath, [System.Text.Encoding]::UTF8) | ConvertFrom-Json
+        if ($mParsed -is [System.Array]) { $manifestList = @($mParsed) }
+        elseif ($null -ne $mParsed) { $manifestList = @($mParsed) }
+    } catch { $manifestList = @() }
+}
+$manifestFiltered = @($manifestList | Where-Object { $_.date -ne $TodayDate })
+$manifestFiltered += [pscustomobject][ordered]@{
+    date          = $TodayDate
+    updatedAt     = $Timestamp
+    rawCsvPath    = "raw_data/raw_vehicles_$($TodayDate).csv"
+    daangnUrlPath = "raw_data/daangn_sitemap_urls_$($TodayDate).csv"
+    vehicleCount  = $allRawVehicles.Count
+    daangnCount   = $daangnNormItems.Count
+    kcarCount     = $kcarNormItems.Count
+    encarCount    = $encarNormItems.Count
+    kbCount       = $kbNormItems.Count
+}
+$sortedManifest = @($manifestFiltered | Sort-Object date)
+$manifestJson = ConvertTo-Json -InputObject $sortedManifest -Depth 4
+if ($sortedManifest.Count -eq 1 -and -not $manifestJson.TrimStart().StartsWith("[")) {
+    $manifestJson = "[`r`n" + $manifestJson + "`r`n]"
+}
+[System.IO.File]::WriteAllText($ManifestPath, $manifestJson, $utf8NoBom)
+
 $portfolioBundle = [ordered]@{
     updatedAt = $Timestamp
     daangn    = $daangnPortfolio
@@ -816,6 +864,7 @@ window.COMPETITOR_TREND_DATA = $jsonOutput;
 window.COMPETITOR_PORTFOLIO_DATA = $portfolioJson;
 window.COMPETITOR_RAW_PREVIEW = $rawPreview;
 window.COMPETITOR_RAW_TOTAL_COUNT = $($allRawVehicles.Count);
+window.COMPETITOR_DB_ARCHIVE = $manifestJson;
 "@
 [System.IO.File]::WriteAllText($JsPath, $jsContent, $utf8NoBom)
 
