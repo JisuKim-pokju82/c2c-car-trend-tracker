@@ -172,6 +172,29 @@ function Compare-And-SaveSnapshot([string]$platformKey, [string[]]$todayIds) {
     }
 }
 
+function Get-CarTypeCategory([string]$title) {
+    $t = $title.ToUpper()
+    if ($t -match (U "SUV|RV|\uC3D8\uB80C\uD1A0|\uC2FC\uD0C0\uD398|\uC2A4\uD3EC\uD2F0\uC9C0|\uD22C\uC2FC|\uCE74\uB2C8\uBC1C|\uD330\uB9AC\uC138\uC774\uB4DC|\uC140\uD1A0\uC2A4|\uB2C8\uB85C|\uCF54\uB098|\uBAA8\uD558\uBE44|\uD2F0\uBCF4\uB9AC|\uD1A0\uB808\uC2A4|\uB809\uC2A4\uD134|\uCF54\uB780\uB3C4|QM6|XM3|\uD2B8\uB799\uC2A4|\uD2B8\uB808\uC77C\uBE14\uB808\uC774\uC800|\uC62C\uB780\uB3C4|\uBCA0\uB274|GV70|GV80|GV60|\uC544\uC774\uC624\uB2C9\s*5|EV6|EV9|EV3|\uBAA8\uB378\s*Y|\uBAA8\uB378\s*X|\uCE74\uC774\uC5D4|\uB9C8\uCE78|X3|X4|X5|X6|X7|GLC|GLE|GLA|GLB|GLS|Q3|Q5|Q7|Q8|\uD2F0\uAD6C\uC548|\uD22C\uC544\uB809|XC60|XC90|XC40|\uB808\uB2C8\uAC8C\uC774\uB4DC|\uCCB4\uB85C\uD0A4|\uB7AD\uAE00\uB7EC|\uB514\uC2A4\uCEE4\uBC84\uB9AC|\uB808\uC778\uC9C0\uB85C\uBC84|\uC775\uC2A4\uD50C\uB85C\uB7EC|\uCEFF\uD2B8\uB9AC\uB9E8")) {
+        return (U "SUV \u00B7 RV")
+    }
+    if ($t -match (U "\uBAA8\uB2DD|\uC2A4\uD30C\uD06C|\uB808\uC774|\uCE90\uC2A4\uD37C|\uB9C8\uD2F0\uC988|\uB2E4\uB9C8\uC2A4|\uB77C\uBCF4|\uC5D1\uC13C\uD2B8|\uD504\uB77C\uC774\uB4DC|\uD074\uB9AD|\uBCA0\uB974\uB098|\uBBF8\uB2C8|\uCFE0\uD37C")) {
+        return (U "\uACBD\uCC28 \u00B7 \uC18C\uD615")
+    }
+    if ($t -match (U "\uC544\uBC18\uB5BC|K3|\uD3EC\uB974\uD14C|\uD06C\uB8E8\uC988|\uB77C\uC138\uD2F0|SM3|\uBCA8\uB85C\uC2A4\uD130|I30|\uACE8\uD504|\uC81C\uD0C0|A3|1\uC2DC\uB9AC\uC988|2\uC2DC\uB9AC\uC988|\uC2DC\uBE45|\uD504\uB9AC\uC6B0\uC2A4")) {
+        return (U "\uC900\uC911\uD615")
+    }
+    if ($t -match (U "\uC3D8\uB098\uD0C0|\uC18C\uB098\uD0C0|K5|\uB9D0\uB9AC\uBD80|SM6|SM5|I40|G70|3\uC2DC\uB9AC\uC988|320|4\uC2DC\uB9AC\uC988|C\uD074\uB798\uC2A4|C200|C220|A4|A5|\uD30C\uC0AC\uD2B8|\uC544\uD14C\uC628|S60|\uCE20\uB9AC|\uC5B4\uCF54\uB4DC|\uBAA8\uB378\s*3|\uC544\uC774\uC624\uB2C9\s*6")) {
+        return (U "\uC911\uD615 \uC138\uB2E8")
+    }
+    if ($t -match (U "\uADF8\uB79C\uC800|K7|K8|K9|G80|G90|\uC81C\uB124\uC2DC\uC2A4|\uC5D0\uCFE0\uC2A4|\uCCB4\uC5B4\uB9E8|\uC624\uD53C\uB7EC\uC2A4|\uC544\uC2AC\uB780|\uC54C\uD398\uC628|\uC784\uD314\uB77C|SM7|5\uC2DC\uB9AC\uC988|520|530|6\uC2DC\uB9AC\uC988|7\uC2DC\uB9AC\uC988|E\uD074\uB798\uC2A4|E200|E220|E250|E300|E350|S\uD074\uB798\uC2A4|CLS|A6|A7|A8|\uD30C\uB098\uBA54\uB77C|\uD0C0\uC774\uCE78|911|\uBC15\uC2A4\uD130|\uCE74\uC774\uB9E8|\uBAA8\uB378\s*S|S90")) {
+        return (U "\uC900\uB300\uD615 \u00B7 \uB300\uD615 \u00B7 \uACE0\uAE09")
+    }
+    if ($t -match (U "\uC2A4\uD0C0\uB9AC\uC544|\uC2A4\uD0C0\uB809\uC2A4|\uD3EC\uD130|\uBD09\uACE0|\uB9C8\uC2A4\uD130|\uC3E0\uB77C\uD2F0|\uCE74\uC6B4\uD2F0|\uB9C8\uC774\uD2F0|\uD2B8\uB7ED|\uD654\uBB3C|\uCE20\uD551\uCE74|\uBC34")) {
+        return (U "\uC0C1\uC6A9 \u00B7 \uC2B9\uD569 \u00B7 \uCE20\uD551")
+    }
+    return (U "\uC911\uD615 \u00B7 \uAE30\uD0C0\uC2B9\uC6A9")
+}
+
 function Build-PortfolioSummary([object[]]$items) {
     $total = $items.Count
     $domCnt = 0; $impCnt = 0
@@ -182,6 +205,15 @@ function Build-PortfolioSummary([object[]]$items) {
         (U "2\uCC9C~3\uCC9C\uB9CC\uC6D0")      = 0
         (U "3\uCC9C~5\uCC9C\uB9CC\uC6D0")      = 0
         (U "5\uCC9C\uB9CC\uC6D0 \uC774\uC0C1") = 0
+    }
+    $carTypes = [ordered]@{
+        (U "SUV \u00B7 RV")                      = 0
+        (U "\uC900\uB300\uD615 \u00B7 \uB300\uD615 \u00B7 \uACE0\uAE09") = 0
+        (U "\uC911\uD615 \uC138\uB2E8")          = 0
+        (U "\uC900\uC911\uD615")                 = 0
+        (U "\uACBD\uCC28 \u00B7 \uC18C\uD615")   = 0
+        (U "\uC0C1\uC6A9 \u00B7 \uC2B9\uD569 \u00B7 \uCE20\uD551") = 0
+        (U "\uC911\uD615 \u00B7 \uAE30\uD0C0\uC2B9\uC6A9") = 0
     }
     $regionCounts = @{}
     $modelCounts  = @{}
@@ -196,6 +228,9 @@ function Build-PortfolioSummary([object[]]$items) {
         }
         $pb = $it.priceBand
         if ($priceBands.Contains($pb)) { $priceBands[$pb] = [int]$priceBands[$pb] + 1 }
+
+        $ct = Get-CarTypeCategory "$($it.model) $($it.fullTitle)"
+        if ($carTypes.Contains($ct)) { $carTypes[$ct] = [int]$carTypes[$ct] + 1 }
 
         $r = if ($it.region) { [string]$it.region } else { U "\uAE30\uD0C0" }
         $regionCounts[$r] = [int]$regionCounts[$r] + 1
@@ -221,6 +256,7 @@ function Build-PortfolioSummary([object[]]$items) {
         importedRatio   = if ($total -gt 0) { [math]::Round(($impCnt / $total) * 100, 1) } else { 0 }
         avgPriceManwon  = $avgPrice
         priceBands      = $priceBands
+        carTypes        = $carTypes
         topRegions      = $topRegions
         topModels       = $topModels
         topBrands       = $topBrands
