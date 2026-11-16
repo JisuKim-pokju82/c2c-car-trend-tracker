@@ -737,8 +737,8 @@ $portfolioBundle = [ordered]@{
     kb        = $kbPortfolio
 }
 $portfolioJson = $portfolioBundle | ConvertTo-Json -Depth 6
-# Embed top 600 sample raw vehicles for instant browser inspection + link to full CSV
-$rawPreview = @($allRawVehicles | Select-Object -First 600) | ConvertTo-Json -Depth 4
+# Embed all raw vehicles across all 4 platforms for instant browser search
+$rawPreview = $allRawVehicles | ConvertTo-Json -Depth 4 -Compress
 
 $jsContent = @"
 // Auto-generated 4-Platform Apple-to-Apple C2C Intelligence Bundle ($Timestamp)

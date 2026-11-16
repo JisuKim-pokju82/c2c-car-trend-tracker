@@ -617,6 +617,74 @@
       <div class="pf-grid" id="portfolioGridContainer"></div>
     </section>
 
+    <!-- =================================================================== -->
+    <!-- Ⅳ. 업체별 개별 매물 RAW 데이터 상세 검색 (매물ID 제외, 4개사 전체 & 매물링크 포함) -->
+    <!-- =================================================================== -->
+    <section class="section-block">
+      <div class="section-header">
+        <div>
+          <div class="section-eyebrow">Ⅳ. 4개사 전수 매물 상세 조회 (원본 매물 바로가기 지원)</div>
+          <h2 class="section-title">업체별 개별 매물 RAW 데이터 상세 검색</h2>
+          <p class="section-desc" id="rawSearchSummaryText">당근중고차 · 케이카 직거래 · 엔카닷컴 개인 · KB차차차 개인 매물을 업체별·국산/수입·키워드별로 상세 검색하고 실제 매물 페이지로 이동할 수 있습니다.</p>
+        </div>
+        <div class="big-tabs" id="rawPlatformTabs">
+          <button type="button" class="big-tab active" data-plat="ALL">전체 업체</button>
+          <button type="button" class="big-tab" data-plat="당근중고차">1. 당근중고차</button>
+          <button type="button" class="big-tab" data-plat="케이카직거래">2. 케이카 직거래</button>
+          <button type="button" class="big-tab" data-plat="엔카닷컴개인">3. 엔카닷컴 개인</button>
+          <button type="button" class="big-tab" data-plat="KB차차차개인">4. KB차차차 개인</button>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-bottom:18px;background:#f8fafc;padding:16px 20px;border-radius:12px;border:1px solid var(--border-soft);">
+        <select id="rawOriginSelect" style="padding:11px 16px;border-radius:9px;border:1px solid var(--border);font-size:15.5px;font-weight:700;background:#fff;">
+          <option value="ALL">국산 + 수입 전체</option>
+          <option value="국산">국산차만 보기</option>
+          <option value="수입">수입차만 보기</option>
+        </select>
+
+        <select id="rawPriceBandSelect" style="padding:11px 16px;border-radius:9px;border:1px solid var(--border);font-size:15.5px;font-weight:700;background:#fff;">
+          <option value="ALL">전체 가격대</option>
+          <option value="1천만원 미만">1천만원 미만</option>
+          <option value="1천~2천만원">1천~2천만원</option>
+          <option value="2천~3천만원">2천~3천만원</option>
+          <option value="3천~5천만원">3천~5천만원</option>
+          <option value="5천만원 이상">5천만원 이상</option>
+        </select>
+
+        <input type="search" id="rawKeywordInput" placeholder="차량명, 제조사, 모델, 지역 검색 (예: 그랜저, 제네시스, BMW, 서울)..." style="flex:1;min-width:260px;padding:11px 16px;border-radius:9px;border:1px solid var(--border);font-size:15.5px;background:#fff;" />
+
+        <button type="button" class="search-submit-btn" id="rawSearchBtn">🔍 매물 검색</button>
+        <button type="button" class="btn" id="rawDownloadFilteredBtn">⬇ 현재 검색결과 엑셀(CSV) 저장</button>
+      </div>
+
+      <div class="table-wrap" style="max-height:580px;overflow-y:auto;">
+        <table class="exec-table">
+          <thead>
+            <tr>
+              <th>업체명</th>
+              <th style="text-align:center;">국산/수입</th>
+              <th style="text-align:left;">제조사</th>
+              <th style="text-align:left;">모델명</th>
+              <th style="text-align:left;">전체 차량명</th>
+              <th style="text-align:center;">연식</th>
+              <th>주행거리</th>
+              <th>판매가격</th>
+              <th style="text-align:center;">가격대 구간</th>
+              <th style="text-align:center;">지역</th>
+              <th style="text-align:center;">상태</th>
+              <th style="text-align:center;">매물 링크</th>
+            </tr>
+          </thead>
+          <tbody id="rawVehicleTableBody"></tbody>
+        </table>
+      </div>
+
+      <div style="margin-top:16px;text-align:center;" id="rawLoadMoreWrap">
+        <button type="button" class="btn" id="rawLoadMoreBtn" style="padding:12px 32px;font-size:15.5px;">더 많은 매물 보기 (+200건)</button>
+      </div>
+    </section>
+
   </main>
 
   <script src="competitor_trend_data.js"></script>
@@ -1094,10 +1162,137 @@
       renderPortfolioSection();
     });
 
+    // Ⅳ. 업체별 RAW 매물 상세 검색 로직 (매물ID 제외, 4개사 전수 검색 + 원본 링크)
+    let selectedRawPlat = 'ALL';
+    let rawVisibleLimit = 200;
+    let lastFilteredRawList = [];
+
+    function getRawVehicles() {
+      return Array.isArray(window.COMPETITOR_RAW_PREVIEW) ? window.COMPETITOR_RAW_PREVIEW : [];
+    }
+
+    function updateRawTabCounts() {
+      const all = getRawVehicles();
+      const counts = { ALL: all.length, '당근중고차': 0, '케이카직거래': 0, '엔카닷컴개인': 0, 'KB차차차개인': 0 };
+      all.forEach(v => { if (counts[v.platform] !== undefined) counts[v.platform]++; });
+      const labels = {
+        ALL: `전체 업체 (${fmt(counts.ALL)}대)`,
+        '당근중고차': `1. 당근중고차 (${fmt(counts['당근중고차'])}대)`,
+        '케이카직거래': `2. 케이카 직거래 (${fmt(counts['케이카직거래'])}대)`,
+        '엔카닷컴개인': `3. 엔카닷컴 개인 (${fmt(counts['엔카닷컴개인'])}대)`,
+        'KB차차차개인': `4. KB차차차 개인 (${fmt(counts['KB차차차개인'])}대)`
+      };
+      document.querySelectorAll('#rawPlatformTabs .big-tab').forEach(btn => {
+        const p = btn.dataset.plat;
+        if (labels[p]) btn.textContent = labels[p];
+      });
+    }
+
+    function filterAndRenderRawTable(resetLimit) {
+      if (resetLimit) rawVisibleLimit = 200;
+      const all = getRawVehicles();
+      const originVal = document.getElementById('rawOriginSelect').value;
+      const bandVal = document.getElementById('rawPriceBandSelect').value;
+      const kw = document.getElementById('rawKeywordInput').value.trim().toLowerCase();
+
+      lastFilteredRawList = all.filter(v => {
+        if (selectedRawPlat !== 'ALL' && v.platform !== selectedRawPlat) return false;
+        if (originVal !== 'ALL' && v.originType !== originVal) return false;
+        if (bandVal !== 'ALL' && v.priceBand !== bandVal) return false;
+        if (kw) {
+          const hay = `${v.platform} ${v.manufacturer} ${v.model} ${v.fullTitle} ${v.region} ${v.year}`.toLowerCase();
+          if (!hay.includes(kw)) return false;
+        }
+        return true;
+      });
+
+      document.getElementById('rawSearchSummaryText').innerHTML =
+        `검색 조건에 일치하는 매물 총 <strong style="color:#0f172a;">${fmt(lastFilteredRawList.length)}대</strong> (현재 화면에 상위 ${fmt(Math.min(rawVisibleLimit, lastFilteredRawList.length))}대 표시 중)`;
+
+      const badgeColorMap = {
+        '당근중고차': 'background:rgba(255,111,15,0.14);color:#c2410c;',
+        '케이카직거래': 'background:rgba(30,58,138,0.12);color:#1e3a8a;',
+        '엔카닷컴개인': 'background:rgba(220,38,38,0.12);color:#dc2626;',
+        'KB차차차개인': 'background:rgba(217,119,6,0.15);color:#b45309;'
+      };
+
+      const slice = lastFilteredRawList.slice(0, rawVisibleLimit);
+      document.getElementById('rawVehicleTableBody').innerHTML = slice.map(v => `
+        <tr>
+          <td><span style="padding:4px 9px;border-radius:6px;font-size:13px;font-weight:800;${badgeColorMap[v.platform] || ''}">${v.platform}</span></td>
+          <td style="text-align:center;font-weight:700;">${v.originType}</td>
+          <td style="text-align:left;font-weight:700;">${v.manufacturer}</td>
+          <td style="text-align:left;font-weight:800;color:#0f172a;">${v.model}</td>
+          <td style="text-align:left;max-width:320px;overflow:hidden;text-overflow:ellipsis;" title="${v.fullTitle}">${v.fullTitle}</td>
+          <td style="text-align:center;">${v.year}</td>
+          <td>${fmt(v.mileageKm)}km</td>
+          <td style="font-weight:800;color:#0f172a;">${fmt(v.priceManwon)}만원</td>
+          <td style="text-align:center;font-size:13.5px;color:#475569;">${v.priceBand}</td>
+          <td style="text-align:center;">${v.region}</td>
+          <td style="text-align:center;font-weight:700;">${v.status}</td>
+          <td style="text-align:center;">
+            <a href="${v.url}" target="_blank" rel="noopener" style="display:inline-block;padding:6px 12px;border-radius:7px;background:#eff6ff;color:#2563eb;text-decoration:none;font-weight:800;font-size:13.5px;">매물 보기 ↗</a>
+          </td>
+        </tr>
+      `).join('');
+
+      document.getElementById('rawLoadMoreWrap').style.display =
+        lastFilteredRawList.length > rawVisibleLimit ? 'block' : 'none';
+    }
+
+    document.getElementById('rawPlatformTabs').addEventListener('click', e => {
+      const btn = e.target.closest('.big-tab');
+      if (!btn) return;
+      document.querySelectorAll('#rawPlatformTabs .big-tab').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      selectedRawPlat = btn.dataset.plat;
+      filterAndRenderRawTable(true);
+    });
+
+    document.getElementById('rawSearchBtn').addEventListener('click', () => filterAndRenderRawTable(true));
+    document.getElementById('rawOriginSelect').addEventListener('change', () => filterAndRenderRawTable(true));
+    document.getElementById('rawPriceBandSelect').addEventListener('change', () => filterAndRenderRawTable(true));
+    document.getElementById('rawKeywordInput').addEventListener('keydown', e => {
+      if (e.key === 'Enter') filterAndRenderRawTable(true);
+    });
+
+    document.getElementById('rawLoadMoreBtn').addEventListener('click', () => {
+      rawVisibleLimit += 200;
+      filterAndRenderRawTable(false);
+    });
+
+    document.getElementById('rawDownloadFilteredBtn').addEventListener('click', () => {
+      const header = '업체명,국산수입구분,제조사,모델명,전체차량명,연식,주행거리_km,판매가격_만원,가격대구간,지역,판매상태,매물링크';
+      const rows = lastFilteredRawList.map(v => [
+        `"${v.platform}"`,
+        `"${v.originType}"`,
+        `"${String(v.manufacturer || '').replace(/"/g, '""')}"`,
+        `"${String(v.model || '').replace(/"/g, '""')}"`,
+        `"${String(v.fullTitle || '').replace(/"/g, '""')}"`,
+        `"${v.year || ''}"`,
+        v.mileageKm || 0,
+        v.priceManwon || 0,
+        `"${v.priceBand || ''}"`,
+        `"${String(v.region || '').replace(/"/g, '""')}"`,
+        `"${v.status || ''}"`,
+        `"${v.url || ''}"`
+      ].join(','));
+      const csv = '\uFEFF' + [header, ...rows].join('\r\n');
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `filtered_vehicles_${selectedRawPlat}_${new Date().toISOString().slice(0, 10)}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+
     initDefaultDates();
     renderStockSection();
     renderFlowSection();
     renderPortfolioSection();
+    updateRawTabCounts();
+    filterAndRenderRawTable(true);
   </script>
 </body>
 </html>
