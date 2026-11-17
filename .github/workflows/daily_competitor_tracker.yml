@@ -25,9 +25,16 @@ jobs:
           powershell.exe -NoProfile -ExecutionPolicy Bypass -File "./collect_competitor_trend.ps1"
 
       - name: Commit & Push Updated RAW Data & Dashboard Bundle
-        shell: powershell
+        shell: pwsh
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add competitor_trend.json competitor_trend.csv competitor_trend_data.js snapshots/ raw_data/ database/
-          git diff --staged --quiet || (git commit -m "chore(data): daily 08:00 KST C2C competitor trend & RAW data ($(Get-Date -Format 'yyyy-MM-dd'))" ; git push)
+          git diff --staged --quiet
+          if ($LASTEXITCODE -ne 0) {
+            $dt = ([DateTimeOffset]::UtcNow.ToOffset([TimeSpan]::FromHours(9))).ToString("yyyy-MM-dd")
+            git commit -m "chore(data): daily 08:00 KST C2C competitor trend & RAW data ($dt)"
+            git push
+          } else {
+            Write-Host "No new complete 4-platform changes to commit."
+          }
