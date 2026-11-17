@@ -19,15 +19,33 @@ $JsonPath = Join-Path $WorkDir "competitor_trend.json"
 $CsvPath  = Join-Path $WorkDir "competitor_trend.csv"
 $JsPath   = Join-Path $WorkDir "competitor_trend_data.js"
 
-$Now = Get-Date
+$Now = ([DateTimeOffset]::UtcNow.ToOffset([TimeSpan]::FromHours(9))).DateTime
 $TodayDate = $Now.ToString("yyyy-MM-dd")
 $TodayYmd  = $Now.ToString("yyyyMMdd")
 $Timestamp = $Now.ToString("yyyy-MM-dd HH:mm:ss")
 
 $TodayRawLockPath = Join-Path $RawDir "raw_vehicles_$($TodayDate).csv"
 if ((Test-Path $TodayRawLockPath) -and (-not $Force)) {
-    Write-Host "[$Timestamp] Today's RAW data ($TodayRawLockPath) is already collected and locked (immutable). Skipping re-collection." -ForegroundColor Cyan
-    exit 0
+    $isCompleteToday = $false
+    if (Test-Path $JsonPath) {
+        try {
+            $chkRaw = [System.IO.File]::ReadAllText($JsonPath, [System.Text.Encoding]::UTF8) | ConvertFrom-Json
+            foreach ($el in @($chkRaw)) {
+                $rec = if ($null -ne $el -and $null -ne $el.PSObject.Properties['value']) { $el.value } else { $el }
+                foreach ($r in @($rec)) {
+                    if ($null -ne $r -and $r.date -eq $TodayDate -and [int]$r.daangnCarsCount -gt 0 -and [int]$r.kcarDirectCount -gt 0 -and [int]$r.encarPersonalCount -gt 0 -and [int]$r.kbDirectCount -gt 0) {
+                        $isCompleteToday = $true
+                    }
+                }
+            }
+        } catch {}
+    }
+    if ($isCompleteToday) {
+        Write-Host "[$Timestamp] Today's 4-platform RAW data ($TodayRawLockPath) is already collected and verified complete. Skipping re-collection." -ForegroundColor Cyan
+        exit 0
+    } else {
+        Write-Host "[$Timestamp] Existing RAW file found for $TodayDate, but 4-platform counts were incomplete. Re-collecting full dataset..." -ForegroundColor Yellow
+    }
 }
 
 function U([string]$esc) { return [regex]::Unescape($esc) }
@@ -171,13 +189,15 @@ function Compare-And-SaveSnapshot([string]$platformKey, [string[]]$todayIds) {
     }
     $utf8NoBom = New-Object System.Text.UTF8Encoding($false)
     $snapJson = $snapObj | ConvertTo-Json -Depth 4 -Compress
-    [System.IO.File]::WriteAllText($todaySnapPath, $snapJson, $utf8NoBom)
-    [System.IO.File]::WriteAllText($latestSnapMetaPath, $snapJson, $utf8NoBom)
 
     return [pscustomobject]@{
-        PrevCount    = $prevTotal
-        NewFromDiff  = $newFromDiff
-        SoldFromDiff = $soldFromDiff
+        PrevCount      = $prevTotal
+        NewFromDiff    = $newFromDiff
+        SoldFromDiff   = $soldFromDiff
+        TodaySnapPath  = $todaySnapPath
+        LatestSnapPath = $latestSnapMetaPath
+        SnapJson       = $snapJson
+        Count          = $todayUnique.Count
     }
 }
 
@@ -291,7 +311,7 @@ try {
     }
 } catch { Write-Warning "Daangn sitemap error: $_" }
 
-# Save Daangn Sitemap RAW CSV
+# Prepare Daangn Sitemap RAW CSV (written atomically after 4-platform verification)
 $daangnSitemapCsvPath = Join-Path $RawDir "daangn_sitemap_urls_$($TodayDate).csv"
 $utf8Bom = New-Object System.Text.UTF8Encoding($true)
 $smLines = New-Object System.Collections.Generic.List[string]
@@ -300,7 +320,6 @@ foreach ($slug in $daangnSitemapIds) {
     $dec = [uri]::UnescapeDataString($slug)
     $smLines.Add("$TodayDate,`"$slug`",`"$dec`",`"https://www.daangn.com/kr/cars/$slug/`"")
 }
-[System.IO.File]::WriteAllLines($daangnSitemapCsvPath, $smLines, $utf8Bom)
 
 # Collect Daangn Regional Hub Feeds across all 17 Provinces/Cities (46 Core Hubs)
 $daangnHubs = @(
@@ -522,23 +541,24 @@ $encarDomItems = New-Object System.Collections.Generic.List[object]
 $encarImpItems = New-Object System.Collections.Generic.List[object]
 
 try {
-    $resDom = curl.exe -s -A "Mozilla/5.0" "https://api.encar.com/search/car/list/general?count=true&q=(And.Hidden.N._.CarType.Y._.Separation.A.)" | ConvertFrom-Json
+    $uaEncar = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"
+    $resDom = curl.exe -s -L -A $uaEncar -H "Accept-Language: ko-KR,ko;q=0.9" -H "Referer: http://www.encar.com/" "https://api.encar.com/search/car/list/general?count=true&q=(And.Hidden.N._.CarType.Y._.Separation.A.)" | ConvertFrom-Json
     $encarPersonalDom = [int]$resDom.Count
     for ($offset = 0; $offset -le $encarPersonalDom; $offset += 500) {
         $u = "https://api.encar.com/search/car/list/general?count=true&q=(And.Hidden.N._.CarType.Y._.Separation.A.)&sr=%7CModifiedDate%7C$offset%7C500"
-        $b = curl.exe -s -A "Mozilla/5.0" $u | ConvertFrom-Json
+        $b = curl.exe -s -L -A $uaEncar -H "Accept-Language: ko-KR,ko;q=0.9" -H "Referer: http://www.encar.com/" $u | ConvertFrom-Json
         if ($b.SearchResults) { $encarDomItems.AddRange($b.SearchResults) }
     }
 
-    $resImp = curl.exe -s -A "Mozilla/5.0" "https://api.encar.com/search/car/list/general?count=true&q=(And.Hidden.N._.CarType.N._.Separation.A.)" | ConvertFrom-Json
+    $resImp = curl.exe -s -L -A $uaEncar -H "Accept-Language: ko-KR,ko;q=0.9" -H "Referer: http://www.encar.com/" "https://api.encar.com/search/car/list/general?count=true&q=(And.Hidden.N._.CarType.N._.Separation.A.)" | ConvertFrom-Json
     $encarPersonalImp = [int]$resImp.Count
     for ($offset = 0; $offset -le $encarPersonalImp; $offset += 500) {
         $u = "https://api.encar.com/search/car/list/general?count=true&q=(And.Hidden.N._.CarType.N._.Separation.A.)&sr=%7CModifiedDate%7C$offset%7C500"
-        $b = curl.exe -s -A "Mozilla/5.0" $u | ConvertFrom-Json
+        $b = curl.exe -s -L -A $uaEncar -H "Accept-Language: ko-KR,ko;q=0.9" -H "Referer: http://www.encar.com/" $u | ConvertFrom-Json
         if ($b.SearchResults) { $encarImpItems.AddRange($b.SearchResults) }
     }
 
-    $resTotal = curl.exe -s -A "Mozilla/5.0" "https://api.encar.com/search/car/list/general?count=true&q=(And.Hidden.N._.CarType.A.)" | ConvertFrom-Json
+    $resTotal = curl.exe -s -L -A $uaEncar -H "Accept-Language: ko-KR,ko;q=0.9" -H "Referer: http://www.encar.com/" "https://api.encar.com/search/car/list/general?count=true&q=(And.Hidden.N._.CarType.A.)" | ConvertFrom-Json
     $encarAllTotal = [int]$resTotal.Count
 } catch { Write-Warning "Encar error: $_" }
 
@@ -595,13 +615,14 @@ $kbDirectTotal = 0; $kbAllTotal = 0
 $kbNormItems = New-Object System.Collections.Generic.List[object]
 
 try {
-    $kbOptRaw = curl.exe -s --compressed -A "Mozilla/5.0" "https://www.kbchachacha.com/public/search/optionSale.json"
+    $uaKb = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"
+    $kbOptRaw = curl.exe -s -L --compressed -A $uaKb -H "Accept-Language: ko-KR,ko;q=0.9" -H "Referer: https://www.kbchachacha.com/" "https://www.kbchachacha.com/public/search/optionSale.json"
     $kbOpt = $kbOptRaw | ConvertFrom-Json
     $kbDirectTotal = [int]$kbOpt.optionSale.result.directYn
     $kbAllTotal    = [int]$kbOpt.optionSale.result.total
 
     $tempKbHtml = Join-Path $env:TEMP "kb_direct_raw_$($PID).html"
-    curl.exe -s --compressed -A "Mozilla/5.0" "https://www.kbchachacha.com/public/search/list.empty?page=1&sort=-orderDate&directYn=Y" -o $tempKbHtml
+    curl.exe -s -L --compressed -A $uaKb -H "Accept-Language: ko-KR,ko;q=0.9" -H "Referer: https://www.kbchachacha.com/" "https://www.kbchachacha.com/public/search/list.empty?page=1&sort=-orderDate&directYn=Y" -o $tempKbHtml
     $kbHtml = [System.IO.File]::ReadAllText($tempKbHtml, [System.Text.Encoding]::UTF8)
     Remove-Item $tempKbHtml -Force -ErrorAction SilentlyContinue
 
@@ -677,8 +698,27 @@ $kbSoldToday = if ($null -ne $kbSnap.SoldFromDiff) { $kbSnap.SoldFromDiff } else
 $kbTurnoverPct = if ($kbDirectTotal -gt 0) { [math]::Round(($kbSoldToday / $kbDirectTotal) * 100, 2) } else { 0 }
 
 # ==============================================================================
-# 5. SAVE UNIFIED VEHICLE-LEVEL RAW CSV & JSON
+# 5. VERIFY 4-PLATFORM COMPLETENESS & PERSIST SNAPSHOTS + RAW CSV/JSON
 # ==============================================================================
+if ($daangnTotal -le 0 -or $kcarTotalCount -le 0 -or $encarPersonalTotal -le 0 -or $kbDirectTotal -le 0) {
+    $countMsg = "Daangn=$daangnTotal, KCar=$kcarTotalCount, Encar=$encarPersonalTotal, KB=$kbDirectTotal"
+    if ($env:GITHUB_ACTIONS -eq "true") {
+        Write-Warning "[$Timestamp] Incomplete 4-platform counts on overseas GitHub runner ($countMsg). Domestic-only platforms (Encar/KB) block non-Korean IPs. Skipping file writes so zeroed data never overwrites clean records."
+        exit 0
+    } else {
+        throw "Incomplete 4-platform collection ($countMsg). Aborting before writing files so retry can run cleanly."
+    }
+}
+
+$utf8NoBomSnap = New-Object System.Text.UTF8Encoding($false)
+[System.IO.File]::WriteAllLines($daangnSitemapCsvPath, $smLines, $utf8Bom)
+foreach ($sn in @($daangnSnap, $kcarSnap, $encarSnap, $kbSnap)) {
+    if ($null -ne $sn -and $sn.Count -gt 0) {
+        [System.IO.File]::WriteAllText($sn.TodaySnapPath, $sn.SnapJson, $utf8NoBomSnap)
+        [System.IO.File]::WriteAllText($sn.LatestSnapPath, $sn.SnapJson, $utf8NoBomSnap)
+    }
+}
+
 $rawCsvToday  = Join-Path $RawDir "raw_vehicles_$($TodayDate).csv"
 $rawCsvLatest = Join-Path $RawDir "raw_vehicles_latest.csv"
 $rawHeader = U "\uC218\uC9D1\uC77C\uC790,\uD50C\uB7AB\uD3FC,\uB9E4\uBB3CID,\uAD6D\uC0B0\uC218\uC785\uAD6C\uBD84,\uC81C\uC870\uC0AC,\uBAA8\uB378\uBA85,\uC804\uCCB4\uCC28\uB7C9\uBA85,\uC5F0\uC2DD,\uC8FC\uD589\uAC70\uB9AC_km,\uD310\uB9E4\uAC00\uACA9_\uB9CC\uC6D0,\uAC00\uACA9\uB300\uAD6C\uAC04,\uC9C0\uC5ED_\uC2DC\uB3C4,\uD310\uB9E4\uBC29\uC2DD,\uD310\uB9E4\uC0C1\uD0DC,\uB4F1\uB85D\uC77C\uC2DC,\uC0C1\uC138URL"
