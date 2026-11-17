@@ -171,19 +171,19 @@ $portfolioByDate["ALL"] = $pfAll
 
 Write-Host "3. Updating competitor_trend.json and c2c_daily_summary_db.csv..." -ForegroundColor Cyan
 $rawJson = [System.IO.File]::ReadAllText($JsonPath, [System.Text.Encoding]::UTF8) | ConvertFrom-Json
-$records = if ($null -ne $rawJson.value) { @($rawJson.value) } else { @($rawJson) }
-
-# Reflect active on-sale growth (+321) in Daangn's 2026-11-17 total estimated count so daily change is visible
-foreach ($r in $records) {
-    if ($r.date -eq "2026-11-17") {
-        $r.daangnCarsCount     = 37829
-        $r.daangnDomesticCount = 25421
-        $r.daangnImportedCount = 12408
-        $r.daangnDiff          = 321
+$records = @()
+foreach ($elem in @($rawJson)) {
+    if ($null -ne $elem -and $null -ne $elem.PSObject.Properties['value']) {
+        foreach ($sub in @($elem.value)) { if ($null -ne $sub -and $sub.date) { $records += $sub } }
+    } elseif ($null -ne $elem -and $elem.date) {
+        $records += $elem
     }
 }
 
 $jsonOutput = $records | ConvertTo-Json -Depth 6
+if (-not $jsonOutput.TrimStart().StartsWith("[")) {
+    $jsonOutput = "[`r`n" + $jsonOutput + "`r`n]"
+}
 [System.IO.File]::WriteAllText($JsonPath, $jsonOutput, $utf8NoBom)
 
 $csvHeader = U (
