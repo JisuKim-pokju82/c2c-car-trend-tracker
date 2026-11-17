@@ -422,11 +422,8 @@ $daangnOnSaleEst = [int][math]::Round($daangnTotal * $daangnOnSaleRatio)
 $daangnTradedEst = $daangnTotal - $daangnOnSaleEst
 
 $daangnSnap = Compare-And-SaveSnapshot "daangn" $daangnSitemapIds.ToArray()
-$daangnScaleFactor = if ($daangnSampleTotal -gt 0) { $daangnTotal / [double]$daangnSampleTotal } else { 1.0 }
-$daangnRawNew = if ($null -ne $daangnSnap.NewFromDiff -and $daangnSnap.NewFromDiff -gt $daangnSampleNewToday) { $daangnSnap.NewFromDiff } else { $daangnSampleNewToday }
-$daangnRawSold = if ($null -ne $daangnSnap.SoldFromDiff -and $daangnSnap.SoldFromDiff -gt $daangnSampleTraded) { $daangnSnap.SoldFromDiff } else { $daangnSampleTraded }
-$daangnNewToday = [int][math]::Round($daangnRawNew * $daangnScaleFactor)
-$daangnSoldToday = [int][math]::Round($daangnRawSold * $daangnScaleFactor)
+$daangnNewToday = if ($null -ne $daangnSnap.NewFromDiff -and $daangnSnap.NewFromDiff -gt $daangnSampleNewToday) { $daangnSnap.NewFromDiff } else { $daangnSampleNewToday }
+$daangnSoldToday = if ($null -ne $daangnSnap.SoldFromDiff -and $daangnSnap.SoldFromDiff -gt $daangnSampleTraded) { $daangnSnap.SoldFromDiff } else { $daangnSampleTraded }
 $daangnTurnoverPct = if ($daangnTotal -gt 0) { [math]::Round(($daangnSoldToday / $daangnTotal) * 100, 2) } else { 0 }
 
 # ==============================================================================
