@@ -422,9 +422,12 @@ $daangnOnSaleEst = [int][math]::Round($daangnTotal * $daangnOnSaleRatio)
 $daangnTradedEst = $daangnTotal - $daangnOnSaleEst
 
 $daangnSnap = Compare-And-SaveSnapshot "daangn" $daangnSitemapIds.ToArray()
-$daangnNewToday = if ($null -ne $daangnSnap.NewFromDiff -and $daangnSnap.NewFromDiff -gt $daangnSampleNewToday) { $daangnSnap.NewFromDiff } else { $daangnSampleNewToday }
-$daangnSoldToday = if ($null -ne $daangnSnap.SoldFromDiff -and $daangnSnap.SoldFromDiff -gt $daangnSampleTraded) { $daangnSnap.SoldFromDiff } else { $daangnSampleTraded }
-$daangnTurnoverPct = if ($daangnOnSaleEst -gt 0) { [math]::Round(($daangnSoldToday / $daangnOnSaleEst) * 100, 2) } else { 0 }
+$daangnScaleFactor = if ($daangnSampleTotal -gt 0) { $daangnTotal / [double]$daangnSampleTotal } else { 1.0 }
+$daangnRawNew = if ($null -ne $daangnSnap.NewFromDiff -and $daangnSnap.NewFromDiff -gt $daangnSampleNewToday) { $daangnSnap.NewFromDiff } else { $daangnSampleNewToday }
+$daangnRawSold = if ($null -ne $daangnSnap.SoldFromDiff -and $daangnSnap.SoldFromDiff -gt $daangnSampleTraded) { $daangnSnap.SoldFromDiff } else { $daangnSampleTraded }
+$daangnNewToday = [int][math]::Round($daangnRawNew * $daangnScaleFactor)
+$daangnSoldToday = [int][math]::Round($daangnRawSold * $daangnScaleFactor)
+$daangnTurnoverPct = if ($daangnTotal -gt 0) { [math]::Round(($daangnSoldToday / $daangnTotal) * 100, 2) } else { 0 }
 
 # ==============================================================================
 # 2. K CAR SAFE DIRECT DEAL (market.kcar.com)
