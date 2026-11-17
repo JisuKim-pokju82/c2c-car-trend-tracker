@@ -2,8 +2,10 @@ name: Daily 4-Platform C2C Competitor Tracker (Cloud 08:00 KST)
 
 on:
   schedule:
-    # 한국시간(KST) 매일 오전 08:00 정각 자동 실행 (UTC 23:00)
-    - cron: '0 23 * * *'
+    # 정각(:00) 글로벌 큐 병목을 피하기 위해 한국시간 07:35 (UTC 22:35) 선발 실행 -> 08:00 전 완료 보장
+    - cron: '35 22 * * *'
+    # 보조 안전망: 한국시간 08:05 (UTC 23:05) 재확인 실행
+    - cron: '5 23 * * *'
   workflow_dispatch:
 
 permissions:
@@ -19,10 +21,10 @@ jobs:
           fetch-depth: 0
 
       - name: Run 4-Platform RAW & Portfolio Collector
-        shell: powershell
+        shell: pwsh
         run: |
           tzutil /s "Korea Standard Time"
-          powershell.exe -NoProfile -ExecutionPolicy Bypass -File "./collect_competitor_trend.ps1"
+          pwsh -NoProfile -ExecutionPolicy Bypass -File "./collect_competitor_trend.ps1"
 
       - name: Commit & Push Updated RAW Data & Dashboard Bundle
         shell: pwsh
@@ -34,7 +36,14 @@ jobs:
           if ($LASTEXITCODE -ne 0) {
             $dt = ([DateTimeOffset]::UtcNow.ToOffset([TimeSpan]::FromHours(9))).ToString("yyyy-MM-dd")
             git commit -m "chore(data): daily 08:00 KST C2C competitor trend & RAW data ($dt)"
-            git push
+            git fetch origin main
+            git rebase origin/main
+            if ($LASTEXITCODE -ne 0) {
+              git rebase --abort
+              Write-Host "Remote main already updated simultaneously; keeping newer remote commit."
+              exit 0
+            }
+            git push origin main
           } else {
-            Write-Host "No new complete 4-platform changes to commit."
+            Write-Host "No new changes to commit."
           }
