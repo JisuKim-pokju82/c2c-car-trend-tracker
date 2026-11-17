@@ -12,7 +12,8 @@ $headers = @{
 
 $Owner = "JisuKim-pokju82"
 $Repo  = "c2c-car-trend-tracker"
-$WorkDir = "c:\Users\KCAR24N20051\Desktop\당근"
+$WorkDir = Split-Path -Parent $MyInvocation.MyCommand.Path
+if (-not $WorkDir) { $WorkDir = (Get-Location).Path }
 $TodayDate = (Get-Date).ToString("yyyy-MM-dd")
 
 $refInfo = Invoke-RestMethod -Uri "https://api.github.com/repos/$Owner/$Repo/git/ref/heads/main" -Headers $headers -Method Get
@@ -20,8 +21,9 @@ $baseCommitSha = $refInfo.object.sha
 $commitInfo = Invoke-RestMethod -Uri "https://api.github.com/repos/$Owner/$Repo/git/commits/$baseCommitSha" -Headers $headers -Method Get
 $baseTreeSha = $commitInfo.tree.sha
 
+# Note: Do NOT include .github/workflows/*.yml in low-level Git Data API commits,
+# as modifying workflow files via Git Data API disables GitHub's cron schedule trigger.
 $filesToUpload = @(
-    ".github/workflows/daily_competitor_tracker.yml",
     "README.md",
     "collect_competitor_trend.ps1",
     "register_windows_task.ps1",
