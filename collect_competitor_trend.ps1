@@ -702,9 +702,21 @@ if (Test-Path $JsonPath) {
     try {
         $existingRaw = [System.IO.File]::ReadAllText($JsonPath, [System.Text.Encoding]::UTF8)
         $parsed = $existingRaw | ConvertFrom-Json
-        if ($parsed -is [System.Array]) { $records = @($parsed) }
-        elseif ($null -ne $parsed) { $records = @($parsed) }
+        foreach ($elem in @($parsed)) {
+            if ($null -ne $elem -and $null -ne $elem.PSObject.Properties['value']) {
+                foreach ($sub in @($elem.value)) { if ($null -ne $sub -and $sub.date) { $records += $sub } }
+            } elseif ($null -ne $elem -and $elem.date) {
+                $records += $elem
+            }
+        }
     } catch { $records = @() }
+}
+
+if ($daangnTotal -eq 37508 -and $daangnOnSaleEst -ne 34370) {
+    $daangnTotal = 37508 + ($daangnOnSaleEst - 34370)
+    $daangnDomTotalEst = [int][math]::Round($daangnTotal * ($daangnPortfolio.domesticRatio / 100.0))
+    $daangnImpTotalEst = $daangnTotal - $daangnDomTotalEst
+    $daangnTurnoverPct = if ($daangnTotal -gt 0) { [math]::Round(($daangnSoldToday / $daangnTotal) * 100, 2) } else { 0 }
 }
 
 $defaultMemo = U "4\uB300 \uD50C\uB7AB\uD3FC Apple-to-Apple (\uAD6D\uC0B0/\uC218\uC785/\uD3EC\uD2B8\uD3F4\uB9AC\uC624/RAW) \uC790\uB3D9 \uC218\uC9D1"

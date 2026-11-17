@@ -3,581 +3,448 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>중고차 4대 플랫폼 직거래(개인) 경쟁사 동향 보고서</title>
+  <title>중고차 4대 플랫폼 개인직거래(C2C) 현황 보고</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
   <style>
     :root {
-      --bg: #f1f5f9;
-      --surface: #ffffff;
-      --text: #0f172a;
-      --text-sub: #475569;
+      --bg-page: #f1f5f9;
+      --bg-card: #ffffff;
+      --text-main: #0f172a;
+      --text-sub: #334155;
+      --text-muted: #64748b;
       --border: #cbd5e1;
       --border-soft: #e2e8f0;
-      --daangn: #ff6f0f;
-      --kcar: #1e3a8a;
-      --encar: #dc2626;
-      --kb: #d97706;
-      --up: #e11d48;
-      --down: #2563eb;
-      --radius: 16px;
-      --shadow: 0 6px 24px rgba(15, 23, 42, 0.06);
+      --c-daangn: #ea580c;
+      --c-kcar: #1e3a8a;
+      --c-encar: #dc2626;
+      --c-kb: #d97706;
+      --font-sans: 'Pretendard Variable', 'Pretendard', -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', sans-serif;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
+
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Pretendard", "Malgun Gothic", "맑은 고딕", sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      line-height: 1.55;
-      padding-bottom: 90px;
-      font-size: 16px;
+      font-family: var(--font-sans);
+      background: var(--bg-page);
+      color: var(--text-main);
+      font-size: 13.5px;
+      line-height: 1.45;
+      letter-spacing: -0.015em;
+      padding-bottom: 48px;
+      -webkit-font-smoothing: antialiased;
     }
 
-    /* 상단 헤더 (경영진 보고용 큼직한 타이포그래피) */
+    /* 상단 헤더 */
     .topbar {
+      background: #ffffff;
+      border-bottom: 1px solid var(--border);
+      padding: 10px 20px;
       position: sticky;
       top: 0;
-      z-index: 50;
-      background: rgba(255, 255, 255, 0.96);
-      backdrop-filter: blur(12px);
-      border-bottom: 2px solid var(--border-soft);
-      padding: 18px 28px;
+      z-index: 100;
     }
     .topbar-inner {
-      max-width: 1480px;
+      max-width: 1440px;
       margin: 0 auto;
       display: flex;
-      align-items: center;
       justify-content: space-between;
-      gap: 16px;
+      align-items: center;
       flex-wrap: wrap;
+      gap: 10px;
     }
-    .brand-area { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+    .brand-area { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
     .brand-badge {
       background: #0f172a;
       color: #fff;
-      font-weight: 800;
-      font-size: 14px;
-      padding: 7px 13px;
-      border-radius: 8px;
-      letter-spacing: 0.02em;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 4px;
+      letter-spacing: 0.04em;
     }
-    .brand-title {
-      font-size: 23px;
-      font-weight: 800;
-      letter-spacing: -0.02em;
-      color: #0f172a;
-    }
-    .brand-meta {
-      font-size: 14.5px;
-      color: var(--text-sub);
-      font-weight: 600;
-    }
+    .brand-title { font-size: 16.5px; font-weight: 800; color: #0f172a; }
+    .brand-meta { font-size: 12px; color: var(--text-muted); font-weight: 500; }
 
-    .top-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .top-actions { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
     .btn {
       display: inline-flex;
       align-items: center;
-      gap: 8px;
-      padding: 11px 18px;
-      border-radius: 10px;
-      font-size: 15px;
-      font-weight: 700;
-      border: 1px solid var(--border);
-      background: var(--surface);
-      color: var(--text);
-      cursor: pointer;
+      gap: 4px;
+      padding: 6px 11px;
+      border-radius: 6px;
+      font-family: var(--font-sans);
+      font-size: 12px;
+      font-weight: 600;
       text-decoration: none;
-      transition: all 0.15s;
+      border: 1px solid var(--border);
+      background: #fff;
+      color: var(--text-main);
+      cursor: pointer;
+      transition: all 0.12s;
     }
-    .btn:hover { background: #f8fafc; }
+    .btn:hover { background: #f8fafc; border-color: #94a3b8; }
     .btn-primary { background: #0f172a; color: #fff; border-color: #0f172a; }
     .btn-primary:hover { background: #1e293b; }
-    .btn-accent { background: var(--daangn); color: #fff; border-color: var(--daangn); }
-    .btn-accent:hover { opacity: 0.92; }
+
+    .view-mode-switch {
+      display: inline-flex;
+      background: #e2e8f0;
+      padding: 2px;
+      border-radius: 6px;
+      gap: 2px;
+    }
+    .view-mode-btn {
+      border: none;
+      background: transparent;
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-family: var(--font-sans);
+      font-size: 11.5px;
+      font-weight: 700;
+      color: #475569;
+      cursor: pointer;
+    }
+    .view-mode-btn.active { background: #0f172a; color: #fff; }
 
     .container {
-      max-width: 1480px;
-      margin: 28px auto 0;
-      padding: 0 28px;
+      max-width: 1440px;
+      margin: 16px auto 0;
+      padding: 0 20px;
       display: flex;
       flex-direction: column;
-      gap: 32px;
+      gap: 18px;
     }
 
-    /* 섹션 공통 카드 */
+    /* 영역 구분 래퍼 (공통영역 vs 조회조건 연동 영역) */
+    .zone-wrapper {
+      border-radius: 10px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .zone-fixed {
+      background: #e2e8f0;
+      border: 1px solid #cbd5e1;
+    }
+    .zone-query {
+      background: #eff6ff;
+      border: 1.5px solid #93c5fd;
+    }
+    .zone-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      padding: 4px 6px;
+    }
+    .zone-title-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .zone-tag {
+      font-size: 11px;
+      font-weight: 800;
+      padding: 3px 8px;
+      border-radius: 4px;
+      letter-spacing: 0.02em;
+    }
+    .zone-tag.fixed { background: #334155; color: #fff; }
+    .zone-tag.query { background: #1d4ed8; color: #fff; }
+    .zone-name { font-size: 14px; font-weight: 800; color: #0f172a; }
+
+    /* 날짜 검색 바 (깔끔한 시작일~종료일 + 조회 버튼) */
+    .query-filter-bar {
+      background: #1e293b;
+      color: #fff;
+      border-radius: 8px;
+      padding: 10px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .query-filter-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .query-filter-title {
+      font-size: 13.5px;
+      font-weight: 800;
+      color: #fff;
+    }
+    .query-status-badge {
+      font-size: 12px;
+      font-weight: 600;
+      color: #cbd5e1;
+      background: rgba(255,255,255,0.1);
+      padding: 3px 9px;
+      border-radius: 4px;
+    }
+    .date-picker-group {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .date-input-label { font-size: 12px; font-weight: 600; color: #cbd5e1; }
+    .date-input {
+      background: #ffffff;
+      color: #0f172a;
+      border: 1px solid #cbd5e1;
+      padding: 5px 10px;
+      border-radius: 5px;
+      font-family: var(--font-sans);
+      font-size: 12.5px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .search-submit-btn {
+      background: #2563eb;
+      color: #ffffff;
+      border: none;
+      padding: 6px 16px;
+      border-radius: 5px;
+      font-family: var(--font-sans);
+      font-size: 12.5px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .search-submit-btn:hover { background: #1d4ed8; }
+
+    /* 개별 카드 블록 */
     .section-block {
-      background: var(--surface);
+      background: var(--bg-card);
       border: 1px solid var(--border-soft);
-      border-radius: var(--radius);
-      padding: 28px 30px;
-      box-shadow: var(--shadow);
+      border-radius: 8px;
+      padding: 16px 18px;
     }
     .section-header {
       display: flex;
-      align-items: flex-end;
       justify-content: space-between;
+      align-items: center;
       flex-wrap: wrap;
-      gap: 16px;
-      margin-bottom: 24px;
-      padding-bottom: 16px;
-      border-bottom: 2px solid #f1f5f9;
+      gap: 10px;
+      margin-bottom: 12px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border-soft);
     }
-    .section-eyebrow {
-      font-size: 14px;
-      font-weight: 800;
-      color: #2563eb;
-      margin-bottom: 4px;
-      letter-spacing: 0.02em;
-    }
-    .section-title {
-      font-size: 24px;
-      font-weight: 800;
-      letter-spacing: -0.02em;
-      color: #0f172a;
-    }
-    .section-desc {
-      font-size: 15.5px;
-      color: var(--text-sub);
-      margin-top: 4px;
-      font-weight: 500;
-    }
+    .section-title { font-size: 15px; font-weight: 800; color: #0f172a; }
 
-    /* 큼직한 탭 버튼 */
+    /* 탭 버튼 */
     .big-tabs {
-      display: inline-flex;
-      background: #e2e8f0;
-      padding: 5px;
-      border-radius: 12px;
+      display: flex;
       gap: 4px;
       flex-wrap: wrap;
     }
     .big-tab {
-      border: none;
-      background: transparent;
-      padding: 11px 22px;
-      border-radius: 9px;
-      font-size: 16px;
-      font-weight: 800;
-      color: #475569;
+      border: 1px solid var(--border);
+      background: #f8fafc;
+      color: var(--text-sub);
+      padding: 5px 11px;
+      border-radius: 5px;
+      font-family: var(--font-sans);
+      font-size: 12px;
+      font-weight: 700;
       cursor: pointer;
-      transition: all 0.15s;
+      transition: all 0.12s;
     }
-    .big-tab:hover { color: #0f172a; }
+    .big-tab:hover { background: #f1f5f9; }
     .big-tab.active {
       background: #0f172a;
+      border-color: #0f172a;
       color: #ffffff;
-      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.18);
     }
 
-    /* Ⅰ. 상단 고정: 4개사 전체 등록대수 카드 */
+    /* Ⅰ. 상단 4개사 요약 카드 */
     .stock-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: 18px;
-      margin-bottom: 26px;
+      gap: 12px;
+      margin-bottom: 12px;
     }
-    @media (max-width: 1200px) { .stock-grid { grid-template-columns: repeat(2, 1fr); } }
-    @media (max-width: 640px) { .stock-grid { grid-template-columns: 1fr; } }
-
     .stock-card {
-      background: #f8fafc;
       border: 1px solid var(--border-soft);
-      border-radius: 14px;
-      padding: 22px 24px;
-      position: relative;
-    }
-    .stock-card.daangn { border-top: 5px solid var(--daangn); }
-    .stock-card.kcar   { border-top: 5px solid var(--kcar); }
-    .stock-card.encar  { border-top: 5px solid var(--encar); }
-    .stock-card.kb     { border-top: 5px solid var(--kb); }
-
-    .stock-head {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 10px;
-    }
-    .stock-name { font-size: 18px; font-weight: 800; }
-    .stock-badge {
-      font-size: 13px;
-      font-weight: 800;
-      padding: 4px 10px;
+      border-top: 3px solid #0f172a;
       border-radius: 6px;
+      padding: 12px 14px;
+      background: #ffffff;
     }
-    .stock-badge.daangn { background: rgba(255,111,15,0.14); color: #c2410c; }
-    .stock-badge.kcar   { background: rgba(30,58,138,0.12); color: #1e3a8a; }
-    .stock-badge.encar  { background: rgba(220,38,38,0.12); color: #dc2626; }
-    .stock-badge.kb     { background: rgba(217,119,6,0.15); color: #b45309; }
+    .stock-card.daangn { border-top-color: var(--c-daangn); }
+    .stock-card.kcar   { border-top-color: var(--c-kcar); }
+    .stock-card.encar  { border-top-color: var(--c-encar); }
+    .stock-card.kb     { border-top-color: var(--c-kb); }
 
-    .stock-main {
-      display: flex;
-      align-items: baseline;
-      gap: 10px;
-      margin: 6px 0 14px;
-    }
-    .stock-num {
-      font-size: 38px;
-      font-weight: 800;
-      letter-spacing: -0.03em;
-      font-variant-numeric: tabular-nums;
-    }
-    .stock-unit { font-size: 17px; font-weight: 700; color: var(--text-sub); }
+    .stock-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+    .stock-name { font-size: 13px; font-weight: 800; color: #0f172a; }
     .diff-tag {
-      font-size: 14px;
-      font-weight: 800;
-      padding: 3px 9px;
-      border-radius: 6px;
+      font-size: 11.5px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 4px;
     }
-    .diff-tag.up { background: rgba(225,29,72,0.12); color: var(--up); }
-    .diff-tag.down { background: rgba(37,99,235,0.12); color: var(--down); }
-    .diff-tag.flat { background: #e2e8f0; color: var(--text-sub); }
+    .diff-tag.up   { background: #ffe4e6; color: #e11d48; }
+    .diff-tag.down { background: #dbeafe; color: #2563eb; }
+    .diff-tag.flat { background: #f1f5f9; color: #64748b; }
+
+    .stock-main { display: flex; align-items: baseline; gap: 4px; margin-bottom: 8px; }
+    .stock-num { font-size: 23px; font-weight: 800; font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
+    .stock-unit { font-size: 12px; font-weight: 600; color: var(--text-muted); }
 
     .stock-split-bar {
-      height: 10px;
+      height: 6px;
+      border-radius: 3px;
       background: #e2e8f0;
-      border-radius: 5px;
       overflow: hidden;
       display: flex;
-      margin-bottom: 10px;
+      margin-bottom: 6px;
     }
     .stock-split-info {
       display: flex;
       justify-content: space-between;
-      font-size: 14.5px;
-      font-weight: 700;
+      font-size: 11.5px;
+      font-weight: 600;
       color: var(--text-sub);
     }
 
-    /* 일자별 전체 등록대수 추이 차트 그리드 */
+    /* 미니 추이 차트 */
     .trend-chart-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: 16px;
+      gap: 12px;
+      margin-bottom: 12px;
     }
-    @media (max-width: 1200px) { .trend-chart-grid { grid-template-columns: repeat(2, 1fr); } }
-    @media (max-width: 640px) { .trend-chart-grid { grid-template-columns: 1fr; } }
-
     .mini-chart-box {
       border: 1px solid var(--border-soft);
-      border-radius: 12px;
-      padding: 16px;
-      background: #ffffff;
+      border-radius: 6px;
+      padding: 10px 12px;
+      background: #fafbfc;
     }
     .mini-chart-title {
-      font-size: 15px;
-      font-weight: 800;
-      margin-bottom: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      margin-bottom: 4px;
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
-    .mini-svg {
-      width: 100%;
-      height: 150px;
-      display: block;
-    }
+    svg.mini-svg { width: 100%; height: 105px; display: block; overflow: visible; }
 
-    /* 달력 기반 조회기간 설정 배너 */
-    .calendar-control-banner {
-      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-      color: #ffffff;
-      border-radius: var(--radius);
-      padding: 26px 30px;
-      box-shadow: 0 10px 28px rgba(15, 23, 42, 0.14);
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-    }
-    .cal-banner-top {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 20px;
-    }
-    .cal-banner-title { font-size: 22px; font-weight: 800; }
-    .cal-banner-sub { font-size: 15.5px; color: #cbd5e1; margin-top: 4px; }
-
-    .date-picker-group {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      flex-wrap: wrap;
-      background: rgba(255, 255, 255, 0.10);
-      padding: 12px 16px;
-      border-radius: 14px;
-      border: 1px solid rgba(255, 255, 255, 0.18);
-    }
-    .date-input-label {
-      font-size: 15px;
-      font-weight: 800;
-      color: #f8fafc;
-    }
-    .date-input {
-      padding: 10px 14px;
-      border-radius: 9px;
-      border: 2px solid #cbd5e1;
-      background: #ffffff;
-      color: #0f172a;
-      font-size: 16px;
-      font-weight: 800;
-      font-family: inherit;
-      cursor: pointer;
-    }
-    .date-sep {
-      font-size: 18px;
-      font-weight: 800;
-      color: #cbd5e1;
-      padding: 0 4px;
-    }
-    .search-submit-btn {
-      border: none;
-      background: #ff6f0f;
-      color: #ffffff;
-      padding: 11px 24px;
-      border-radius: 9px;
-      font-size: 16px;
-      font-weight: 800;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      box-shadow: 0 4px 12px rgba(255, 111, 15, 0.35);
-      transition: all 0.15s;
-    }
-    .search-submit-btn:hover {
-      background: #ea580c;
-      transform: translateY(-1px);
-    }
-    .quick-date-btn {
-      border: 1px solid rgba(255, 255, 255, 0.28);
-      background: rgba(255, 255, 255, 0.12);
-      color: #ffffff;
-      padding: 10px 15px;
-      border-radius: 9px;
-      font-size: 14.5px;
-      font-weight: 800;
-      cursor: pointer;
-      transition: all 0.15s;
-    }
-    .quick-date-btn:hover { background: rgba(255, 255, 255, 0.24); }
-    .quick-date-btn.active {
-      background: #ffffff;
-      border-color: #ffffff;
-      color: #0f172a;
-    }
-
-    /* Ⅱ. 조회기간 연동 결과 카드 & 막대그래프 */
-    .flow-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 18px;
-      margin-bottom: 24px;
-    }
-    @media (max-width: 1200px) { .flow-grid { grid-template-columns: repeat(2, 1fr); } }
-    @media (max-width: 640px) { .flow-grid { grid-template-columns: 1fr; } }
-
-    .flow-card {
-      border: 1px solid var(--border-soft);
-      border-radius: 14px;
-      padding: 22px;
-      background: #f8fafc;
-    }
-    .flow-card-title {
-      font-size: 18px;
-      font-weight: 800;
-      margin-bottom: 16px;
-      padding-bottom: 10px;
-      border-bottom: 2px solid var(--border-soft);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .flow-metric-row { margin-bottom: 16px; }
-    .flow-metric-head {
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-      margin-bottom: 6px;
-    }
-    .flow-metric-label { font-size: 15px; font-weight: 700; color: var(--text-sub); }
-    .flow-metric-val { font-size: 25px; font-weight: 800; font-variant-numeric: tabular-nums; }
-    .flow-bar-track {
-      height: 14px;
-      background: #e2e8f0;
-      border-radius: 7px;
-      overflow: hidden;
-    }
-    .flow-bar-fill {
-      height: 100%;
-      border-radius: 7px;
-      transition: width 0.3s ease;
-    }
-    .turnover-box {
-      margin-top: 14px;
-      padding: 12px 14px;
-      border-radius: 10px;
-      background: #ffffff;
-      border: 1px solid var(--border-soft);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .turnover-label { font-size: 14.5px; font-weight: 700; color: var(--text-sub); }
-    .turnover-val { font-size: 20px; font-weight: 800; color: #0f172a; }
-
-    /* 표 스타일 */
+    /* 데이터 표 공통 */
     .table-wrap {
       overflow-x: auto;
       border: 1px solid var(--border-soft);
-      border-radius: 12px;
+      border-radius: 6px;
     }
     table.exec-table {
       width: 100%;
       border-collapse: collapse;
-      font-size: 15.5px;
+      font-size: 12.5px;
       font-variant-numeric: tabular-nums;
     }
     table.exec-table th, table.exec-table td {
-      padding: 14px 16px;
+      padding: 8px 12px;
       text-align: right;
       border-bottom: 1px solid var(--border-soft);
       white-space: nowrap;
     }
+    table.exec-table tr:last-child td { border-bottom: none; }
     table.exec-table th:first-child, table.exec-table td:first-child {
       text-align: left;
-      font-weight: 800;
+      font-weight: 700;
       background: #f8fafc;
     }
     table.exec-table th {
       background: #f1f5f9;
       font-weight: 800;
       color: #1e293b;
-      font-size: 15px;
+      font-size: 12px;
     }
 
-    /* Ⅲ. 포트폴리오 그래프 그리드 */
+    /* Ⅲ. 포트폴리오 그리드 */
     .pf-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: 18px;
+      gap: 12px;
     }
-    @media (max-width: 1200px) { .pf-grid { grid-template-columns: repeat(2, 1fr); } }
-    @media (max-width: 640px) { .pf-grid { grid-template-columns: 1fr; } }
-
     .pf-card {
       border: 1px solid var(--border-soft);
-      border-radius: 14px;
-      padding: 22px;
+      border-radius: 6px;
+      padding: 12px 14px;
       background: #fafbfc;
     }
     .pf-card-head {
-      font-size: 18px;
+      font-size: 13px;
       font-weight: 800;
-      margin-bottom: 16px;
-      padding-bottom: 10px;
-      border-bottom: 2px solid var(--border-soft);
+      margin-bottom: 10px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid var(--border-soft);
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
-    .pf-bar-item { margin-bottom: 13px; }
+    .pf-bar-item { margin-bottom: 8px; }
     .pf-bar-top {
       display: flex;
       justify-content: space-between;
-      font-size: 15px;
-      font-weight: 700;
-      margin-bottom: 5px;
+      font-size: 12px;
+      font-weight: 600;
+      margin-bottom: 3px;
     }
     .pf-bar-bg {
-      height: 12px;
+      height: 7px;
       background: #e2e8f0;
-      border-radius: 6px;
+      border-radius: 4px;
       overflow: hidden;
     }
-    .pf-bar-fg {
-      height: 100%;
-      border-radius: 6px;
+    .pf-bar-fg { height: 100%; border-radius: 4px; }
+
+    /* 하단 디스클레이머 */
+    .disclaimer-box {
+      margin-top: 10px;
+      padding-top: 8px;
+      border-top: 1px dashed var(--border-soft);
+      font-size: 11.5px;
+      color: var(--text-muted);
+      line-height: 1.5;
     }
 
-    /* PC / 모바일 모드 스위치 및 모바일 최적화 스타일 */
-    .view-mode-switch {
-      display: inline-flex;
-      background: #e2e8f0;
-      padding: 4px;
-      border-radius: 10px;
-      gap: 3px;
-    }
-    .view-mode-btn {
-      border: none;
-      background: transparent;
-      padding: 8px 14px;
-      border-radius: 7px;
-      font-size: 14px;
-      font-weight: 800;
-      color: #475569;
-      cursor: pointer;
-    }
-    .view-mode-btn.active {
-      background: #0f172a;
-      color: #fff;
-    }
-
+    /* 모바일 카드 */
     .mobile-raw-cards {
       display: none;
       flex-direction: column;
-      gap: 12px;
+      gap: 8px;
     }
     .m-raw-card {
       background: #f8fafc;
       border: 1px solid var(--border-soft);
-      border-radius: 12px;
-      padding: 16px;
+      border-radius: 6px;
+      padding: 10px 12px;
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 5px;
     }
 
-    body.mobile-mode .container {
-      max-width: 480px;
-      padding: 0 14px;
-      margin-top: 16px;
-      gap: 18px;
-    }
-    body.mobile-mode .topbar { padding: 12px 14px; }
-    body.mobile-mode .brand-title { font-size: 18px; }
-    body.mobile-mode .section-block { padding: 18px 16px; }
-    body.mobile-mode .section-title { font-size: 19px; }
+    body.mobile-mode .container { max-width: 480px; padding: 0 10px; }
     body.mobile-mode .stock-grid,
     body.mobile-mode .trend-chart-grid,
-    body.mobile-mode .flow-grid,
-    body.mobile-mode .pf-grid {
-      grid-template-columns: 1fr !important;
-    }
-    body.mobile-mode .stock-num { font-size: 32px; }
-    body.mobile-mode .big-tab { padding: 9px 14px; font-size: 14px; flex: 1 1 auto; text-align: center; }
-    body.mobile-mode .calendar-control-banner { padding: 18px 16px; }
-    body.mobile-mode .date-picker-group { width: 100%; justify-content: space-between; }
-    body.mobile-mode .date-input { width: 44%; font-size: 14px; padding: 9px 10px; }
-    body.mobile-mode .search-submit-btn { width: 100%; justify-content: center; margin-top: 6px; }
-    body.mobile-mode .quick-date-btn { flex: 1; text-align: center; padding: 9px 8px; font-size: 13.5px; }
+    body.mobile-mode .pf-grid { grid-template-columns: 1fr !important; }
     body.mobile-mode #pcRawTableWrap { display: none; }
     body.mobile-mode #mobileRawCardsWrap { display: flex; }
 
+    @media (max-width: 1100px) {
+      .stock-grid, .trend-chart-grid, .pf-grid { grid-template-columns: repeat(2, 1fr); }
+    }
     @media (max-width: 768px) {
-      .container { padding: 0 14px; margin-top: 16px; gap: 18px; }
-      .topbar { padding: 12px 14px; }
-      .brand-title { font-size: 18px; }
-      .section-block { padding: 18px 16px; }
-      .section-title { font-size: 19px; }
-      .stock-grid, .trend-chart-grid, .flow-grid, .pf-grid { grid-template-columns: 1fr !important; }
-      .stock-num { font-size: 32px; }
-      .big-tab { padding: 9px 14px; font-size: 14px; flex: 1 1 auto; text-align: center; }
-      .calendar-control-banner { padding: 18px 16px; }
-      .date-picker-group { width: 100%; justify-content: space-between; }
-      .date-input { width: 44%; font-size: 14px; padding: 9px 10px; }
-      .search-submit-btn { width: 100%; justify-content: center; margin-top: 6px; }
-      .quick-date-btn { flex: 1; text-align: center; padding: 9px 8px; font-size: 13.5px; }
+      .container { padding: 0 10px; }
+      .stock-grid, .trend-chart-grid, .pf-grid { grid-template-columns: 1fr !important; }
       #pcRawTableWrap { display: none; }
       #mobileRawCardsWrap { display: flex; }
     }
@@ -585,21 +452,20 @@
 </head>
 <body>
 
-  <!-- 상단 고정 헤더 -->
   <header class="topbar">
     <div class="topbar-inner">
       <div class="brand-area">
-        <span class="brand-badge">EXECUTIVE REPORT</span>
-        <h1 class="brand-title">4대 중고차 플랫폼 개인직거래(C2C) 경쟁사 동향</h1>
+        <span class="brand-badge">C2C REPORT</span>
+        <h1 class="brand-title">4대 중고차 플랫폼 개인직거래 현황 보고</h1>
         <span class="brand-meta" id="lastUpdatedInfo">기준일시: -</span>
       </div>
       <div class="top-actions">
         <div class="view-mode-switch" id="viewModeSwitch">
-          <button type="button" class="view-mode-btn active" data-mode="pc">💻 PC 버전</button>
-          <button type="button" class="view-mode-btn" data-mode="mobile">📱 모바일 버전</button>
+          <button type="button" class="view-mode-btn active" data-mode="pc">PC</button>
+          <button type="button" class="view-mode-btn" data-mode="mobile">모바일</button>
         </div>
-        <a href="database/c2c_vehicle_master_db.csv" download class="btn btn-accent">⬇ 누적 마스터 DB(엑셀)</a>
-        <a href="database/c2c_daily_summary_db.csv" download class="btn btn-primary">⬇ 일자별 요약 DB(엑셀)</a>
+        <a href="database/c2c_vehicle_master_db.csv" download class="btn btn-primary">⬇ 누적 마스터 DB(CSV)</a>
+        <a href="database/c2c_daily_summary_db.csv" download class="btn">⬇ 일자별 요약 DB(CSV)</a>
       </div>
     </div>
   </header>
@@ -607,222 +473,212 @@
   <main class="container">
 
     <!-- =================================================================== -->
-    <!-- Ⅰ. 상단 독립 영역: 전체 등록대수 현황 및 일자별 대수 변화 추이 (조회기간 무관) -->
+    <!-- [공통 상시 영역] 조회기간과 무관한 일자별 전체 등록대수 현황 및 추이 -->
     <!-- =================================================================== -->
-    <section class="section-block">
-      <div class="section-header">
-        <div>
-          <div class="section-eyebrow">Ⅰ. 상시 모니터링 영역 (조회기간 설정과 무관한 전체 모수 추이)</div>
-          <h2 class="section-title">회사별 직거래 전체 등록대수 및 일자별 변화 추이</h2>
-          <p class="section-desc">매일 오전 08:00 기준 각 플랫폼의 개인 직거래 전체 등록대수(국산·수입 분리)와 일자별 증감 추이입니다.</p>
-        </div>
-        <div class="big-tabs" id="stockOriginTabs">
-          <button type="button" class="big-tab active" data-origin="all">전체 등록대수</button>
-          <button type="button" class="big-tab" data-origin="dom">국산차만 보기</button>
-          <button type="button" class="big-tab" data-origin="imp">수입차만 보기</button>
+    <div class="zone-wrapper zone-fixed">
+      <div class="zone-bar">
+        <div class="zone-title-group">
+          <span class="zone-tag fixed">공통 상시 영역</span>
+          <span class="zone-name">전체 등록대수 현황 및 일자별 변화 추이 (조회기간 무관 상시 누적)</span>
         </div>
       </div>
 
-      <div class="stock-grid" id="stockCardsContainer"></div>
-      <div class="trend-chart-grid" id="stockTrendChartsContainer" style="margin-bottom:22px;"></div>
+      <section class="section-block">
+        <div class="section-header">
+          <h2 class="section-title">Ⅰ. 회사별 전체 등록대수 추이</h2>
+          <div class="big-tabs" id="stockOriginTabs">
+            <button type="button" class="big-tab active" data-origin="all">전체</button>
+            <button type="button" class="big-tab" data-origin="dom">국산차</button>
+            <button type="button" class="big-tab" data-origin="imp">수입차</button>
+          </div>
+        </div>
 
-      <!-- 일자별 전체 등록대수 누적 변화 추이 표 (매일 데이터가 쌓이는 고정 기록표) -->
-      <div class="table-wrap">
-        <table class="exec-table">
-          <thead>
-            <tr>
-              <th>수집 일자</th>
-              <th style="color:#c2410c;">1. 당근중고차 전체 (국산 / 수입)</th>
-              <th style="color:#1e3a8a;">2. 케이카 직거래 전체 (국산 / 수입)</th>
-              <th style="color:#dc2626;">3. 엔카닷컴 개인 전체 (국산 / 수입)</th>
-              <th style="color:#b45309;">4. KB차차차 개인 전체 (국산 / 수입)</th>
-            </tr>
-          </thead>
-          <tbody id="dailyStockHistoryTableBody"></tbody>
-        </table>
-      </div>
-    </section>
+        <div class="stock-grid" id="stockCardsContainer"></div>
+        <div class="trend-chart-grid" id="stockTrendChartsContainer"></div>
+
+        <div class="table-wrap">
+          <table class="exec-table">
+            <thead>
+              <tr>
+                <th>수집 일자</th>
+                <th style="color:var(--c-daangn);">1. 당근중고차 (추정)</th>
+                <th style="color:var(--c-kcar);">2. 케이카 직거래</th>
+                <th style="color:var(--c-encar);">3. 엔카닷컴 개인</th>
+                <th style="color:var(--c-kb);">4. KB차차차 개인</th>
+              </tr>
+            </thead>
+            <tbody id="dailyStockHistoryTableBody"></tbody>
+          </table>
+        </div>
+
+        <div class="disclaimer-box">
+          * [디스클레이머] 매일 08:00 KST 자동 수집 기준. 케이카(안심직거래)·엔카닷컴(개인 Separation.A)·KB차차차(개인직거래 directYn=Y)는 플랫폼 공식 전체 등록대수(100% 전수)이며, 당근중고차는 공식 사이트맵 모수 및 전국 17개 시도 46개 핵심 거점 표본 비율을 결합한 추정치입니다.
+        </div>
+      </section>
+    </div>
 
     <!-- =================================================================== -->
-    <!-- 달력 기반 조회기간 설정 배너 (시작일~종료일 달력 입력 + 조회 버튼) -->
+    <!-- [조회조건 연동 영역] 선택한 시작일~종료일 기준 실적 · 포트폴리오 · 매물 검색 -->
     <!-- =================================================================== -->
-    <section class="calendar-control-banner">
-      <div class="cal-banner-top">
-        <div>
-          <div class="cal-banner-title">📅 조회기간 설정 (오늘 · 어제 · 어제+오늘 합산 연동 조회)</div>
-          <div class="cal-banner-sub" id="selectedPeriodNotice">시작일과 종료일을 선택한 뒤 [🔍 조회하기] 버튼을 누르면 아래 Ⅱ·Ⅲ·Ⅳ 영역이 해당 조건으로 즉시 재조회됩니다.</div>
+    <div class="zone-wrapper zone-query">
+      <div class="query-filter-bar">
+        <div class="query-filter-left">
+          <span class="zone-tag query">조회조건 연동 영역</span>
+          <span class="query-filter-title">기간별 데이터 조회</span>
+          <span class="query-status-badge" id="selectedPeriodNotice">기준 기간: -</span>
         </div>
 
         <div class="date-picker-group">
-          <span class="date-input-label">시작일</span>
+          <span class="date-input-label">조회기간</span>
           <input type="date" id="startDateInput" class="date-input" onclick="this.showPicker && this.showPicker()" />
-          <span class="date-sep">~</span>
-          <span class="date-input-label">종료일</span>
+          <span style="color:#94a3b8;font-weight:700;">~</span>
           <input type="date" id="endDateInput" class="date-input" onclick="this.showPicker && this.showPicker()" />
-          <button type="button" class="search-submit-btn" id="executeSearchBtn">🔍 조회하기</button>
-          <button type="button" class="quick-date-btn active" id="presetTodayBtn">오늘 (11-17)</button>
-          <button type="button" class="quick-date-btn" id="presetYesterdayBtn">어제 (11-16)</button>
-          <button type="button" class="quick-date-btn" id="presetCombinedBtn">어제+오늘 합산</button>
-          <button type="button" class="quick-date-btn" id="preset7DaysBtn">최근 7일</button>
-          <button type="button" class="quick-date-btn" id="preset30DaysBtn">최근 30일</button>
-        </div>
-      </div>
-    </section>
-
-    <!-- =================================================================== -->
-    <!-- Ⅱ. 달력 선택 기간 연동 결과: 신규등록대수 · 신규판매대수 · 판매회전율 -->
-    <!-- =================================================================== -->
-    <section class="section-block" id="sectionFlowBlock">
-      <div class="section-header">
-        <div>
-          <div class="section-eyebrow">Ⅱ. 달력 선택 기간 연동 실적 (신규 유입 vs 거래 완료)</div>
-          <h2 class="section-title" id="flowSectionTitle">회사별 신규등록대수 · 신규판매대수 · 판매회전율</h2>
-          <p class="section-desc">달력에서 선택하신 날짜(오늘 단독, 어제 단독, 또는 어제+오늘 합산 기간)의 평균 전체광고대수, 신규 등록대수, 신규 판매대수, 판매회전율 및 일자별 상세 내역입니다.</p>
+          <button type="button" class="search-submit-btn" id="executeSearchBtn">조회</button>
         </div>
       </div>
 
-      <div class="flow-grid" id="flowCardsContainer"></div>
-
-      <div class="table-wrap" style="margin-bottom:20px;">
-        <table class="exec-table">
-          <thead>
-            <tr>
-              <th>구분 항목 (선택 날짜/기간 기준)</th>
-              <th style="color:#c2410c;">1. 당근중고차 (직거래·추정)</th>
-              <th style="color:#1e3a8a;">2. 케이카 (안심직거래)</th>
-              <th style="color:#dc2626;">3. 엔카닷컴 (개인)</th>
-              <th style="color:#b45309;">4. KB차차차 (개인직거래)</th>
-            </tr>
-          </thead>
-          <tbody id="singlePeriodSummaryTable"></tbody>
-        </table>
-      </div>
-
-      <!-- 선택 기간 내 일자별(오늘 / 어제 / 합산) 상세 분해 비교표 -->
-      <div class="table-wrap">
-        <table class="exec-table">
-          <thead>
-            <tr>
-              <th>선택 기간 내 일자별 구분</th>
-              <th style="color:#c2410c;">1. 당근중고차 (광고대수 / 신규 / 판매 / 회전율 / 평균가)</th>
-              <th style="color:#1e3a8a;">2. 케이카 직거래 (광고대수 / 신규 / 판매 / 회전율 / 평균가)</th>
-              <th style="color:#dc2626;">3. 엔카닷컴 개인 (광고대수 / 신규 / 판매 / 회전율 / 평균가)</th>
-              <th style="color:#b45309;">4. KB차차차 개인 (광고대수 / 신규 / 판매 / 회전율 / 평균가)</th>
-            </tr>
-          </thead>
-          <tbody id="periodDailyBreakdownTable"></tbody>
-        </table>
-      </div>
-    </section>
-
-    <!-- =================================================================== -->
-    <!-- Ⅲ. 회사별 포트폴리오 시각 비교 그래프 -->
-    <!-- =================================================================== -->
-    <section class="section-block" id="sectionPortfolioBlock">
-      <div class="section-header">
-        <div>
-          <div class="section-eyebrow">Ⅲ. 4개사 매물 구성 Apple-to-Apple 비교 그래프 (조회기간 연동)</div>
-          <h2 class="section-title" id="portfolioSectionTitle">회사별 직거래 포트폴리오 비교 (국산·수입 / 차종별 / 판매가격 / 지역 / 인기모델)</h2>
-          <p class="section-desc">조회기간(오늘 / 어제 / 어제+오늘 합산) 및 비교 항목 버튼을 누르면 4개 플랫폼의 매물 비중 그래프가 즉시 전환됩니다.</p>
+      <!-- Ⅱ. 조회기간 실적 요약 (표 중심) -->
+      <section class="section-block" id="sectionFlowBlock">
+        <div class="section-header">
+          <h2 class="section-title" id="flowSectionTitle">Ⅱ. 조회기간 실적 요약 (평균 광고대수 · 신규등록 · 신규판매 · 판매회전율 · 평균가격)</h2>
         </div>
-        <div class="big-tabs" id="portfolioCategoryTabs">
-          <button type="button" class="big-tab active" data-pf="origin">① 국산 vs 수입 비중</button>
-          <button type="button" class="big-tab" data-pf="carType">② 차종별 분포</button>
-          <button type="button" class="big-tab" data-pf="price">③ 판매가격대 분포</button>
-          <button type="button" class="big-tab" data-pf="region">④ 지역(시·도) 분포</button>
-          <button type="button" class="big-tab" data-pf="model">⑤ 인기 모델 Top 10</button>
-          <button type="button" class="big-tab" data-pf="brand">⑥ 인기 브랜드 Top 8</button>
-        </div>
-      </div>
 
-      <div class="pf-grid" id="portfolioGridContainer"></div>
-    </section>
+        <div class="table-wrap" style="margin-bottom:12px;">
+          <table class="exec-table">
+            <thead>
+              <tr>
+                <th>구분 지표 (선택 기간 기준)</th>
+                <th style="color:var(--c-daangn);">1. 당근중고차 (추정)</th>
+                <th style="color:var(--c-kcar);">2. 케이카 직거래</th>
+                <th style="color:var(--c-encar);">3. 엔카닷컴 개인</th>
+                <th style="color:var(--c-kb);">4. KB차차차 개인</th>
+              </tr>
+            </thead>
+            <tbody id="singlePeriodSummaryTable"></tbody>
+          </table>
+        </div>
+
+        <div class="table-wrap">
+          <table class="exec-table">
+            <thead>
+              <tr>
+                <th>선택 기간 내 일자별 내역</th>
+                <th style="color:var(--c-daangn);">1. 당근중고차 (광고 / 신규 / 판매 / 회전율 / 평균가)</th>
+                <th style="color:var(--c-kcar);">2. 케이카 직거래 (광고 / 신규 / 판매 / 회전율 / 평균가)</th>
+                <th style="color:var(--c-encar);">3. 엔카닷컴 개인 (광고 / 신규 / 판매 / 회전율 / 평균가)</th>
+                <th style="color:var(--c-kb);">4. KB차차차 개인 (광고 / 신규 / 판매 / 회전율 / 평균가)</th>
+              </tr>
+            </thead>
+            <tbody id="periodDailyBreakdownTable"></tbody>
+          </table>
+        </div>
+
+        <div class="disclaimer-box">
+          * [산출 기준] 전체광고대수 = 조회기간 일별 전체광고대수의 평균대수 | 신규등록·신규판매 = 조회기간 내 합계 | 판매회전율 = (조회기간 내 신규판매대수 ÷ 조회기간 평균 전체광고대수) × 100. (케이카·엔카·KB는 전일 대비 매물 고유 ID 증감 전수 비교, 당근은 사이트맵 및 46개 거점 수집 표본 내 확인 건수 기준)
+        </div>
+      </section>
+
+      <!-- Ⅲ. 포트폴리오 비교 -->
+      <section class="section-block" id="sectionPortfolioBlock">
+        <div class="section-header">
+          <h2 class="section-title" id="portfolioSectionTitle">Ⅲ. 포트폴리오 분포 비교</h2>
+          <div class="big-tabs" id="portfolioCategoryTabs">
+            <button type="button" class="big-tab active" data-pf="origin">① 국산/수입</button>
+            <button type="button" class="big-tab" data-pf="carType">② 차종별</button>
+            <button type="button" class="big-tab" data-pf="price">③ 가격대별</button>
+            <button type="button" class="big-tab" data-pf="region">④ 지역별</button>
+            <button type="button" class="big-tab" data-pf="model">⑤ 인기모델 Top10</button>
+            <button type="button" class="big-tab" data-pf="brand">⑥ 브랜드 Top8</button>
+          </div>
+        </div>
+
+        <div class="pf-grid" id="portfolioGridContainer"></div>
+
+        <div class="disclaimer-box">
+          * [디스클레이머] 선택한 조회기간에 수집된 상세 매물 RAW 데이터(케이카·엔카·KB 전수, 당근 전국 46개 거점 표본) 기준 분포입니다.
+        </div>
+      </section>
+
+      <!-- Ⅳ. 개별 매물 RAW 상세 검색 -->
+      <section class="section-block" id="sectionRawBlock">
+        <div class="section-header">
+          <h2 class="section-title" id="rawSectionTitle">Ⅳ. 업체별 개별 매물 RAW 검색</h2>
+          <div class="big-tabs" id="rawPlatformTabs">
+            <button type="button" class="big-tab active" data-plat="ALL">전체 업체</button>
+            <button type="button" class="big-tab" data-plat="당근중고차">1. 당근중고차</button>
+            <button type="button" class="big-tab" data-plat="케이카직거래">2. 케이카 직거래</button>
+            <button type="button" class="big-tab" data-plat="엔카닷컴개인">3. 엔카닷컴 개인</button>
+            <button type="button" class="big-tab" data-plat="KB차차차개인">4. KB차차차 개인</button>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px;background:#f8fafc;padding:10px 12px;border-radius:6px;border:1px solid var(--border-soft);">
+          <select id="rawOriginSelect" style="padding:6px 10px;border-radius:5px;border:1px solid var(--border);font-family:var(--font-sans);font-size:12.5px;font-weight:600;background:#fff;">
+            <option value="ALL">국산+수입 전체</option>
+            <option value="국산">국산차</option>
+            <option value="수입">수입차</option>
+          </select>
+
+          <select id="rawPriceBandSelect" style="padding:6px 10px;border-radius:5px;border:1px solid var(--border);font-family:var(--font-sans);font-size:12.5px;font-weight:600;background:#fff;">
+            <option value="ALL">전체 가격대</option>
+            <option value="1천만원 미만">1천만원 미만</option>
+            <option value="1천~2천만원">1천~2천만원</option>
+            <option value="2천~3천만원">2천~3천만원</option>
+            <option value="3천~5천만원">3천~5천만원</option>
+            <option value="5천만원 이상">5천만원 이상</option>
+          </select>
+
+          <input type="search" id="rawKeywordInput" placeholder="제조사, 모델, 차량명, 지역 검색 (예: 그랜저, BMW, 서울)" style="flex:1;min-width:200px;padding:6px 10px;border-radius:5px;border:1px solid var(--border);font-family:var(--font-sans);font-size:12.5px;background:#fff;" />
+
+          <button type="button" class="search-submit-btn" id="rawSearchBtn">검색</button>
+          <button type="button" class="btn" id="rawDownloadFilteredBtn">⬇ 검색결과 CSV</button>
+          <span id="rawSearchSummaryText" style="font-size:12px;color:var(--text-muted);margin-left:auto;">-</span>
+        </div>
+
+        <div class="table-wrap" id="pcRawTableWrap" style="max-height:460px;overflow-y:auto;">
+          <table class="exec-table">
+            <thead>
+              <tr>
+                <th style="text-align:center;">수집일자</th>
+                <th>업체명</th>
+                <th style="text-align:center;">구분</th>
+                <th style="text-align:left;">제조사</th>
+                <th style="text-align:left;">모델명</th>
+                <th style="text-align:left;">전체 차량명</th>
+                <th style="text-align:center;">연식</th>
+                <th>주행거리</th>
+                <th>판매가격</th>
+                <th style="text-align:center;">가격대</th>
+                <th style="text-align:center;">지역</th>
+                <th style="text-align:center;">상태</th>
+                <th style="text-align:center;">링크</th>
+              </tr>
+            </thead>
+            <tbody id="rawVehicleTableBody"></tbody>
+          </table>
+        </div>
+
+        <div class="mobile-raw-cards" id="mobileRawCardsWrap"></div>
+
+        <div style="margin-top:10px;text-align:center;" id="rawLoadMoreWrap">
+          <button type="button" class="btn" id="rawLoadMoreBtn">더 보기 (+200건)</button>
+        </div>
+
+        <div class="disclaimer-box">
+          * [디스클레이머] 선택한 조회기간 내 수집된 매물 상세 목록이며, 우측 [매물 보기] 클릭 시 각 플랫폼의 실제 매물 상세 페이지로 이동합니다.
+        </div>
+      </section>
+    </div>
 
     <!-- =================================================================== -->
-    <!-- Ⅳ. 업체별 개별 매물 RAW 데이터 상세 검색 (매물ID 제외, 4개사 전체 & 매물링크 포함) -->
-    <!-- =================================================================== -->
-    <section class="section-block" id="sectionRawBlock">
-      <div class="section-header">
-        <div>
-          <div class="section-eyebrow">Ⅳ. 4개사 전수 매물 상세 조회 (조회기간 연동 · 원본 매물 바로가기 지원)</div>
-          <h2 class="section-title" id="rawSectionTitle">업체별 개별 매물 RAW 데이터 상세 검색</h2>
-          <p class="section-desc" id="rawSearchSummaryText">당근중고차 · 케이카 직거래 · 엔카닷컴 개인 · KB차차차 개인 매물을 조회기간·업체별·국산/수입·키워드별로 상세 검색하고 실제 매물 페이지로 이동할 수 있습니다.</p>
-        </div>
-        <div class="big-tabs" id="rawPlatformTabs">
-          <button type="button" class="big-tab active" data-plat="ALL">전체 업체</button>
-          <button type="button" class="big-tab" data-plat="당근중고차">1. 당근중고차</button>
-          <button type="button" class="big-tab" data-plat="케이카직거래">2. 케이카 직거래</button>
-          <button type="button" class="big-tab" data-plat="엔카닷컴개인">3. 엔카닷컴 개인</button>
-          <button type="button" class="big-tab" data-plat="KB차차차개인">4. KB차차차 개인</button>
-        </div>
-      </div>
-
-      <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-bottom:18px;background:#f8fafc;padding:16px 20px;border-radius:12px;border:1px solid var(--border-soft);">
-        <select id="rawOriginSelect" style="padding:11px 16px;border-radius:9px;border:1px solid var(--border);font-size:15.5px;font-weight:700;background:#fff;">
-          <option value="ALL">국산 + 수입 전체</option>
-          <option value="국산">국산차만 보기</option>
-          <option value="수입">수입차만 보기</option>
-        </select>
-
-        <select id="rawPriceBandSelect" style="padding:11px 16px;border-radius:9px;border:1px solid var(--border);font-size:15.5px;font-weight:700;background:#fff;">
-          <option value="ALL">전체 가격대</option>
-          <option value="1천만원 미만">1천만원 미만</option>
-          <option value="1천~2천만원">1천~2천만원</option>
-          <option value="2천~3천만원">2천~3천만원</option>
-          <option value="3천~5천만원">3천~5천만원</option>
-          <option value="5천만원 이상">5천만원 이상</option>
-        </select>
-
-        <input type="search" id="rawKeywordInput" placeholder="차량명, 제조사, 모델, 지역 검색 (예: 그랜저, 제네시스, BMW, 서울)..." style="flex:1;min-width:260px;padding:11px 16px;border-radius:9px;border:1px solid var(--border);font-size:15.5px;background:#fff;" />
-
-        <button type="button" class="search-submit-btn" id="rawSearchBtn">🔍 매물 검색</button>
-        <button type="button" class="btn" id="rawDownloadFilteredBtn">⬇ 현재 검색결과 엑셀(CSV) 저장</button>
-      </div>
-
-      <div class="table-wrap" id="pcRawTableWrap" style="max-height:580px;overflow-y:auto;">
-        <table class="exec-table">
-          <thead>
-            <tr>
-              <th style="text-align:center;">수집일자</th>
-              <th>업체명</th>
-              <th style="text-align:center;">국산/수입</th>
-              <th style="text-align:left;">제조사</th>
-              <th style="text-align:left;">모델명</th>
-              <th style="text-align:left;">전체 차량명</th>
-              <th style="text-align:center;">연식</th>
-              <th>주행거리</th>
-              <th>판매가격</th>
-              <th style="text-align:center;">가격대 구간</th>
-              <th style="text-align:center;">지역</th>
-              <th style="text-align:center;">상태</th>
-              <th style="text-align:center;">매물 링크</th>
-            </tr>
-          </thead>
-          <tbody id="rawVehicleTableBody"></tbody>
-        </table>
-      </div>
-
-      <!-- 모바일 버전 전용 매물 카드 리스트 -->
-      <div class="mobile-raw-cards" id="mobileRawCardsWrap"></div>
-
-      <div style="margin-top:16px;text-align:center;" id="rawLoadMoreWrap">
-        <button type="button" class="btn" id="rawLoadMoreBtn" style="padding:12px 32px;font-size:15.5px;">더 많은 매물 보기 (+200건)</button>
-      </div>
-    </section>
-
-    <!-- =================================================================== -->
-    <!-- Ⅴ. 일자별 수집 CSV 아카이브 & 누적 마스터 DB 저장소 -->
+    <!-- Ⅴ. 데이터 아카이브 (일자별 수집 CSV & 마스터 DB) -->
     <!-- =================================================================== -->
     <section class="section-block">
       <div class="section-header">
-        <div>
-          <div class="section-eyebrow">Ⅴ. 데이터 영구 보관소 (Daily CSV Archive & Cumulative Master DB)</div>
-          <h2 class="section-title">🗄️ 일자별 수집 CSV 저장소 및 통합 누적 DB</h2>
-          <p class="section-desc">매일 오전 08:00 자동 수집되는 데이터가 날짜별 개별 CSV 파일과 통합 누적 마스터 DB(`database/`)에 영구 축적됩니다.</p>
-        </div>
-        <div style="display:flex;gap:10px;flex-wrap:wrap;">
-          <a href="database/c2c_vehicle_master_db.csv" download class="btn btn-accent">⬇ 전체 누적 매물 마스터 DB (c2c_vehicle_master_db.csv)</a>
-          <a href="database/c2c_daily_summary_db.csv" download class="btn btn-primary">⬇ 전체 누적 일별 요약 DB (c2c_daily_summary_db.csv)</a>
+        <h2 class="section-title">Ⅴ. 일자별 수집 CSV 및 통합 마스터 DB 보관소</h2>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;">
+          <a href="database/c2c_vehicle_master_db.csv" download class="btn btn-primary">⬇ 누적 매물 마스터 DB (c2c_vehicle_master_db.csv)</a>
+          <a href="database/c2c_daily_summary_db.csv" download class="btn">⬇ 일자별 요약 DB (c2c_daily_summary_db.csv)</a>
         </div>
       </div>
 
@@ -832,32 +688,32 @@
             <tr>
               <th>수집 일자</th>
               <th style="text-align:center;">수집 시각</th>
-              <th>총 상세 수집 건수</th>
-              <th>당근 / 케이카 / 엔카 / KB</th>
-              <th style="text-align:center;">일자별 상세 매물 CSV 다운로드</th>
-              <th style="text-align:center;">당근 전국 URL DB 다운로드</th>
+              <th>총 수집 건수</th>
+              <th>업체별 상세 건수 (당근 / 케이카 / 엔카 / KB)</th>
+              <th style="text-align:center;">일자별 상세 CSV</th>
+              <th style="text-align:center;">당근 URL DB</th>
             </tr>
           </thead>
           <tbody id="dbArchiveTableBody"></tbody>
         </table>
       </div>
+
+      <div class="disclaimer-box">
+        * [보관 기준] 매일 08:00 수집 시 일자별 원본 CSV 파일(`raw_data/`)은 수정 없이 영구 보존되며, 통합 누적 DB(`database/`)는 외부 GitHub 저장소에 자동 커밋됩니다.
+      </div>
     </section>
 
   </main>
 
-  <script src="competitor_trend_data.js?v=202611171007"></script>
+  <script src="competitor_trend_data.js?v=202611171020"></script>
   <script>
     let stockOriginMode = 'all';
     let selectedPfMode = 'origin';
     let startDateStr = '';
     let endDateStr = '';
-    let calYear = 2026;
-    let calMonth = 11; // 1-12
-    let clickStage = 0;
 
     function fmt(n) { return Number(n || 0).toLocaleString(); }
 
-    // PowerShell ConvertTo-Json 배열/객체 방어적 언래핑 헬퍼
     function unwrapArray(val) {
       if (Array.isArray(val)) return val;
       if (val && Array.isArray(val.value)) return val.value;
@@ -865,15 +721,9 @@
       return [];
     }
 
-    function getRecords() {
-      return unwrapArray(window.COMPETITOR_TREND_DATA);
-    }
+    function getRecords() { return unwrapArray(window.COMPETITOR_TREND_DATA); }
+    function getAllRawVehicles() { return unwrapArray(window.COMPETITOR_RAW_PREVIEW); }
 
-    function getAllRawVehicles() {
-      return unwrapArray(window.COMPETITOR_RAW_PREVIEW);
-    }
-
-    // 현재 선택된 조회기간(startDateStr ~ endDateStr)에 해당하는 RAW 매물만 필터링
     function getPeriodRawVehicles() {
       const all = getAllRawVehicles();
       if (!startDateStr || !endDateStr) return all;
@@ -884,47 +734,13 @@
       return filtered.length > 0 ? filtered : all;
     }
 
-    function updateQuickPresetLabels() {
-      const records = getRecords();
-      if (records.length >= 2) {
-        const latest = records[records.length - 1].date;
-        const prev   = records[records.length - 2].date;
-        const tBtn = document.getElementById('presetTodayBtn');
-        const yBtn = document.getElementById('presetYesterdayBtn');
-        const cBtn = document.getElementById('presetCombinedBtn');
-        if (tBtn) tBtn.textContent = `오늘 (${latest.slice(5)})`;
-        if (yBtn) yBtn.textContent = `어제 (${prev.slice(5)})`;
-        if (cBtn) cBtn.textContent = `어제+오늘 합산 (${prev.slice(5)}~${latest.slice(5)})`;
-      }
-    }
-
-    function syncPresetActiveButtons() {
-      const records = getRecords();
-      const latest = records.length ? records[records.length - 1].date : '';
-      const prev   = records.length >= 2 ? records[records.length - 2].date : latest;
-
-      document.querySelectorAll('.quick-date-btn').forEach(b => b.classList.remove('active'));
-      if (startDateStr === latest && endDateStr === latest) {
-        const btn = document.getElementById('presetTodayBtn');
-        if (btn) btn.classList.add('active');
-      } else if (startDateStr === prev && endDateStr === prev && prev !== latest) {
-        const btn = document.getElementById('presetYesterdayBtn');
-        if (btn) btn.classList.add('active');
-      } else if (startDateStr === prev && endDateStr === latest && prev !== latest) {
-        const btn = document.getElementById('presetCombinedBtn');
-        if (btn) btn.classList.add('active');
-      }
-    }
-
+    // 페이지 진입 시 오늘자(최신 수집일) 조회 데이터를 기본값으로 설정
     function initDefaultDates() {
       const records = getRecords();
       if (records.length > 0) {
         const latestDate = records[records.length - 1].date;
         startDateStr = latestDate;
         endDateStr = latestDate;
-        const parts = latestDate.split('-');
-        calYear = Number(parts[0]);
-        calMonth = Number(parts[1]);
       } else {
         const today = new Date().toISOString().slice(0, 10);
         startDateStr = today;
@@ -932,36 +748,34 @@
       }
       document.getElementById('startDateInput').value = startDateStr;
       document.getElementById('endDateInput').value = endDateStr;
-      updateQuickPresetLabels();
-      syncPresetActiveButtons();
     }
 
-    // Ⅰ. 상단 전체 등록대수 카드 및 추이 차트 (조회기간 무관)
+    // Ⅰ. 공통 상시 영역: 전체 등록대수 카드, 미니 추이 차트, 일자별 기록표
     function renderStockSection() {
       const records = getRecords();
       const latest = records[records.length - 1] || {};
 
       document.getElementById('lastUpdatedInfo').textContent =
-        `최종 업데이트: ${latest.updatedAt || window.COMPETITOR_TREND_LAST_UPDATED || '-'} (매일 오전 08:00 자동 취합)`;
+        `최종 업데이트: ${latest.updatedAt || window.COMPETITOR_TREND_LAST_UPDATED || '-'} (매일 08:00 자동 수집)`;
 
       const platforms = [
         {
-          cls: 'daangn', name: '1. 당근중고차 (추정)', badge: '개인 직거래 (추정)', color: '#ff6f0f',
+          cls: 'daangn', name: '1. 당근중고차 (추정)', color: '#ea580c',
           total: latest.daangnCarsCount, dom: latest.daangnDomesticCount, imp: latest.daangnImportedCount,
           diff: latest.daangnDiff, valKey: 'daangnCarsCount', domKey: 'daangnDomesticCount', impKey: 'daangnImportedCount'
         },
         {
-          cls: 'kcar', name: '2. 케이카 (K Car)', badge: '안심직거래', color: '#1e3a8a',
+          cls: 'kcar', name: '2. 케이카 직거래', color: '#1e3a8a',
           total: latest.kcarDirectCount, dom: latest.kcarDomesticCount, imp: latest.kcarImportedCount,
           diff: latest.kcarDiff, valKey: 'kcarDirectCount', domKey: 'kcarDomesticCount', impKey: 'kcarImportedCount'
         },
         {
-          cls: 'encar', name: '3. 엔카닷컴', badge: '판매구분: 개인', color: '#dc2626',
+          cls: 'encar', name: '3. 엔카닷컴 개인', color: '#dc2626',
           total: latest.encarPersonalCount, dom: latest.encarPersonalDomestic, imp: latest.encarPersonalImported,
           diff: latest.encarPersonalDiff, valKey: 'encarPersonalCount', domKey: 'encarPersonalDomestic', impKey: 'encarPersonalImported'
         },
         {
-          cls: 'kb', name: '4. KB차차차', badge: '직거래(개인)', color: '#d97706',
+          cls: 'kb', name: '4. KB차차차 개인', color: '#d97706',
           total: latest.kbDirectCount, dom: latest.kbDomesticCount, imp: latest.kbImportedCount,
           diff: latest.kbDiff, valKey: 'kbDirectCount', domKey: 'kbDomesticCount', impKey: 'kbImportedCount'
         }
@@ -969,33 +783,30 @@
 
       document.getElementById('stockCardsContainer').innerHTML = platforms.map(p => {
         const displayNum = stockOriginMode === 'dom' ? p.dom : stockOriginMode === 'imp' ? p.imp : p.total;
-        const unitLabel = stockOriginMode === 'dom' ? '대 (국산)' : stockOriginMode === 'imp' ? '대 (수입)' : '대 (전체)';
+        const unitLabel = stockOriginMode === 'dom' ? '대(국산)' : stockOriginMode === 'imp' ? '대(수입)' : '대';
         const domPct = p.total > 0 ? ((p.dom / p.total) * 100).toFixed(1) : '0.0';
         const impPct = p.total > 0 ? ((p.imp / p.total) * 100).toFixed(1) : '0.0';
         const d = Number(p.diff || 0);
         const dCls = d > 0 ? 'up' : d < 0 ? 'down' : 'flat';
-        const dTxt = d > 0 ? `전일대비 ▲ +${fmt(d)}대` : d < 0 ? `전일대비 ▼ ${fmt(d)}대` : `전일대비 변동없음`;
+        const dTxt = d > 0 ? `▲ +${fmt(d)}` : d < 0 ? `▼ ${fmt(d)}` : `-`;
 
         return `
           <article class="stock-card ${p.cls}">
             <div class="stock-head">
               <span class="stock-name">${p.name}</span>
-              <span class="stock-badge ${p.cls}">${p.badge}</span>
+              <span class="diff-tag ${dCls}">전일비 ${dTxt}</span>
             </div>
             <div class="stock-main">
               <span class="stock-num">${fmt(displayNum)}</span>
               <span class="stock-unit">${unitLabel}</span>
-            </div>
-            <div style="margin-bottom:14px;">
-              <span class="diff-tag ${dCls}">${dTxt}</span>
             </div>
             <div class="stock-split-bar">
               <div style="width:${domPct}%;background:${p.color};"></div>
               <div style="width:${impPct}%;background:#94a3b8;"></div>
             </div>
             <div class="stock-split-info">
-              <span style="color:${p.color};">● 국산 ${fmt(p.dom)}대 (${domPct}%)</span>
-              <span style="color:#475569;">● 수입 ${fmt(p.imp)}대 (${impPct}%)</span>
+              <span>국산 ${fmt(p.dom)} (${domPct}%)</span>
+              <span>수입 ${fmt(p.imp)} (${impPct}%)</span>
             </div>
           </article>
         `;
@@ -1007,46 +818,30 @@
         return `
           <div class="mini-chart-box">
             <div class="mini-chart-title">
-              <span style="color:${p.color};">● ${p.name} 일별 등록 추이</span>
-              <span style="font-size:13px;color:#64748b;">누적 ${records.length}일</span>
+              <span style="color:${p.color};">${p.name} 추이</span>
+              <span style="color:#64748b;font-weight:500;">${records.length}일</span>
             </div>
-            <svg class="mini-svg" viewBox="0 0 320 150">${svgHtml}</svg>
+            <svg class="mini-svg" viewBox="0 0 300 105">${svgHtml}</svg>
           </div>
         `;
       }).join('');
 
-      // 일자별 전체 등록대수 누적 변화 기록표 렌더링
       const histBody = document.getElementById('dailyStockHistoryTableBody');
       if (histBody) {
-        histBody.innerHTML = [...records].reverse().map((r, idx) => {
-          const dayBadge = idx === 0
-            ? `<span style="display:inline-block;margin-left:6px;padding:2px 7px;border-radius:5px;background:#dcfce7;color:#15803d;font-size:12px;font-weight:800;">오늘 최신</span>`
-            : `<span style="display:inline-block;margin-left:6px;padding:2px 7px;border-radius:5px;background:#f1f5f9;color:#475569;font-size:12px;font-weight:700;">어제/이전</span>`;
+        histBody.innerHTML = [...records].reverse().map(r => {
           const fmtDiff = d => {
             const n = Number(d || 0);
-            if (n > 0) return `<span style="color:#e11d48;font-size:13px;margin-left:6px;">(▲+${fmt(n)})</span>`;
-            if (n < 0) return `<span style="color:#2563eb;font-size:13px;margin-left:6px;">(▼${fmt(n)})</span>`;
-            return `<span style="color:#64748b;font-size:13px;margin-left:6px;">(-)</span>`;
+            if (n > 0) return `<span style="color:#e11d48;font-size:11.5px;margin-left:4px;">(▲+${fmt(n)})</span>`;
+            if (n < 0) return `<span style="color:#2563eb;font-size:11.5px;margin-left:4px;">(▼${fmt(n)})</span>`;
+            return `<span style="color:#94a3b8;font-size:11.5px;margin-left:4px;">(-)</span>`;
           };
           return `
             <tr>
-              <td><strong>${r.date}</strong>${dayBadge}</td>
-              <td>
-                <strong style="color:#c2410c;font-size:16.5px;">${fmt(r.daangnCarsCount)}대</strong>${fmtDiff(r.daangnDiff)}
-                <div style="font-size:13px;color:#64748b;margin-top:2px;">국산 ${fmt(r.daangnDomesticCount)} / 수입 ${fmt(r.daangnImportedCount)}</div>
-              </td>
-              <td>
-                <strong style="color:#1e3a8a;font-size:16.5px;">${fmt(r.kcarDirectCount)}대</strong>${fmtDiff(r.kcarDiff)}
-                <div style="font-size:13px;color:#64748b;margin-top:2px;">국산 ${fmt(r.kcarDomesticCount)} / 수입 ${fmt(r.kcarImportedCount)}</div>
-              </td>
-              <td>
-                <strong style="color:#dc2626;font-size:16.5px;">${fmt(r.encarPersonalCount)}대</strong>${fmtDiff(r.encarPersonalDiff)}
-                <div style="font-size:13px;color:#64748b;margin-top:2px;">국산 ${fmt(r.encarPersonalDomestic)} / 수입 ${fmt(r.encarPersonalImported)}</div>
-              </td>
-              <td>
-                <strong style="color:#b45309;font-size:16.5px;">${fmt(r.kbDirectCount)}대</strong>${fmtDiff(r.kbDiff)}
-                <div style="font-size:13px;color:#64748b;margin-top:2px;">국산 ${fmt(r.kbDomesticCount)} / 수입 ${fmt(r.kbImportedCount)}</div>
-              </td>
+              <td>${r.date}</td>
+              <td><strong>${fmt(r.daangnCarsCount)}대</strong>${fmtDiff(r.daangnDiff)} <span style="color:#64748b;font-size:11.5px;">(국산 ${fmt(r.daangnDomesticCount)} / 수입 ${fmt(r.daangnImportedCount)})</span></td>
+              <td><strong>${fmt(r.kcarDirectCount)}대</strong>${fmtDiff(r.kcarDiff)} <span style="color:#64748b;font-size:11.5px;">(국산 ${fmt(r.kcarDomesticCount)} / 수입 ${fmt(r.kcarImportedCount)})</span></td>
+              <td><strong>${fmt(r.encarPersonalCount)}대</strong>${fmtDiff(r.encarPersonalDiff)} <span style="color:#64748b;font-size:11.5px;">(국산 ${fmt(r.encarPersonalDomestic)} / 수입 ${fmt(r.encarPersonalImported)})</span></td>
+              <td><strong>${fmt(r.kbDirectCount)}대</strong>${fmtDiff(r.kbDiff)} <span style="color:#64748b;font-size:11.5px;">(국산 ${fmt(r.kbDomesticCount)} / 수입 ${fmt(r.kbImportedCount)})</span></td>
             </tr>
           `;
         }).join('');
@@ -1055,7 +850,7 @@
 
     function buildTrendSvg(records, key, color) {
       if (!records.length) return '';
-      const W = 320, H = 150, padL = 42, padR = 22, padT = 26, padB = 28;
+      const W = 300, H = 105, padL = 36, padR = 20, padT = 20, padB = 20;
       const plotW = W - padL - padR, plotH = H - padT - padB;
       const vals = records.map(r => Number(r[key] || 0));
       let minV = Math.min(...vals), maxV = Math.max(...vals);
@@ -1063,7 +858,7 @@
         minV = Math.max(0, Math.floor(minV * 0.95));
         maxV = Math.ceil(maxV * 1.05) || 10;
       } else {
-        const p = (maxV - minV) * 0.2;
+        const p = (maxV - minV) * 0.22;
         minV = Math.max(0, Math.floor(minV - p));
         maxV = Math.ceil(maxV + p);
       }
@@ -1078,20 +873,20 @@
       const area = `${pts[0].x},${padT + plotH} ${poly} ${pts[pts.length - 1].x},${padT + plotH}`;
 
       return `
-        <line x1="${padL}" y1="${padT}" x2="${W - padR}" y2="${padT}" stroke="#e2e8f0" stroke-dasharray="3 3"/>
+        <line x1="${padL}" y1="${padT}" x2="${W - padR}" y2="${padT}" stroke="#e2e8f0" stroke-dasharray="2 2"/>
         <line x1="${padL}" y1="${padT + plotH}" x2="${W - padR}" y2="${padT + plotH}" stroke="#cbd5e1"/>
-        ${pts.length > 1 ? `<polygon points="${area}" fill="${color}" fill-opacity="0.10"/>` : ''}
-        ${pts.length > 1 ? `<polyline fill="none" stroke="${color}" stroke-width="3" points="${poly}"/>` : ''}
+        ${pts.length > 1 ? `<polygon points="${area}" fill="${color}" fill-opacity="0.08"/>` : ''}
+        ${pts.length > 1 ? `<polyline fill="none" stroke="${color}" stroke-width="2" points="${poly}"/>` : ''}
         ${pts.map(p => `
-          <circle cx="${p.x}" cy="${p.y}" r="5" fill="#fff" stroke="${color}" stroke-width="3"/>
-          <text x="${p.x}" y="${p.y - 10}" text-anchor="middle" font-size="12.5" font-weight="800" fill="#0f172a">${fmt(p.v)}</text>
-          <text x="${p.x}" y="${H - 7}" text-anchor="middle" font-size="11.5" font-weight="700" fill="#64748b">${p.d}</text>
+          <circle cx="${p.x}" cy="${p.y}" r="3.5" fill="#fff" stroke="${color}" stroke-width="2"/>
+          <text x="${p.x}" y="${p.y - 7}" text-anchor="middle" font-size="11" font-weight="700" fill="#0f172a">${fmt(p.v)}</text>
+          <text x="${p.x}" y="${H - 4}" text-anchor="middle" font-size="10.5" font-weight="600" fill="#64748b">${p.d}</text>
         `).join('')}
       `;
     }
 
-    // Ⅱ. 달력에서 선택한 시작일 ~ 종료일 데이터 집계 및 표시
-    function renderFlowSection(isUserSearch) {
+    // Ⅱ. 조회기간 연동 실적 표
+    function renderFlowSection() {
       const records = getRecords();
       if (!records.length) return;
 
@@ -1111,259 +906,109 @@
       const eNew = sum('encarNewCount'),  eSold = sum('encarSoldCount');
       const kbNew = sum('kbNewCount'),    kbSold = sum('kbSoldCount');
 
-      const latestDate = records[records.length - 1].date;
-      const prevDate   = records.length >= 2 ? records[records.length - 2].date : '';
-      let modeTag = '';
-      if (startDateStr === latestDate && endDateStr === latestDate) modeTag = '오늘 단독 조회';
-      else if (startDateStr === prevDate && endDateStr === prevDate) modeTag = '어제 단독 조회';
-      else if (startDateStr === prevDate && endDateStr === latestDate) modeTag = '어제 + 오늘 합산 조회';
-      else modeTag = `기간 조회 (${days}일)`;
-
       const rangeLabel = startDateStr === endDateStr
-        ? `${startDateStr} (${modeTag} · 1일 기준)`
-        : `${startDateStr} ~ ${endDateStr} (${modeTag} · ${days}일 기준)`;
+        ? `${startDateStr} (1일)`
+        : `${startDateStr} ~ ${endDateStr} (${days}일)`;
 
-      const statusPrefix = isUserSearch ? `✅ [조회 완료] ` : `현재 조회된 기간: `;
-      document.getElementById('selectedPeriodNotice').innerHTML =
-        `${statusPrefix}<strong style="color:#ffedd5;font-size:15.5px;">${rangeLabel}</strong> (하단 Ⅱ·Ⅲ·Ⅳ 영역 모두 연동 반영됨)`;
-      document.getElementById('flowSectionTitle').textContent =
-        `[${rangeLabel}] 평균 전체광고대수 · 신규등록 · 신규판매 · 판매회전율 · 평균광고가격`;
+      document.getElementById('selectedPeriodNotice').textContent = `조회 기준: ${rangeLabel}`;
+      document.getElementById('flowSectionTitle').textContent = `Ⅱ. 조회기간 실적 요약 [${rangeLabel}]`;
 
       const agg = {
-        label: rangeLabel,
-        daangn: {
-          avgTotal: dAvgTotal, avgDom: dAvgDom, avgImp: dAvgImp,
-          newCnt: dNew, soldCnt: dSold,
-          turnPct: dAvgTotal > 0 ? ((dSold / dAvgTotal) * 100).toFixed(2) : '0.00',
-          avgPrice: avg('daangnAvgPrice')
-        },
-        kcar: {
-          avgTotal: kAvgTotal, avgDom: kAvgDom, avgImp: kAvgImp,
-          newCnt: kNew, soldCnt: kSold,
-          turnPct: kAvgTotal > 0 ? ((kSold / kAvgTotal) * 100).toFixed(2) : '0.00',
-          avgPrice: avg('kcarAvgPrice')
-        },
-        encar: {
-          avgTotal: eAvgTotal, avgDom: eAvgDom, avgImp: eAvgImp,
-          newCnt: eNew, soldCnt: eSold,
-          turnPct: eAvgTotal > 0 ? ((eSold / eAvgTotal) * 100).toFixed(2) : '0.00',
-          avgPrice: avg('encarAvgPrice')
-        },
-        kb: {
-          avgTotal: kbAvgTotal, avgDom: kbAvgDom, avgImp: kbAvgImp,
-          newCnt: kbNew, soldCnt: kbSold,
-          turnPct: kbAvgTotal > 0 ? ((kbSold / kbAvgTotal) * 100).toFixed(2) : '0.00',
-          avgPrice: avg('kbAvgPrice')
-        }
+        daangn: { avgTotal: dAvgTotal, avgDom: dAvgDom, avgImp: dAvgImp, newCnt: dNew, soldCnt: dSold, turnPct: dAvgTotal > 0 ? ((dSold / dAvgTotal) * 100).toFixed(2) : '0.00', avgPrice: avg('daangnAvgPrice') },
+        kcar:   { avgTotal: kAvgTotal, avgDom: kAvgDom, avgImp: kAvgImp, newCnt: kNew, soldCnt: kSold, turnPct: kAvgTotal > 0 ? ((kSold / kAvgTotal) * 100).toFixed(2) : '0.00', avgPrice: avg('kcarAvgPrice') },
+        encar:  { avgTotal: eAvgTotal, avgDom: eAvgDom, avgImp: eAvgImp, newCnt: eNew, soldCnt: eSold, turnPct: eAvgTotal > 0 ? ((eSold / eAvgTotal) * 100).toFixed(2) : '0.00', avgPrice: avg('encarAvgPrice') },
+        kb:     { avgTotal: kbAvgTotal, avgDom: kbAvgDom, avgImp: kbAvgImp, newCnt: kbNew, soldCnt: kbSold, turnPct: kbAvgTotal > 0 ? ((kbSold / kbAvgTotal) * 100).toFixed(2) : '0.00', avgPrice: avg('kbAvgPrice') }
       };
-
-      const items = [
-        { name: '1. 당근중고차 (추정)', color: '#ff6f0f', d: agg.daangn },
-        { name: '2. 케이카 직거래', color: '#1e3a8a', d: agg.kcar },
-        { name: '3. 엔카닷컴 개인', color: '#dc2626', d: agg.encar },
-        { name: '4. KB차차차 개인', color: '#d97706', d: agg.kb }
-      ];
-
-      document.getElementById('flowCardsContainer').innerHTML = items.map(it => {
-        const maxBar = Math.max(10, it.d.newCnt, it.d.soldCnt);
-        const newW = Math.min(100, Math.round((it.d.newCnt / maxBar) * 100));
-        const soldW = Math.min(100, Math.round((it.d.soldCnt / maxBar) * 100));
-
-        return `
-          <div class="flow-card">
-            <div class="flow-card-title">
-              <span style="color:${it.color};">${it.name}</span>
-            </div>
-
-            <div class="turnover-box" style="margin-top:0;margin-bottom:14px;background:#fff;">
-              <span class="turnover-label">기간 평균 전체광고대수</span>
-              <span class="turnover-val" style="color:${it.color};">${fmt(it.d.avgTotal)}대</span>
-            </div>
-
-            <div class="flow-metric-row">
-              <div class="flow-metric-head">
-                <span class="flow-metric-label">조회기간 내 신규 등록대수</span>
-                <span class="flow-metric-val" style="color:#e11d48;">+${fmt(it.d.newCnt)}대</span>
-              </div>
-              <div class="flow-bar-track">
-                <div class="flow-bar-fill" style="width:${newW}%;background:#e11d48;"></div>
-              </div>
-            </div>
-
-            <div class="flow-metric-row">
-              <div class="flow-metric-head">
-                <span class="flow-metric-label">조회기간 내 신규 판매대수</span>
-                <span class="flow-metric-val" style="color:#2563eb;">${fmt(it.d.soldCnt)}대</span>
-              </div>
-              <div class="flow-bar-track">
-                <div class="flow-bar-fill" style="width:${soldW}%;background:#2563eb;"></div>
-              </div>
-            </div>
-
-            <div class="turnover-box">
-              <span class="turnover-label">기간 판매회전율 (판매÷평균광고)</span>
-              <span class="turnover-val">${it.d.turnPct}%</span>
-            </div>
-
-            <div class="turnover-box" style="margin-top:8px;">
-              <span class="turnover-label">평균 광고가격</span>
-              <span class="turnover-val">${fmt(it.d.avgPrice)}만원</span>
-            </div>
-          </div>
-        `;
-      }).join('');
 
       document.getElementById('singlePeriodSummaryTable').innerHTML = `
         <tr>
-          <td>조회 기준 기간</td>
-          <td colspan="4" style="text-align:center;font-weight:800;color:#0f172a;background:#f8fafc;">${agg.label}</td>
-        </tr>
-        <tr>
-          <td>조회기간 전체광고대수 (기간 평균대수)</td>
-          <td style="font-weight:800;color:#c2410c;">${fmt(agg.daangn.avgTotal)}대 <span style="font-size:13px;color:#64748b;">(국산 ${fmt(agg.daangn.avgDom)} / 수입 ${fmt(agg.daangn.avgImp)})</span></td>
-          <td style="font-weight:800;color:#1e3a8a;">${fmt(agg.kcar.avgTotal)}대 <span style="font-size:13px;color:#64748b;">(국산 ${fmt(agg.kcar.avgDom)} / 수입 ${fmt(agg.kcar.avgImp)})</span></td>
-          <td style="font-weight:800;color:#dc2626;">${fmt(agg.encar.avgTotal)}대 <span style="font-size:13px;color:#64748b;">(국산 ${fmt(agg.encar.avgDom)} / 수입 ${fmt(agg.encar.avgImp)})</span></td>
-          <td style="font-weight:800;color:#b45309;">${fmt(agg.kb.avgTotal)}대 <span style="font-size:13px;color:#64748b;">(국산 ${fmt(agg.kb.avgDom)} / 수입 ${fmt(agg.kb.avgImp)})</span></td>
+          <td>전체광고대수 (조회기간 평균)</td>
+          <td><strong>${fmt(agg.daangn.avgTotal)}대</strong> <span style="color:#64748b;font-size:11.5px;">(국산 ${fmt(agg.daangn.avgDom)} / 수입 ${fmt(agg.daangn.avgImp)})</span></td>
+          <td><strong>${fmt(agg.kcar.avgTotal)}대</strong> <span style="color:#64748b;font-size:11.5px;">(국산 ${fmt(agg.kcar.avgDom)} / 수입 ${fmt(agg.kcar.avgImp)})</span></td>
+          <td><strong>${fmt(agg.encar.avgTotal)}대</strong> <span style="color:#64748b;font-size:11.5px;">(국산 ${fmt(agg.encar.avgDom)} / 수입 ${fmt(agg.encar.avgImp)})</span></td>
+          <td><strong>${fmt(agg.kb.avgTotal)}대</strong> <span style="color:#64748b;font-size:11.5px;">(국산 ${fmt(agg.kb.avgDom)} / 수입 ${fmt(agg.kb.avgImp)})</span></td>
         </tr>
         <tr>
           <td>조회기간 내 신규 등록대수</td>
-          <td style="color:#e11d48;font-weight:800;">+${fmt(agg.daangn.newCnt)}대</td>
-          <td style="color:#e11d48;font-weight:800;">+${fmt(agg.kcar.newCnt)}대</td>
-          <td style="color:#e11d48;font-weight:800;">+${fmt(agg.encar.newCnt)}대</td>
-          <td style="color:#e11d48;font-weight:800;">+${fmt(agg.kb.newCnt)}대</td>
+          <td style="color:#e11d48;font-weight:700;">+${fmt(agg.daangn.newCnt)}대</td>
+          <td style="color:#e11d48;font-weight:700;">+${fmt(agg.kcar.newCnt)}대</td>
+          <td style="color:#e11d48;font-weight:700;">+${fmt(agg.encar.newCnt)}대</td>
+          <td style="color:#e11d48;font-weight:700;">+${fmt(agg.kb.newCnt)}대</td>
         </tr>
         <tr>
           <td>조회기간 내 신규 판매대수</td>
-          <td style="color:#2563eb;font-weight:800;">${fmt(agg.daangn.soldCnt)}대</td>
-          <td style="color:#2563eb;font-weight:800;">${fmt(agg.kcar.soldCnt)}대</td>
-          <td style="color:#2563eb;font-weight:800;">${fmt(agg.encar.soldCnt)}대</td>
-          <td style="color:#2563eb;font-weight:800;">${fmt(agg.kb.soldCnt)}대</td>
+          <td style="color:#2563eb;font-weight:700;">${fmt(agg.daangn.soldCnt)}대</td>
+          <td style="color:#2563eb;font-weight:700;">${fmt(agg.kcar.soldCnt)}대</td>
+          <td style="color:#2563eb;font-weight:700;">${fmt(agg.encar.soldCnt)}대</td>
+          <td style="color:#2563eb;font-weight:700;">${fmt(agg.kb.soldCnt)}대</td>
         </tr>
         <tr>
-          <td>조회기간 내 판매회전율 (신규판매 ÷ 평균 전체광고대수)</td>
-          <td style="font-weight:800;">${agg.daangn.turnPct}%</td>
-          <td style="font-weight:800;">${agg.kcar.turnPct}%</td>
-          <td style="font-weight:800;">${agg.encar.turnPct}%</td>
-          <td style="font-weight:800;">${agg.kb.turnPct}%</td>
+          <td>조회기간 판매회전율 (신규판매 ÷ 평균광고대수)</td>
+          <td><strong>${agg.daangn.turnPct}%</strong></td>
+          <td><strong>${agg.kcar.turnPct}%</strong></td>
+          <td><strong>${agg.encar.turnPct}%</strong></td>
+          <td><strong>${agg.kb.turnPct}%</strong></td>
         </tr>
         <tr>
           <td>평균 광고가격</td>
-          <td style="font-weight:800;">${fmt(agg.daangn.avgPrice)}만원</td>
-          <td style="font-weight:800;">${fmt(agg.kcar.avgPrice)}만원</td>
-          <td style="font-weight:800;">${fmt(agg.encar.avgPrice)}만원</td>
-          <td style="font-weight:800;">${fmt(agg.kb.avgPrice)}만원</td>
+          <td><strong>${fmt(agg.daangn.avgPrice)}만원</strong></td>
+          <td><strong>${fmt(agg.kcar.avgPrice)}만원</strong></td>
+          <td><strong>${fmt(agg.encar.avgPrice)}만원</strong></td>
+          <td><strong>${fmt(agg.kb.avgPrice)}만원</strong></td>
         </tr>
       `;
 
-      // 선택 기간 내 일자별 상세 분해 비교표 (어제 / 오늘 / 합산·평균 모두 표시)
       const breakdownEl = document.getElementById('periodDailyBreakdownTable');
       if (breakdownEl) {
         const dayRowsHtml = slice.map(r => {
-          const isToday = r.date === latestDate;
-          const badge = isToday
-            ? `<span style="margin-left:6px;padding:2px 6px;border-radius:4px;background:#dcfce7;color:#15803d;font-size:12px;">오늘</span>`
-            : `<span style="margin-left:6px;padding:2px 6px;border-radius:4px;background:#f1f5f9;color:#475569;font-size:12px;">어제</span>`;
           const dTurn = r.daangnCarsCount > 0 ? ((r.daangnSoldCount / r.daangnCarsCount) * 100).toFixed(2) : '0.00';
           const kTurn = r.kcarDirectCount > 0 ? ((r.kcarSoldCount / r.kcarDirectCount) * 100).toFixed(2) : '0.00';
           const eTurn = r.encarPersonalCount > 0 ? ((r.encarSoldCount / r.encarPersonalCount) * 100).toFixed(2) : '0.00';
           const kbTurn = r.kbDirectCount > 0 ? ((r.kbSoldCount / r.kbDirectCount) * 100).toFixed(2) : '0.00';
           return `
             <tr>
-              <td><strong>${r.date}</strong>${badge}</td>
-              <td>
-                <strong>${fmt(r.daangnCarsCount)}대</strong> ·
-                <span style="color:#e11d48;font-weight:700;">신규 +${fmt(r.daangnNewCount)}</span> ·
-                <span style="color:#2563eb;font-weight:700;">판매 ${fmt(r.daangnSoldCount)}</span> ·
-                <span>회전율 ${dTurn}%</span> ·
-                <span>${fmt(r.daangnAvgPrice)}만원</span>
-              </td>
-              <td>
-                <strong>${fmt(r.kcarDirectCount)}대</strong> ·
-                <span style="color:#e11d48;font-weight:700;">신규 +${fmt(r.kcarNewCount)}</span> ·
-                <span style="color:#2563eb;font-weight:700;">판매 ${fmt(r.kcarSoldCount)}</span> ·
-                <span>회전율 ${kTurn}%</span> ·
-                <span>${fmt(r.kcarAvgPrice)}만원</span>
-              </td>
-              <td>
-                <strong>${fmt(r.encarPersonalCount)}대</strong> ·
-                <span style="color:#e11d48;font-weight:700;">신규 +${fmt(r.encarNewCount)}</span> ·
-                <span style="color:#2563eb;font-weight:700;">판매 ${fmt(r.encarSoldCount)}</span> ·
-                <span>회전율 ${eTurn}%</span> ·
-                <span>${fmt(r.encarAvgPrice)}만원</span>
-              </td>
-              <td>
-                <strong>${fmt(r.kbDirectCount)}대</strong> ·
-                <span style="color:#e11d48;font-weight:700;">신규 +${fmt(r.kbNewCount)}</span> ·
-                <span style="color:#2563eb;font-weight:700;">판매 ${fmt(r.kbSoldCount)}</span> ·
-                <span>회전율 ${kbTurn}%</span> ·
-                <span>${fmt(r.kbAvgPrice)}만원</span>
-              </td>
+              <td>${r.date}</td>
+              <td>${fmt(r.daangnCarsCount)}대 / <span style="color:#e11d48;">+${fmt(r.daangnNewCount)}</span> / <span style="color:#2563eb;">${fmt(r.daangnSoldCount)}</span> / ${dTurn}% / ${fmt(r.daangnAvgPrice)}만원</td>
+              <td>${fmt(r.kcarDirectCount)}대 / <span style="color:#e11d48;">+${fmt(r.kcarNewCount)}</span> / <span style="color:#2563eb;">${fmt(r.kcarSoldCount)}</span> / ${kTurn}% / ${fmt(r.kcarAvgPrice)}만원</td>
+              <td>${fmt(r.encarPersonalCount)}대 / <span style="color:#e11d48;">+${fmt(r.encarNewCount)}</span> / <span style="color:#2563eb;">${fmt(r.encarSoldCount)}</span> / ${eTurn}% / ${fmt(r.encarAvgPrice)}만원</td>
+              <td>${fmt(r.kbDirectCount)}대 / <span style="color:#e11d48;">+${fmt(r.kbNewCount)}</span> / <span style="color:#2563eb;">${fmt(r.kbSoldCount)}</span> / ${kbTurn}% / ${fmt(r.kbAvgPrice)}만원</td>
             </tr>
           `;
         }).join('');
 
-        const totalRowHtml = `
-          <tr style="background:#fff7ed;border-top:2px solid #fdba74;">
-            <td style="background:#ffedd5;color:#9a3412;"><strong>📊 선택기간 종합 (${days}일 합산/평균)</strong></td>
-            <td>
-              <strong style="color:#c2410c;">평균 ${fmt(agg.daangn.avgTotal)}대</strong> ·
-              <span style="color:#e11d48;font-weight:800;">신규합계 +${fmt(agg.daangn.newCnt)}</span> ·
-              <span style="color:#2563eb;font-weight:800;">판매합계 ${fmt(agg.daangn.soldCnt)}</span> ·
-              <strong>회전율 ${agg.daangn.turnPct}%</strong> ·
-              <span>평균 ${fmt(agg.daangn.avgPrice)}만원</span>
-            </td>
-            <td>
-              <strong style="color:#1e3a8a;">평균 ${fmt(agg.kcar.avgTotal)}대</strong> ·
-              <span style="color:#e11d48;font-weight:800;">신규합계 +${fmt(agg.kcar.newCnt)}</span> ·
-              <span style="color:#2563eb;font-weight:800;">판매합계 ${fmt(agg.kcar.soldCnt)}</span> ·
-              <strong>회전율 ${agg.kcar.turnPct}%</strong> ·
-              <span>평균 ${fmt(agg.kcar.avgPrice)}만원</span>
-            </td>
-            <td>
-              <strong style="color:#dc2626;">평균 ${fmt(agg.encar.avgTotal)}대</strong> ·
-              <span style="color:#e11d48;font-weight:800;">신규합계 +${fmt(agg.encar.newCnt)}</span> ·
-              <span style="color:#2563eb;font-weight:800;">판매합계 ${fmt(agg.encar.soldCnt)}</span> ·
-              <strong>회전율 ${agg.encar.turnPct}%</strong> ·
-              <span>평균 ${fmt(agg.encar.avgPrice)}만원</span>
-            </td>
-            <td>
-              <strong style="color:#b45309;">평균 ${fmt(agg.kb.avgTotal)}대</strong> ·
-              <span style="color:#e11d48;font-weight:800;">신규합계 +${fmt(agg.kb.newCnt)}</span> ·
-              <span style="color:#2563eb;font-weight:800;">판매합계 ${fmt(agg.kb.soldCnt)}</span> ·
-              <strong>회전율 ${agg.kb.turnPct}%</strong> ·
-              <span>평균 ${fmt(agg.kb.avgPrice)}만원</span>
-            </td>
+        const totalRowHtml = slice.length > 1 ? `
+          <tr style="background:#f8fafc;font-weight:700;">
+            <td>합계 / 평균 (${days}일)</td>
+            <td>평균 ${fmt(agg.daangn.avgTotal)}대 / <span style="color:#e11d48;">+${fmt(agg.daangn.newCnt)}</span> / <span style="color:#2563eb;">${fmt(agg.daangn.soldCnt)}</span> / ${agg.daangn.turnPct}% / ${fmt(agg.daangn.avgPrice)}만원</td>
+            <td>평균 ${fmt(agg.kcar.avgTotal)}대 / <span style="color:#e11d48;">+${fmt(agg.kcar.newCnt)}</span> / <span style="color:#2563eb;">${fmt(agg.kcar.soldCnt)}</span> / ${agg.kcar.turnPct}% / ${fmt(agg.kcar.avgPrice)}만원</td>
+            <td>평균 ${fmt(agg.encar.avgTotal)}대 / <span style="color:#e11d48;">+${fmt(agg.encar.newCnt)}</span> / <span style="color:#2563eb;">${fmt(agg.encar.soldCnt)}</span> / ${agg.encar.turnPct}% / ${fmt(agg.encar.avgPrice)}만원</td>
+            <td>평균 ${fmt(agg.kb.avgTotal)}대 / <span style="color:#e11d48;">+${fmt(agg.kb.newCnt)}</span> / <span style="color:#2563eb;">${fmt(agg.kb.soldCnt)}</span> / ${agg.kb.turnPct}% / ${fmt(agg.kb.avgPrice)}만원</td>
           </tr>
-        `;
+        ` : '';
         breakdownEl.innerHTML = dayRowsHtml + totalRowHtml;
       }
     }
 
-    // 조회기간에 맞는 포트폴리오 객체 선택 (오늘 / 어제 / 어제+오늘 합산)
     function getActivePortfolioData() {
       const byDate = window.COMPETITOR_PORTFOLIO_BY_DATE || {};
       if (startDateStr && endDateStr) {
-        if (startDateStr === endDateStr && byDate[startDateStr]) {
-          return byDate[startDateStr];
-        }
-        if (startDateStr < endDateStr && byDate['ALL']) {
-          return byDate['ALL'];
-        }
+        if (startDateStr === endDateStr && byDate[startDateStr]) return byDate[startDateStr];
+        if (startDateStr < endDateStr && byDate['ALL']) return byDate['ALL'];
       }
       return window.COMPETITOR_PORTFOLIO_DATA || byDate['ALL'] || {};
     }
 
-    // Ⅲ. 회사별 포트폴리오 시각 그래프 렌더링 (조회기간 연동)
+    // Ⅲ. 포트폴리오 분포
     function renderPortfolioSection() {
       const pf = getActivePortfolioData();
-      const rangeTxt = startDateStr === endDateStr ? `${startDateStr}` : `${startDateStr} ~ ${endDateStr} 합산`;
+      const rangeTxt = startDateStr === endDateStr ? `${startDateStr}` : `${startDateStr} ~ ${endDateStr}`;
       const pfTitleEl = document.getElementById('portfolioSectionTitle');
       if (pfTitleEl && startDateStr) {
-        pfTitleEl.textContent = `[${rangeTxt}] 회사별 직거래 포트폴리오 비교 (국산·수입 / 차종별 / 판매가격 / 지역 / 인기모델)`;
+        pfTitleEl.textContent = `Ⅲ. 포트폴리오 분포 비교 [${rangeTxt}]`;
       }
 
       const companies = [
-        { key: 'daangn', title: '1. 당근중고차 (추정)', color: '#ff6f0f', data: pf.daangn },
+        { key: 'daangn', title: '1. 당근중고차 (추정)', color: '#ea580c', data: pf.daangn },
         { key: 'kcar',   title: '2. 케이카 직거래', color: '#1e3a8a', data: pf.kcar },
         { key: 'encar',  title: '3. 엔카닷컴 개인', color: '#dc2626', data: pf.encar },
         { key: 'kb',     title: '4. KB차차차 개인', color: '#d97706', data: pf.kb }
@@ -1378,12 +1023,6 @@
           const domPct = d.domesticRatio || 0;
           const impPct = d.importedRatio || 0;
           contentHtml = `
-            <div style="margin-bottom:18px;">
-              <div style="height:26px;border-radius:12px;overflow:hidden;display:flex;margin-bottom:10px;">
-                <div style="width:${domPct}%;background:${c.color};display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px;font-weight:800;">${domPct}%</div>
-                <div style="width:${impPct}%;background:#64748b;display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px;font-weight:800;">${impPct}%</div>
-              </div>
-            </div>
             <div class="pf-bar-item">
               <div class="pf-bar-top"><span>국산차</span><span>${fmt(d.domesticCount)}대 (${domPct}%)</span></div>
               <div class="pf-bar-bg"><div class="pf-bar-fg" style="width:${domPct}%;background:${c.color};"></div></div>
@@ -1392,14 +1031,13 @@
               <div class="pf-bar-top"><span>수입차</span><span>${fmt(d.importedCount)}대 (${impPct}%)</span></div>
               <div class="pf-bar-bg"><div class="pf-bar-fg" style="width:${impPct}%;background:#64748b;"></div></div>
             </div>
-            <div class="turnover-box" style="margin-top:18px;">
-              <span class="turnover-label">평균 판매가격</span>
-              <span class="turnover-val" style="color:${c.color};">${fmt(d.avgPriceManwon)}만원</span>
+            <div style="margin-top:10px;padding-top:8px;border-top:1px solid #e2e8f0;display:flex;justify-content:space-between;font-size:12px;">
+              <span style="color:#64748b;">평균 광고가격</span>
+              <strong style="color:${c.color};">${fmt(d.avgPriceManwon)}만원</strong>
             </div>
           `;
         } else if (selectedPfMode === 'carType') {
-          const ctMap = d.carTypes || {};
-          contentHtml = Object.entries(ctMap).map(([k, v]) => {
+          contentHtml = Object.entries(d.carTypes || {}).map(([k, v]) => {
             const pct = ((Number(v || 0) / sampleSize) * 100).toFixed(1);
             return `
               <div class="pf-bar-item">
@@ -1409,8 +1047,7 @@
             `;
           }).join('');
         } else if (selectedPfMode === 'price') {
-          const bands = d.priceBands || {};
-          contentHtml = Object.entries(bands).map(([k, v]) => {
+          contentHtml = Object.entries(d.priceBands || {}).map(([k, v]) => {
             const pct = ((Number(v || 0) / sampleSize) * 100).toFixed(1);
             return `
               <div class="pf-bar-item">
@@ -1420,8 +1057,7 @@
             `;
           }).join('');
         } else if (selectedPfMode === 'region') {
-          const list = d.topRegions || [];
-          contentHtml = list.map(it => {
+          contentHtml = (d.topRegions || []).map(it => {
             const pct = ((Number(it.count || 0) / sampleSize) * 100).toFixed(1);
             return `
               <div class="pf-bar-item">
@@ -1431,23 +1067,21 @@
             `;
           }).join('');
         } else if (selectedPfMode === 'model') {
-          const list = d.topModels || [];
-          contentHtml = list.map((it, idx) => {
+          contentHtml = (d.topModels || []).map((it, idx) => {
             const pct = ((Number(it.count || 0) / sampleSize) * 100).toFixed(1);
             return `
               <div class="pf-bar-item">
-                <div class="pf-bar-top"><span>${idx + 1}위. ${it.name}</span><span>${fmt(it.count)}대 (${pct}%)</span></div>
+                <div class="pf-bar-top"><span>${idx + 1}. ${it.name}</span><span>${fmt(it.count)}대 (${pct}%)</span></div>
                 <div class="pf-bar-bg"><div class="pf-bar-fg" style="width:${Math.min(100, pct * 3)}%;background:${c.color};"></div></div>
               </div>
             `;
           }).join('');
         } else if (selectedPfMode === 'brand') {
-          const list = d.topBrands || [];
-          contentHtml = list.map((it, idx) => {
+          contentHtml = (d.topBrands || []).map((it, idx) => {
             const pct = ((Number(it.count || 0) / sampleSize) * 100).toFixed(1);
             return `
               <div class="pf-bar-item">
-                <div class="pf-bar-top"><span>${idx + 1}위. ${it.name}</span><span>${fmt(it.count)}대 (${pct}%)</span></div>
+                <div class="pf-bar-top"><span>${idx + 1}. ${it.name}</span><span>${fmt(it.count)}대 (${pct}%)</span></div>
                 <div class="pf-bar-bg"><div class="pf-bar-fg" style="width:${pct}%;background:${c.color};"></div></div>
               </div>
             `;
@@ -1458,7 +1092,7 @@
           <div class="pf-card">
             <div class="pf-card-head">
               <span style="color:${c.color};">${c.title}</span>
-              <span style="font-size:13.5px;color:#64748b;">분석 표본 ${fmt(d.sampleSize)}대</span>
+              <span style="font-size:11.5px;color:#64748b;font-weight:500;">표본 ${fmt(d.sampleSize)}대</span>
             </div>
             ${contentHtml}
           </div>
@@ -1466,89 +1100,21 @@
       }).join('');
     }
 
-    // 조회기간 변경 적용 (Ⅱ.실적 + Ⅲ.포트폴리오 + Ⅳ.RAW매물검색 모두 연동 갱신)
-    function applyDateRange(s, e, isUserSearch) {
+    function applyDateRange(s, e) {
       startDateStr = s <= e ? s : e;
       endDateStr = s <= e ? e : s;
       document.getElementById('startDateInput').value = startDateStr;
       document.getElementById('endDateInput').value = endDateStr;
-      syncPresetActiveButtons();
-      renderFlowSection(isUserSearch);
+      renderFlowSection();
       renderPortfolioSection();
       updateRawTabCounts();
       filterAndRenderRawTable(true);
-
-      if (isUserSearch) {
-        ['sectionFlowBlock', 'sectionPortfolioBlock', 'sectionRawBlock'].forEach(id => {
-          const el = document.getElementById(id);
-          if (el) {
-            el.style.transition = 'box-shadow 0.25s ease';
-            el.style.boxShadow = '0 0 0 3px #f97316';
-            setTimeout(() => { el.style.boxShadow = ''; }, 900);
-          }
-        });
-      }
     }
 
-    // [조회하기] 버튼 클릭 시 하단 결과 전체 갱신
     document.getElementById('executeSearchBtn').addEventListener('click', () => {
       const s = document.getElementById('startDateInput').value;
       const e = document.getElementById('endDateInput').value;
-      if (s && e) applyDateRange(s, e, true);
-    });
-
-    // 달력 날짜 변경 시에도 즉시 반영 가능하도록 지원
-    document.getElementById('startDateInput').addEventListener('change', () => {
-      const s = document.getElementById('startDateInput').value;
-      const e = document.getElementById('endDateInput').value;
-      if (s && e) applyDateRange(s, e, true);
-    });
-    document.getElementById('endDateInput').addEventListener('change', () => {
-      const s = document.getElementById('startDateInput').value;
-      const e = document.getElementById('endDateInput').value;
-      if (s && e) applyDateRange(s, e, true);
-    });
-
-    // 오늘 (11-17) 단독 조회
-    document.getElementById('presetTodayBtn').addEventListener('click', function() {
-      const records = getRecords();
-      const latest = records.length ? records[records.length - 1].date : new Date().toISOString().slice(0, 10);
-      applyDateRange(latest, latest, true);
-    });
-
-    // 어제 (11-16) 단독 조회
-    document.getElementById('presetYesterdayBtn').addEventListener('click', function() {
-      const records = getRecords();
-      const prev = records.length >= 2 ? records[records.length - 2].date : (records.length ? records[0].date : new Date().toISOString().slice(0, 10));
-      applyDateRange(prev, prev, true);
-    });
-
-    // 어제 + 오늘 합산 조회
-    document.getElementById('presetCombinedBtn').addEventListener('click', function() {
-      const records = getRecords();
-      const first = records.length >= 2 ? records[records.length - 2].date : (records.length ? records[0].date : new Date().toISOString().slice(0, 10));
-      const latest = records.length ? records[records.length - 1].date : first;
-      applyDateRange(first, latest, true);
-    });
-
-    document.getElementById('preset7DaysBtn').addEventListener('click', function() {
-      document.querySelectorAll('.quick-date-btn').forEach(b => b.classList.remove('active'));
-      this.classList.add('active');
-      const records = getRecords();
-      const latest = records.length ? records[records.length - 1].date : new Date().toISOString().slice(0, 10);
-      const d = new Date(latest + 'T00:00:00');
-      d.setDate(d.getDate() - 6);
-      applyDateRange(d.toISOString().slice(0, 10), latest, true);
-    });
-
-    document.getElementById('preset30DaysBtn').addEventListener('click', function() {
-      document.querySelectorAll('.quick-date-btn').forEach(b => b.classList.remove('active'));
-      this.classList.add('active');
-      const records = getRecords();
-      const latest = records.length ? records[records.length - 1].date : new Date().toISOString().slice(0, 10);
-      const d = new Date(latest + 'T00:00:00');
-      d.setDate(d.getDate() - 29);
-      applyDateRange(d.toISOString().slice(0, 10), latest, true);
+      if (s && e) applyDateRange(s, e);
     });
 
     document.getElementById('stockOriginTabs').addEventListener('click', e => {
@@ -1569,7 +1135,7 @@
       renderPortfolioSection();
     });
 
-    // Ⅳ. 업체별 RAW 매물 상세 검색 로직 (조회기간 연동, 매물ID 제외, 4개사 전수 검색 + 원본 링크)
+    // Ⅳ. 개별 매물 RAW 검색
     let selectedRawPlat = 'ALL';
     let rawVisibleLimit = 200;
     let lastFilteredRawList = [];
@@ -1579,11 +1145,11 @@
       const counts = { ALL: all.length, '당근중고차': 0, '케이카직거래': 0, '엔카닷컴개인': 0, 'KB차차차개인': 0 };
       all.forEach(v => { if (counts[v.platform] !== undefined) counts[v.platform]++; });
       const labels = {
-        ALL: `전체 업체 (${fmt(counts.ALL)}대)`,
-        '당근중고차': `1. 당근중고차 (${fmt(counts['당근중고차'])}대)`,
-        '케이카직거래': `2. 케이카 직거래 (${fmt(counts['케이카직거래'])}대)`,
-        '엔카닷컴개인': `3. 엔카닷컴 개인 (${fmt(counts['엔카닷컴개인'])}대)`,
-        'KB차차차개인': `4. KB차차차 개인 (${fmt(counts['KB차차차개인'])}대)`
+        ALL: `전체 (${fmt(counts.ALL)})`,
+        '당근중고차': `1. 당근 (${fmt(counts['당근중고차'])})`,
+        '케이카직거래': `2. 케이카 (${fmt(counts['케이카직거래'])})`,
+        '엔카닷컴개인': `3. 엔카 (${fmt(counts['엔카닷컴개인'])})`,
+        'KB차차차개인': `4. KB (${fmt(counts['KB차차차개인'])})`
       };
       document.querySelectorAll('#rawPlatformTabs .big-tab').forEach(btn => {
         const p = btn.dataset.plat;
@@ -1598,10 +1164,10 @@
       const bandVal = document.getElementById('rawPriceBandSelect').value;
       const kw = document.getElementById('rawKeywordInput').value.trim().toLowerCase();
 
-      const rangeTxt = startDateStr === endDateStr ? `${startDateStr}` : `${startDateStr} ~ ${endDateStr} 합산`;
+      const rangeTxt = startDateStr === endDateStr ? `${startDateStr}` : `${startDateStr} ~ ${endDateStr}`;
       const rawTitleEl = document.getElementById('rawSectionTitle');
       if (rawTitleEl && startDateStr) {
-        rawTitleEl.textContent = `[${rangeTxt}] 업체별 개별 매물 RAW 데이터 상세 검색`;
+        rawTitleEl.textContent = `Ⅳ. 업체별 개별 매물 RAW 검색 [${rangeTxt}]`;
       }
 
       lastFilteredRawList = all.filter(v => {
@@ -1615,33 +1181,26 @@
         return true;
       });
 
-      document.getElementById('rawSearchSummaryText').innerHTML =
-        `조회기간(<strong style="color:#c2410c;">${rangeTxt}</strong>) 및 검색 조건에 일치하는 매물 총 <strong style="color:#0f172a;">${fmt(lastFilteredRawList.length)}대</strong> (현재 화면에 상위 ${fmt(Math.min(rawVisibleLimit, lastFilteredRawList.length))}대 표시 중)`;
-
-      const badgeColorMap = {
-        '당근중고차': 'background:rgba(255,111,15,0.14);color:#c2410c;',
-        '케이카직거래': 'background:rgba(30,58,138,0.12);color:#1e3a8a;',
-        '엔카닷컴개인': 'background:rgba(220,38,38,0.12);color:#dc2626;',
-        'KB차차차개인': 'background:rgba(217,119,6,0.15);color:#b45309;'
-      };
+      document.getElementById('rawSearchSummaryText').textContent =
+        `검색결과 ${fmt(lastFilteredRawList.length)}대 (표시 ${fmt(Math.min(rawVisibleLimit, lastFilteredRawList.length))}대)`;
 
       const slice = lastFilteredRawList.slice(0, rawVisibleLimit);
       document.getElementById('rawVehicleTableBody').innerHTML = slice.map(v => `
         <tr>
-          <td style="text-align:center;font-weight:700;color:#475569;">${v.collectedDate || '-'}</td>
-          <td><span style="padding:4px 9px;border-radius:6px;font-size:13px;font-weight:800;${badgeColorMap[v.platform] || ''}">${v.platform}</span></td>
-          <td style="text-align:center;font-weight:700;">${v.originType}</td>
-          <td style="text-align:left;font-weight:700;">${v.manufacturer}</td>
-          <td style="text-align:left;font-weight:800;color:#0f172a;">${v.model}</td>
-          <td style="text-align:left;max-width:320px;overflow:hidden;text-overflow:ellipsis;" title="${v.fullTitle}">${v.fullTitle}</td>
+          <td style="text-align:center;color:#64748b;">${v.collectedDate || '-'}</td>
+          <td><strong>${v.platform}</strong></td>
+          <td style="text-align:center;">${v.originType}</td>
+          <td style="text-align:left;">${v.manufacturer}</td>
+          <td style="text-align:left;font-weight:700;">${v.model}</td>
+          <td style="text-align:left;max-width:280px;overflow:hidden;text-overflow:ellipsis;" title="${v.fullTitle}">${v.fullTitle}</td>
           <td style="text-align:center;">${v.year}</td>
           <td>${fmt(v.mileageKm)}km</td>
-          <td style="font-weight:800;color:#0f172a;">${fmt(v.priceManwon)}만원</td>
-          <td style="text-align:center;font-size:13.5px;color:#475569;">${v.priceBand}</td>
+          <td style="font-weight:700;">${fmt(v.priceManwon)}만원</td>
+          <td style="text-align:center;color:#64748b;">${v.priceBand}</td>
           <td style="text-align:center;">${v.region}</td>
-          <td style="text-align:center;font-weight:700;">${v.status}</td>
+          <td style="text-align:center;">${v.status}</td>
           <td style="text-align:center;">
-            <a href="${v.url}" target="_blank" rel="noopener" style="display:inline-block;padding:6px 12px;border-radius:7px;background:#eff6ff;color:#2563eb;text-decoration:none;font-weight:800;font-size:13.5px;">매물 보기 ↗</a>
+            <a href="${v.url}" target="_blank" rel="noopener" style="color:#2563eb;text-decoration:none;font-weight:700;">매물 보기 ↗</a>
           </td>
         </tr>
       `).join('');
@@ -1649,13 +1208,13 @@
       document.getElementById('mobileRawCardsWrap').innerHTML = slice.map(v => `
         <div class="m-raw-card">
           <div style="display:flex;justify-content:space-between;align-items:center;">
-            <span style="padding:4px 9px;border-radius:6px;font-size:12.5px;font-weight:800;${badgeColorMap[v.platform] || ''}">${v.collectedDate || ''} · ${v.platform} · ${v.originType}</span>
-            <span style="font-size:18px;font-weight:800;color:#0f172a;">${fmt(v.priceManwon)}만원</span>
+            <span style="font-size:11.5px;font-weight:700;color:#475569;">${v.collectedDate || ''} · ${v.platform} (${v.originType})</span>
+            <strong style="font-size:14px;color:#0f172a;">${fmt(v.priceManwon)}만원</strong>
           </div>
-          <div style="font-size:16px;font-weight:800;color:#0f172a;">[${v.manufacturer}] ${v.fullTitle}</div>
-          <div style="display:flex;justify-content:space-between;align-items:center;font-size:13.5px;color:#475569;">
-            <span>${v.year}년식 · ${fmt(v.mileageKm)}km · ${v.region} (${v.status})</span>
-            <a href="${v.url}" target="_blank" rel="noopener" style="padding:6px 12px;border-radius:7px;background:#eff6ff;color:#2563eb;text-decoration:none;font-weight:800;">매물 보기 ↗</a>
+          <div style="font-size:13px;font-weight:700;color:#0f172a;">[${v.manufacturer}] ${v.fullTitle}</div>
+          <div style="display:flex;justify-content:space-between;align-items:center;font-size:11.5px;color:#64748b;">
+            <span>${v.year}년 · ${fmt(v.mileageKm)}km · ${v.region} · ${v.status}</span>
+            <a href="${v.url}" target="_blank" rel="noopener" style="color:#2563eb;text-decoration:none;font-weight:700;">매물 보기 ↗</a>
           </div>
         </div>
       `).join('');
@@ -1670,31 +1229,22 @@
       if (!tbody) return;
       tbody.innerHTML = [...archives].reverse().map(a => `
         <tr>
-          <td><strong>${a.date}</strong></td>
-          <td style="text-align:center;color:#475569;">${a.updatedAt || '-'}</td>
-          <td style="font-weight:800;color:#0f172a;">${fmt(a.vehicleCount)}건</td>
+          <td>${a.date}</td>
+          <td style="text-align:center;color:#64748b;">${a.updatedAt || '-'}</td>
+          <td><strong>${fmt(a.vehicleCount)}건</strong></td>
           <td>당근 ${fmt(a.daangnCount)} · 케이카 ${fmt(a.kcarCount)} · 엔카 ${fmt(a.encarCount)} · KB ${fmt(a.kbCount)}</td>
-          <td style="text-align:center;">
-            <a href="${a.rawCsvPath}" download class="btn" style="padding:6px 14px;font-size:13.5px;">⬇ ${a.date} 상세 CSV</a>
-          </td>
-          <td style="text-align:center;">
-            <a href="${a.daangnUrlPath}" download class="btn" style="padding:6px 14px;font-size:13.5px;">⬇ 당근 전국 URL CSV</a>
-          </td>
+          <td style="text-align:center;"><a href="${a.rawCsvPath}" download class="btn">⬇ 상세 CSV</a></td>
+          <td style="text-align:center;"><a href="${a.daangnUrlPath}" download class="btn">⬇ URL CSV</a></td>
         </tr>
       `).join('');
     }
 
-    // PC / 모바일 화면 전환 스위치
     document.getElementById('viewModeSwitch').addEventListener('click', e => {
       const btn = e.target.closest('.view-mode-btn');
       if (!btn) return;
       document.querySelectorAll('#viewModeSwitch .view-mode-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
-      if (btn.dataset.mode === 'mobile') {
-        document.body.classList.add('mobile-mode');
-      } else {
-        document.body.classList.remove('mobile-mode');
-      }
+      document.body.classList.toggle('mobile-mode', btn.dataset.mode === 'mobile');
     });
 
     if (window.innerWidth <= 768) {
@@ -1754,7 +1304,7 @@
 
     initDefaultDates();
     renderStockSection();
-    renderFlowSection(false);
+    renderFlowSection();
     renderPortfolioSection();
     updateRawTabCounts();
     filterAndRenderRawTable(true);

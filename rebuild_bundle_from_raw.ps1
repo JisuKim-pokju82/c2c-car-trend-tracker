@@ -1,5 +1,6 @@
 ﻿$ErrorActionPreference = "Stop"
-$WorkDir = "c:\Users\KCAR24N20051\Desktop\당근"
+$WorkDir = Split-Path -Parent $MyInvocation.MyCommand.Path
+if (-not $WorkDir) { $WorkDir = (Get-Location).Path }
 $RawDir  = Join-Path $WorkDir "raw_data"
 $DbDir   = Join-Path $WorkDir "database"
 $JsonPath = Join-Path $WorkDir "competitor_trend.json"
@@ -213,9 +214,10 @@ $pfLatestJson = $latestPf | ConvertTo-Json -Depth 6
 $pfByDateJson = $portfolioByDate | ConvertTo-Json -Depth 7
 $rawAllJson   = $itemsAll | ConvertTo-Json -Depth 4 -Compress
 
+$latestUpdated = if ($records.Count -gt 0) { $records[$records.Count - 1].updatedAt } else { (Get-Date).ToString("yyyy-MM-dd HH:mm:ss") }
 $jsContent = @"
-// Auto-generated 4-Platform Apple-to-Apple C2C Intelligence Bundle (2026-11-17 09:16:22)
-window.COMPETITOR_TREND_LAST_UPDATED = "2026-11-17 09:16:22";
+// Auto-generated 4-Platform Apple-to-Apple C2C Intelligence Bundle ($latestUpdated)
+window.COMPETITOR_TREND_LAST_UPDATED = "$latestUpdated";
 window.COMPETITOR_TREND_DATA = $jsonOutput;
 window.COMPETITOR_PORTFOLIO_DATA = $pfLatestJson;
 window.COMPETITOR_PORTFOLIO_BY_DATE = $pfByDateJson;
