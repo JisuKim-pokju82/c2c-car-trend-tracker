@@ -34,6 +34,59 @@
       -webkit-font-smoothing: antialiased;
     }
 
+    /* 최상단 사이트 전환 네비게이션 바 (중고차 직거래 <-> 오토바이) */
+    .suite-switch-bar {
+      background: #0f172a;
+      color: #cbd5e1;
+      padding: 7px 20px;
+      border-bottom: 1px solid #1e293b;
+    }
+    .suite-switch-inner {
+      max-width: 1440px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .suite-switch-label {
+      font-size: 11.5px;
+      font-weight: 700;
+      color: #94a3b8;
+      letter-spacing: 0.02em;
+    }
+    .suite-switch-links {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .suite-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      text-decoration: none;
+      color: #cbd5e1;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      transition: all 0.14s;
+    }
+    .suite-link:hover {
+      background: rgba(255, 255, 255, 0.18);
+      color: #ffffff;
+    }
+    .suite-link.active {
+      background: #ea580c;
+      color: #ffffff;
+      border-color: #ea580c;
+      box-shadow: 0 1px 6px rgba(234, 88, 12, 0.45);
+    }
+
     /* 상단 헤더 */
     .topbar {
       background: #ffffff;
@@ -452,6 +505,17 @@
 </head>
 <body>
 
+  <!-- 제일 상단: 중고차 직거래 <-> 오토바이(바이크) 사이트 양방향 전환 바 -->
+  <nav class="suite-switch-bar" aria-label="리포트 전환 네비게이션">
+    <div class="suite-switch-inner">
+      <span class="suite-switch-label">모빌리티 C2C 경쟁사 동향 통합 리포트</span>
+      <div class="suite-switch-links">
+        <a id="suiteLinkCar" href="https://jisukim-pokju82.github.io/c2c-car-trend-tracker/competitor_trend.html" class="suite-link active">🚗 중고차 직거래 현황 보고 (4대 플랫폼)</a>
+        <a id="suiteLinkBike" href="https://jisukim-pokju82.github.io/c2c-bike-trend-tracker/" class="suite-link">🏍️ 오토바이(바이크) 현황 보고 (5대 플랫폼)</a>
+      </div>
+    </div>
+  </nav>
+
   <header class="topbar">
     <div class="topbar-inner">
       <div class="brand-area">
@@ -499,11 +563,11 @@
         <div class="table-wrap">
           <table class="exec-table">
             <thead>
-              <tr>
+              <tr id="dailyStockHistoryTableHead">
                 <th>수집 일자</th>
                 <th style="color:var(--c-daangn);">1. 당근중고차 (추정)</th>
-                <th style="color:var(--c-kcar);">2. 케이카 직거래</th>
-                <th style="color:var(--c-encar);">3. 엔카닷컴 개인</th>
+                <th style="color:var(--c-encar);">2. 엔카닷컴 개인</th>
+                <th style="color:var(--c-kcar);">3. 케이카 직거래</th>
                 <th style="color:var(--c-kb);">4. KB차차차 개인</th>
               </tr>
             </thead>
@@ -512,7 +576,7 @@
         </div>
 
         <div class="disclaimer-box">
-          * [디스클레이머] 매일 08:00 KST 자동 수집 기준. 케이카(안심직거래)·엔카닷컴(개인 Separation.A)·KB차차차(개인직거래 directYn=Y)는 플랫폼 공식 전체 등록대수(100% 전수)이며, 당근중고차는 공식 사이트맵 모수 및 전국 17개 시도 46개 핵심 거점 표본 비율을 결합한 추정치입니다.
+          * [디스클레이머] 매일 08:00 KST 자동 수집 기준(총등록대수 순위 자동 정렬). 엔카닷컴(개인 Separation.A)·케이카(안심직거래)·KB차차차(개인직거래 directYn=Y)는 플랫폼 공식 전체 등록대수(100% 전수)이며, 당근중고차는 공식 사이트맵 모수 및 전국 17개 시도 46개 핵심 거점 표본 비율을 결합한 추정치입니다.
         </div>
       </section>
     </div>
@@ -546,11 +610,11 @@
         <div class="table-wrap" style="margin-bottom:12px;">
           <table class="exec-table">
             <thead>
-              <tr>
+              <tr id="singlePeriodSummaryTableHead">
                 <th>구분 지표 (선택 기간 기준)</th>
                 <th style="color:var(--c-daangn);">1. 당근중고차 (추정)</th>
-                <th style="color:var(--c-kcar);">2. 케이카 직거래</th>
-                <th style="color:var(--c-encar);">3. 엔카닷컴 개인</th>
+                <th style="color:var(--c-encar);">2. 엔카닷컴 개인</th>
+                <th style="color:var(--c-kcar);">3. 케이카 직거래</th>
                 <th style="color:var(--c-kb);">4. KB차차차 개인</th>
               </tr>
             </thead>
@@ -561,11 +625,11 @@
         <div class="table-wrap">
           <table class="exec-table">
             <thead>
-              <tr>
+              <tr id="periodDailyBreakdownTableHead">
                 <th>선택 기간 내 일자별 내역</th>
                 <th style="color:var(--c-daangn);">1. 당근중고차 (광고 / 신규 / 판매 / 회전율 / 평균가)</th>
-                <th style="color:var(--c-kcar);">2. 케이카 직거래 (광고 / 신규 / 판매 / 회전율 / 평균가)</th>
-                <th style="color:var(--c-encar);">3. 엔카닷컴 개인 (광고 / 신규 / 판매 / 회전율 / 평균가)</th>
+                <th style="color:var(--c-encar);">2. 엔카닷컴 개인 (광고 / 신규 / 판매 / 회전율 / 평균가)</th>
+                <th style="color:var(--c-kcar);">3. 케이카 직거래 (광고 / 신규 / 판매 / 회전율 / 평균가)</th>
                 <th style="color:var(--c-kb);">4. KB차차차 개인 (광고 / 신규 / 판매 / 회전율 / 평균가)</th>
               </tr>
             </thead>
@@ -574,7 +638,7 @@
         </div>
 
         <div class="disclaimer-box">
-          * [산출 기준] 전체광고대수 = 조회기간 일별 전체광고대수의 평균대수 | 신규등록·신규판매 = 조회기간 내 합계 | 판매회전율 = (조회기간 내 신규판매대수 ÷ 조회기간 평균 전체광고대수) × 100. (케이카·엔카·KB는 전일 대비 매물 고유 ID 증감 전수 비교, 당근은 사이트맵 및 46개 거점 수집 표본 내 확인 건수 기준)
+          * [산출 기준] 전체광고대수 = 조회기간 일별 전체광고대수의 평균대수(많은 순으로 1~4위 자동 정렬) | 신규등록·신규판매 = 조회기간 내 합계 | 판매회전율 = (조회기간 내 신규판매대수 ÷ 조회기간 평균 전체광고대수) × 100.
         </div>
       </section>
 
@@ -595,7 +659,7 @@
         <div class="pf-grid" id="portfolioGridContainer"></div>
 
         <div class="disclaimer-box">
-          * [디스클레이머] 선택한 조회기간에 수집된 상세 매물 RAW 데이터(케이카·엔카·KB 전수, 당근 전국 46개 거점 표본) 기준 분포입니다.
+          * [디스클레이머] 선택한 조회기간에 수집된 상세 매물 RAW 데이터(엔카·케이카·KB 전수, 당근 전국 46개 거점 표본) 기준 분포입니다.
         </div>
       </section>
 
@@ -606,8 +670,8 @@
           <div class="big-tabs" id="rawPlatformTabs">
             <button type="button" class="big-tab active" data-plat="ALL">전체 업체</button>
             <button type="button" class="big-tab" data-plat="당근중고차">1. 당근중고차</button>
-            <button type="button" class="big-tab" data-plat="케이카직거래">2. 케이카 직거래</button>
-            <button type="button" class="big-tab" data-plat="엔카닷컴개인">3. 엔카닷컴 개인</button>
+            <button type="button" class="big-tab" data-plat="엔카닷컴개인">2. 엔카닷컴 개인</button>
+            <button type="button" class="big-tab" data-plat="케이카직거래">3. 케이카 직거래</button>
             <button type="button" class="big-tab" data-plat="KB차차차개인">4. KB차차차 개인</button>
           </div>
         </div>
@@ -707,6 +771,10 @@
 
   <script src="competitor_trend_data.js?v=202611171020"></script>
   <script>
+    if (window.location.protocol === 'file:') {
+      document.getElementById('suiteLinkCar').href = './competitor_trend.html';
+      document.getElementById('suiteLinkBike').href = '../바이크/competitor_trend.html';
+    }
     let stockOriginMode = 'all';
     let selectedPfMode = 'origin';
     let startDateStr = '';
