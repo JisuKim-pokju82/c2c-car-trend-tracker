@@ -753,7 +753,7 @@
               <th>수집 일자</th>
               <th style="text-align:center;">수집 시각</th>
               <th>총 수집 건수</th>
-              <th>업체별 상세 건수 (당근 / 케이카 / 엔카 / KB)</th>
+              <th>업체별 상세 건수 (당근 / 엔카 / 케이카 / KB)</th>
               <th style="text-align:center;">일자별 상세 CSV</th>
               <th style="text-align:center;">당근 URL DB</th>
             </tr>
@@ -769,7 +769,9 @@
 
   </main>
 
-  <script src="competitor_trend_data.js?v=202611171020"></script>
+  <script>
+    document.write('<script src="competitor_trend_data.js?v=' + Math.floor(Date.now() / 60000) + '"><\/script>');
+  </script>
   <script>
     if (window.location.protocol === 'file:') {
       document.getElementById('suiteLinkCar').href = './competitor_trend.html';
@@ -833,14 +835,14 @@
           diff: latest.daangnDiff, valKey: 'daangnCarsCount', domKey: 'daangnDomesticCount', impKey: 'daangnImportedCount'
         },
         {
-          cls: 'kcar', name: '2. 케이카 직거래', color: '#1e3a8a',
-          total: latest.kcarDirectCount, dom: latest.kcarDomesticCount, imp: latest.kcarImportedCount,
-          diff: latest.kcarDiff, valKey: 'kcarDirectCount', domKey: 'kcarDomesticCount', impKey: 'kcarImportedCount'
-        },
-        {
-          cls: 'encar', name: '3. 엔카닷컴 개인', color: '#dc2626',
+          cls: 'encar', name: '2. 엔카닷컴 개인', color: '#dc2626',
           total: latest.encarPersonalCount, dom: latest.encarPersonalDomestic, imp: latest.encarPersonalImported,
           diff: latest.encarPersonalDiff, valKey: 'encarPersonalCount', domKey: 'encarPersonalDomestic', impKey: 'encarPersonalImported'
+        },
+        {
+          cls: 'kcar', name: '3. 케이카 직거래', color: '#1e3a8a',
+          total: latest.kcarDirectCount, dom: latest.kcarDomesticCount, imp: latest.kcarImportedCount,
+          diff: latest.kcarDiff, valKey: 'kcarDirectCount', domKey: 'kcarDomesticCount', impKey: 'kcarImportedCount'
         },
         {
           cls: 'kb', name: '4. KB차차차 개인', color: '#d97706',
@@ -907,8 +909,8 @@
             <tr>
               <td>${r.date}</td>
               <td><strong>${fmt(r.daangnCarsCount)}대</strong>${fmtDiff(r.daangnDiff)} <span style="color:#64748b;font-size:11.5px;">(국산 ${fmt(r.daangnDomesticCount)} / 수입 ${fmt(r.daangnImportedCount)})</span></td>
-              <td><strong>${fmt(r.kcarDirectCount)}대</strong>${fmtDiff(r.kcarDiff)} <span style="color:#64748b;font-size:11.5px;">(국산 ${fmt(r.kcarDomesticCount)} / 수입 ${fmt(r.kcarImportedCount)})</span></td>
               <td><strong>${fmt(r.encarPersonalCount)}대</strong>${fmtDiff(r.encarPersonalDiff)} <span style="color:#64748b;font-size:11.5px;">(국산 ${fmt(r.encarPersonalDomestic)} / 수입 ${fmt(r.encarPersonalImported)})</span></td>
+              <td><strong>${fmt(r.kcarDirectCount)}대</strong>${fmtDiff(r.kcarDiff)} <span style="color:#64748b;font-size:11.5px;">(국산 ${fmt(r.kcarDomesticCount)} / 수입 ${fmt(r.kcarImportedCount)})</span></td>
               <td><strong>${fmt(r.kbDirectCount)}대</strong>${fmtDiff(r.kbDiff)} <span style="color:#64748b;font-size:11.5px;">(국산 ${fmt(r.kbDomesticCount)} / 수입 ${fmt(r.kbImportedCount)})</span></td>
             </tr>
           `;
@@ -992,36 +994,36 @@
         <tr>
           <td>전체광고대수 (조회기간 평균)</td>
           <td><strong>${fmt(agg.daangn.avgTotal)}대</strong> <span style="color:#64748b;font-size:11.5px;">(국산 ${fmt(agg.daangn.avgDom)} / 수입 ${fmt(agg.daangn.avgImp)})</span></td>
-          <td><strong>${fmt(agg.kcar.avgTotal)}대</strong> <span style="color:#64748b;font-size:11.5px;">(국산 ${fmt(agg.kcar.avgDom)} / 수입 ${fmt(agg.kcar.avgImp)})</span></td>
           <td><strong>${fmt(agg.encar.avgTotal)}대</strong> <span style="color:#64748b;font-size:11.5px;">(국산 ${fmt(agg.encar.avgDom)} / 수입 ${fmt(agg.encar.avgImp)})</span></td>
+          <td><strong>${fmt(agg.kcar.avgTotal)}대</strong> <span style="color:#64748b;font-size:11.5px;">(국산 ${fmt(agg.kcar.avgDom)} / 수입 ${fmt(agg.kcar.avgImp)})</span></td>
           <td><strong>${fmt(agg.kb.avgTotal)}대</strong> <span style="color:#64748b;font-size:11.5px;">(국산 ${fmt(agg.kb.avgDom)} / 수입 ${fmt(agg.kb.avgImp)})</span></td>
         </tr>
         <tr>
           <td>조회기간 내 신규 등록대수</td>
           <td style="color:#e11d48;font-weight:700;">+${fmt(agg.daangn.newCnt)}대</td>
-          <td style="color:#e11d48;font-weight:700;">+${fmt(agg.kcar.newCnt)}대</td>
           <td style="color:#e11d48;font-weight:700;">+${fmt(agg.encar.newCnt)}대</td>
+          <td style="color:#e11d48;font-weight:700;">+${fmt(agg.kcar.newCnt)}대</td>
           <td style="color:#e11d48;font-weight:700;">+${fmt(agg.kb.newCnt)}대</td>
         </tr>
         <tr>
           <td>조회기간 내 신규 판매대수</td>
           <td style="color:#2563eb;font-weight:700;">${fmt(agg.daangn.soldCnt)}대</td>
-          <td style="color:#2563eb;font-weight:700;">${fmt(agg.kcar.soldCnt)}대</td>
           <td style="color:#2563eb;font-weight:700;">${fmt(agg.encar.soldCnt)}대</td>
+          <td style="color:#2563eb;font-weight:700;">${fmt(agg.kcar.soldCnt)}대</td>
           <td style="color:#2563eb;font-weight:700;">${fmt(agg.kb.soldCnt)}대</td>
         </tr>
         <tr>
           <td>조회기간 판매회전율 (신규판매 ÷ 평균광고대수)</td>
           <td><strong>${agg.daangn.turnPct}%</strong></td>
-          <td><strong>${agg.kcar.turnPct}%</strong></td>
           <td><strong>${agg.encar.turnPct}%</strong></td>
+          <td><strong>${agg.kcar.turnPct}%</strong></td>
           <td><strong>${agg.kb.turnPct}%</strong></td>
         </tr>
         <tr>
           <td>평균 광고가격</td>
           <td><strong>${fmt(agg.daangn.avgPrice)}만원</strong></td>
-          <td><strong>${fmt(agg.kcar.avgPrice)}만원</strong></td>
           <td><strong>${fmt(agg.encar.avgPrice)}만원</strong></td>
+          <td><strong>${fmt(agg.kcar.avgPrice)}만원</strong></td>
           <td><strong>${fmt(agg.kb.avgPrice)}만원</strong></td>
         </tr>
       `;
@@ -1037,8 +1039,8 @@
             <tr>
               <td>${r.date}</td>
               <td>${fmt(r.daangnCarsCount)}대 / <span style="color:#e11d48;">+${fmt(r.daangnNewCount)}</span> / <span style="color:#2563eb;">${fmt(r.daangnSoldCount)}</span> / ${dTurn}% / ${fmt(r.daangnAvgPrice)}만원</td>
-              <td>${fmt(r.kcarDirectCount)}대 / <span style="color:#e11d48;">+${fmt(r.kcarNewCount)}</span> / <span style="color:#2563eb;">${fmt(r.kcarSoldCount)}</span> / ${kTurn}% / ${fmt(r.kcarAvgPrice)}만원</td>
               <td>${fmt(r.encarPersonalCount)}대 / <span style="color:#e11d48;">+${fmt(r.encarNewCount)}</span> / <span style="color:#2563eb;">${fmt(r.encarSoldCount)}</span> / ${eTurn}% / ${fmt(r.encarAvgPrice)}만원</td>
+              <td>${fmt(r.kcarDirectCount)}대 / <span style="color:#e11d48;">+${fmt(r.kcarNewCount)}</span> / <span style="color:#2563eb;">${fmt(r.kcarSoldCount)}</span> / ${kTurn}% / ${fmt(r.kcarAvgPrice)}만원</td>
               <td>${fmt(r.kbDirectCount)}대 / <span style="color:#e11d48;">+${fmt(r.kbNewCount)}</span> / <span style="color:#2563eb;">${fmt(r.kbSoldCount)}</span> / ${kbTurn}% / ${fmt(r.kbAvgPrice)}만원</td>
             </tr>
           `;
@@ -1048,8 +1050,8 @@
           <tr style="background:#f8fafc;font-weight:700;">
             <td>합계 / 평균 (${days}일)</td>
             <td>평균 ${fmt(agg.daangn.avgTotal)}대 / <span style="color:#e11d48;">+${fmt(agg.daangn.newCnt)}</span> / <span style="color:#2563eb;">${fmt(agg.daangn.soldCnt)}</span> / ${agg.daangn.turnPct}% / ${fmt(agg.daangn.avgPrice)}만원</td>
-            <td>평균 ${fmt(agg.kcar.avgTotal)}대 / <span style="color:#e11d48;">+${fmt(agg.kcar.newCnt)}</span> / <span style="color:#2563eb;">${fmt(agg.kcar.soldCnt)}</span> / ${agg.kcar.turnPct}% / ${fmt(agg.kcar.avgPrice)}만원</td>
             <td>평균 ${fmt(agg.encar.avgTotal)}대 / <span style="color:#e11d48;">+${fmt(agg.encar.newCnt)}</span> / <span style="color:#2563eb;">${fmt(agg.encar.soldCnt)}</span> / ${agg.encar.turnPct}% / ${fmt(agg.encar.avgPrice)}만원</td>
+            <td>평균 ${fmt(agg.kcar.avgTotal)}대 / <span style="color:#e11d48;">+${fmt(agg.kcar.newCnt)}</span> / <span style="color:#2563eb;">${fmt(agg.kcar.soldCnt)}</span> / ${agg.kcar.turnPct}% / ${fmt(agg.kcar.avgPrice)}만원</td>
             <td>평균 ${fmt(agg.kb.avgTotal)}대 / <span style="color:#e11d48;">+${fmt(agg.kb.newCnt)}</span> / <span style="color:#2563eb;">${fmt(agg.kb.soldCnt)}</span> / ${agg.kb.turnPct}% / ${fmt(agg.kb.avgPrice)}만원</td>
           </tr>
         ` : '';
@@ -1077,8 +1079,8 @@
 
       const companies = [
         { key: 'daangn', title: '1. 당근중고차 (추정)', color: '#ea580c', data: pf.daangn },
-        { key: 'kcar',   title: '2. 케이카 직거래', color: '#1e3a8a', data: pf.kcar },
-        { key: 'encar',  title: '3. 엔카닷컴 개인', color: '#dc2626', data: pf.encar },
+        { key: 'encar',  title: '2. 엔카닷컴 개인', color: '#dc2626', data: pf.encar },
+        { key: 'kcar',   title: '3. 케이카 직거래', color: '#1e3a8a', data: pf.kcar },
         { key: 'kb',     title: '4. KB차차차 개인', color: '#d97706', data: pf.kb }
       ];
 
@@ -1215,8 +1217,8 @@
       const labels = {
         ALL: `전체 (${fmt(counts.ALL)})`,
         '당근중고차': `1. 당근 (${fmt(counts['당근중고차'])})`,
-        '케이카직거래': `2. 케이카 (${fmt(counts['케이카직거래'])})`,
-        '엔카닷컴개인': `3. 엔카 (${fmt(counts['엔카닷컴개인'])})`,
+        '엔카닷컴개인': `2. 엔카 (${fmt(counts['엔카닷컴개인'])})`,
+        '케이카직거래': `3. 케이카 (${fmt(counts['케이카직거래'])})`,
         'KB차차차개인': `4. KB (${fmt(counts['KB차차차개인'])})`
       };
       document.querySelectorAll('#rawPlatformTabs .big-tab').forEach(btn => {
@@ -1300,7 +1302,7 @@
           <td>${a.date}</td>
           <td style="text-align:center;color:#64748b;">${a.updatedAt || '-'}</td>
           <td><strong>${fmt(a.vehicleCount)}건</strong></td>
-          <td>당근 ${fmt(a.daangnCount)} · 케이카 ${fmt(a.kcarCount)} · 엔카 ${fmt(a.encarCount)} · KB ${fmt(a.kbCount)}</td>
+          <td>당근 ${fmt(a.daangnCount)} · 엔카 ${fmt(a.encarCount)} · 케이카 ${fmt(a.kcarCount)} · KB ${fmt(a.kbCount)}</td>
           <td style="text-align:center;"><a href="${a.rawCsvPath}" download class="btn">⬇ 상세 CSV</a></td>
           <td style="text-align:center;"><a href="${a.daangnUrlPath}" download class="btn">⬇ URL CSV</a></td>
         </tr>

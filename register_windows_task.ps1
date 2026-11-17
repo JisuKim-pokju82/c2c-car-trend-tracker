@@ -41,7 +41,7 @@ if (-not `$netReady) {
 try {
     `$raw = Invoke-RestMethod -Uri 'https://raw.githubusercontent.com/JisuKim-pokju82/c2c-car-trend-tracker/main/competitor_trend.json' -TimeoutSec 15
     foreach (`$r in @(`$raw)) {
-        if (`$null -ne `$r -and `$r.date -eq `$today -and [int]`$r.daangnCarsCount -gt 0 -and [int]`$r.kcarDirectCount -gt 0 -and [int]`$r.encarPersonalCount -gt 0 -and [int]`$r.kbDirectCount -gt 0) {
+        if (`$null -ne `$r -and `$r.date -eq `$today -and `$r.source -ne 'cloud_geo_fallback' -and [int]`$r.daangnCarsCount -gt 0 -and [int]`$r.kcarDirectCount -gt 0 -and [int]`$r.encarPersonalCount -gt 0 -and [int]`$r.kbDirectCount -gt 0) {
             `$alreadyCompleteOnCloud = `$true
         }
     }

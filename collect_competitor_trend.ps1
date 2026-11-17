@@ -34,7 +34,9 @@ if ((Test-Path $TodayRawLockPath) -and (-not $Force)) {
                 $rec = if ($null -ne $el -and $null -ne $el.PSObject.Properties['value']) { $el.value } else { $el }
                 foreach ($r in @($rec)) {
                     if ($null -ne $r -and $r.date -eq $TodayDate -and [int]$r.daangnCarsCount -gt 0 -and [int]$r.kcarDirectCount -gt 0 -and [int]$r.encarPersonalCount -gt 0 -and [int]$r.kbDirectCount -gt 0) {
-                        $isCompleteToday = $true
+                        if ($env:GITHUB_ACTIONS -eq "true" -or $r.source -ne "cloud_geo_fallback") {
+                            $isCompleteToday = $true
+                        }
                     }
                 }
             }
@@ -700,11 +702,79 @@ $kbTurnoverPct = if ($kbDirectTotal -gt 0) { [math]::Round(($kbSoldToday / $kbDi
 # ==============================================================================
 # 5. VERIFY 4-PLATFORM COMPLETENESS & PERSIST SNAPSHOTS + RAW CSV/JSON
 # ==============================================================================
+$recordSource = "auto"
 if ($daangnTotal -le 0 -or $kcarTotalCount -le 0 -or $encarPersonalTotal -le 0 -or $kbDirectTotal -le 0) {
     $countMsg = "Daangn=$daangnTotal, KCar=$kcarTotalCount, Encar=$encarPersonalTotal, KB=$kbDirectTotal"
-    if ($env:GITHUB_ACTIONS -eq "true") {
-        Write-Warning "[$Timestamp] Incomplete 4-platform counts on overseas GitHub runner ($countMsg). Domestic-only platforms (Encar/KB) block non-Korean IPs. Skipping file writes so zeroed data never overwrites clean records."
-        exit 0
+    if ($env:GITHUB_ACTIONS -eq "true" -and $daangnTotal -gt 0 -and $kcarTotalCount -gt 0) {
+        Write-Warning "[$Timestamp] Overseas GitHub runner Geo-IP blocked on domestic-only platform(s) ($countMsg). Carrying forward latest verified Encar/KB baseline so PC-OFF 08:00 AM update still succeeds!"
+        $recordSource = "cloud_geo_fallback"
+        $prevLatestRec = $null
+        if (Test-Path $JsonPath) {
+            try {
+                $pArr = [System.IO.File]::ReadAllText($JsonPath, [System.Text.Encoding]::UTF8) | ConvertFrom-Json
+                $flatP = @()
+                foreach ($el in @($pArr)) {
+                    if ($null -ne $el.PSObject.Properties['value']) { foreach ($s in @($el.value)) { if ($s.date) { $flatP += $s } } }
+                    elseif ($el.date) { $flatP += $el }
+                }
+                if ($flatP.Count -gt 0) { $prevLatestRec = @($flatP | Sort-Object date)[-1] }
+            } catch {}
+        }
+        $prevLatestCsv = Join-Path $RawDir "raw_vehicles_latest.csv"
+        $prevCsvRows = @()
+        if (Test-Path $prevLatestCsv) {
+            try { $prevCsvRows = @(Import-Csv -Path $prevLatestCsv -Encoding UTF8) } catch {}
+        }
+
+        if ($encarPersonalTotal -le 0 -and $null -ne $prevLatestRec) {
+            $encarPersonalTotal = [int]$prevLatestRec.encarPersonalCount
+            $encarPersonalDom   = [int]$prevLatestRec.encarPersonalDomestic
+            $encarPersonalImp   = [int]$prevLatestRec.encarPersonalImported
+            $encarAllTotal      = [int]$prevLatestRec.encarTotalCount
+            $encarNewToday      = 0
+            $encarSoldToday     = 0
+            $encarTurnoverPct   = 0
+            $platEncarName      = U "\uC5D4\uCE74\uB2F7\uCEF4\uAC1C\uC778"
+            foreach ($pr in $prevCsvRows) {
+                $pv = @($pr.PSObject.Properties)
+                if ($pv.Count -ge 16 -and $pv[1].Value -eq $platEncarName) {
+                    $row = [pscustomobject][ordered]@{
+                        collectedDate = $TodayDate; platform = $pv[1].Value; carId = $pv[2].Value; originType = $pv[3].Value
+                        manufacturer = $pv[4].Value; model = $pv[5].Value; fullTitle = $pv[6].Value; year = $pv[7].Value
+                        mileageKm = [int]($pv[8].Value -replace '[^\d]',''); priceManwon = [int]($pv[9].Value -replace '[^\d]','')
+                        priceBand = $pv[10].Value; region = $pv[11].Value; sido = ($pv[11].Value -split '\s+')[0]
+                        sellType = $pv[12].Value; status = $pv[13].Value; registeredAt = $pv[14].Value; url = $pv[15].Value
+                    }
+                    $encarNormItems.Add($row)
+                    $allRawVehicles.Add($row)
+                }
+            }
+            $encarPortfolio = Build-PortfolioSummary $encarNormItems.ToArray()
+        }
+
+        if ($kbDirectTotal -le 0 -and $null -ne $prevLatestRec) {
+            $kbDirectTotal = [int]$prevLatestRec.kbDirectCount
+            $kbAllTotal    = [int]$prevLatestRec.kbTotalCount
+            $kbNewToday    = 0
+            $kbSoldToday   = 0
+            $kbTurnoverPct = 0
+            $platKbName    = U "KB\uCC28\uCC28\uCC28\uAC1C\uC778"
+            foreach ($pr in $prevCsvRows) {
+                $pv = @($pr.PSObject.Properties)
+                if ($pv.Count -ge 16 -and $pv[1].Value -eq $platKbName) {
+                    $row = [pscustomobject][ordered]@{
+                        collectedDate = $TodayDate; platform = $pv[1].Value; carId = $pv[2].Value; originType = $pv[3].Value
+                        manufacturer = $pv[4].Value; model = $pv[5].Value; fullTitle = $pv[6].Value; year = $pv[7].Value
+                        mileageKm = [int]($pv[8].Value -replace '[^\d]',''); priceManwon = [int]($pv[9].Value -replace '[^\d]','')
+                        priceBand = $pv[10].Value; region = $pv[11].Value; sido = ($pv[11].Value -split '\s+')[0]
+                        sellType = $pv[12].Value; status = $pv[13].Value; registeredAt = $pv[14].Value; url = $pv[15].Value
+                    }
+                    $kbNormItems.Add($row)
+                    $allRawVehicles.Add($row)
+                }
+            }
+            $kbPortfolio = Build-PortfolioSummary $kbNormItems.ToArray()
+        }
     } else {
         throw "Incomplete 4-platform collection ($countMsg). Aborting before writing files so retry can run cleanly."
     }
@@ -809,7 +879,7 @@ $newEntry = [ordered]@{
     kbAvgPrice            = $kbPortfolio.avgPriceManwon
     kbTotalCount          = $kbAllTotal
     kbDiff                = 0
-    source                = "auto"
+    source                = $recordSource
     memo                  = $defaultMemo
 }
 
