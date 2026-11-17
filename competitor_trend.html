@@ -649,8 +649,8 @@
     <section class="calendar-control-banner">
       <div class="cal-banner-top">
         <div>
-          <div class="cal-banner-title">📅 조회기간 설정 (하단 신규등록 · 판매완료 결과 연동)</div>
-          <div class="cal-banner-sub" id="selectedPeriodNotice">시작일과 종료일을 선택한 뒤 [조회하기] 버튼을 누르면 아래 결과가 변경됩니다.</div>
+          <div class="cal-banner-title">📅 조회기간 설정 (오늘 · 어제 · 어제+오늘 합산 연동 조회)</div>
+          <div class="cal-banner-sub" id="selectedPeriodNotice">시작일과 종료일을 선택한 뒤 [🔍 조회하기] 버튼을 누르면 아래 Ⅱ·Ⅲ·Ⅳ 영역이 해당 조건으로 즉시 재조회됩니다.</div>
         </div>
 
         <div class="date-picker-group">
@@ -660,7 +660,9 @@
           <span class="date-input-label">종료일</span>
           <input type="date" id="endDateInput" class="date-input" onclick="this.showPicker && this.showPicker()" />
           <button type="button" class="search-submit-btn" id="executeSearchBtn">🔍 조회하기</button>
-          <button type="button" class="quick-date-btn active" id="presetLatestDayBtn">전일 (1일)</button>
+          <button type="button" class="quick-date-btn active" id="presetTodayBtn">오늘 (11-17)</button>
+          <button type="button" class="quick-date-btn" id="presetYesterdayBtn">어제 (11-16)</button>
+          <button type="button" class="quick-date-btn" id="presetCombinedBtn">어제+오늘 합산</button>
           <button type="button" class="quick-date-btn" id="preset7DaysBtn">최근 7일</button>
           <button type="button" class="quick-date-btn" id="preset30DaysBtn">최근 30일</button>
         </div>
@@ -670,18 +672,18 @@
     <!-- =================================================================== -->
     <!-- Ⅱ. 달력 선택 기간 연동 결과: 신규등록대수 · 신규판매대수 · 판매회전율 -->
     <!-- =================================================================== -->
-    <section class="section-block">
+    <section class="section-block" id="sectionFlowBlock">
       <div class="section-header">
         <div>
           <div class="section-eyebrow">Ⅱ. 달력 선택 기간 연동 실적 (신규 유입 vs 거래 완료)</div>
           <h2 class="section-title" id="flowSectionTitle">회사별 신규등록대수 · 신규판매대수 · 판매회전율</h2>
-          <p class="section-desc">달력에서 선택하신 날짜(또는 기간) 동안 새로 등록된 직거래 매물 수와 판매 완료된 매물 수를 시각적으로 비교합니다.</p>
+          <p class="section-desc">달력에서 선택하신 날짜(오늘 단독, 어제 단독, 또는 어제+오늘 합산 기간)의 평균 전체광고대수, 신규 등록대수, 신규 판매대수, 판매회전율 및 일자별 상세 내역입니다.</p>
         </div>
       </div>
 
       <div class="flow-grid" id="flowCardsContainer"></div>
 
-      <div class="table-wrap">
+      <div class="table-wrap" style="margin-bottom:20px;">
         <table class="exec-table">
           <thead>
             <tr>
@@ -695,17 +697,33 @@
           <tbody id="singlePeriodSummaryTable"></tbody>
         </table>
       </div>
+
+      <!-- 선택 기간 내 일자별(오늘 / 어제 / 합산) 상세 분해 비교표 -->
+      <div class="table-wrap">
+        <table class="exec-table">
+          <thead>
+            <tr>
+              <th>선택 기간 내 일자별 구분</th>
+              <th style="color:#c2410c;">1. 당근중고차 (광고대수 / 신규 / 판매 / 회전율 / 평균가)</th>
+              <th style="color:#1e3a8a;">2. 케이카 직거래 (광고대수 / 신규 / 판매 / 회전율 / 평균가)</th>
+              <th style="color:#dc2626;">3. 엔카닷컴 개인 (광고대수 / 신규 / 판매 / 회전율 / 평균가)</th>
+              <th style="color:#b45309;">4. KB차차차 개인 (광고대수 / 신규 / 판매 / 회전율 / 평균가)</th>
+            </tr>
+          </thead>
+          <tbody id="periodDailyBreakdownTable"></tbody>
+        </table>
+      </div>
     </section>
 
     <!-- =================================================================== -->
     <!-- Ⅲ. 회사별 포트폴리오 시각 비교 그래프 -->
     <!-- =================================================================== -->
-    <section class="section-block">
+    <section class="section-block" id="sectionPortfolioBlock">
       <div class="section-header">
         <div>
-          <div class="section-eyebrow">Ⅲ. 4개사 매물 구성 Apple-to-Apple 비교 그래프</div>
-          <h2 class="section-title">회사별 직거래 포트폴리오 비교 (국산·수입 / 판매가격 / 지역 / 인기모델)</h2>
-          <p class="section-desc">원하시는 비교 항목 버튼을 누르면 4개 플랫폼의 매물 비중 그래프가 즉시 전환됩니다.</p>
+          <div class="section-eyebrow">Ⅲ. 4개사 매물 구성 Apple-to-Apple 비교 그래프 (조회기간 연동)</div>
+          <h2 class="section-title" id="portfolioSectionTitle">회사별 직거래 포트폴리오 비교 (국산·수입 / 차종별 / 판매가격 / 지역 / 인기모델)</h2>
+          <p class="section-desc">조회기간(오늘 / 어제 / 어제+오늘 합산) 및 비교 항목 버튼을 누르면 4개 플랫폼의 매물 비중 그래프가 즉시 전환됩니다.</p>
         </div>
         <div class="big-tabs" id="portfolioCategoryTabs">
           <button type="button" class="big-tab active" data-pf="origin">① 국산 vs 수입 비중</button>
@@ -723,12 +741,12 @@
     <!-- =================================================================== -->
     <!-- Ⅳ. 업체별 개별 매물 RAW 데이터 상세 검색 (매물ID 제외, 4개사 전체 & 매물링크 포함) -->
     <!-- =================================================================== -->
-    <section class="section-block">
+    <section class="section-block" id="sectionRawBlock">
       <div class="section-header">
         <div>
-          <div class="section-eyebrow">Ⅳ. 4개사 전수 매물 상세 조회 (원본 매물 바로가기 지원)</div>
-          <h2 class="section-title">업체별 개별 매물 RAW 데이터 상세 검색</h2>
-          <p class="section-desc" id="rawSearchSummaryText">당근중고차 · 케이카 직거래 · 엔카닷컴 개인 · KB차차차 개인 매물을 업체별·국산/수입·키워드별로 상세 검색하고 실제 매물 페이지로 이동할 수 있습니다.</p>
+          <div class="section-eyebrow">Ⅳ. 4개사 전수 매물 상세 조회 (조회기간 연동 · 원본 매물 바로가기 지원)</div>
+          <h2 class="section-title" id="rawSectionTitle">업체별 개별 매물 RAW 데이터 상세 검색</h2>
+          <p class="section-desc" id="rawSearchSummaryText">당근중고차 · 케이카 직거래 · 엔카닷컴 개인 · KB차차차 개인 매물을 조회기간·업체별·국산/수입·키워드별로 상세 검색하고 실제 매물 페이지로 이동할 수 있습니다.</p>
         </div>
         <div class="big-tabs" id="rawPlatformTabs">
           <button type="button" class="big-tab active" data-plat="ALL">전체 업체</button>
@@ -765,6 +783,7 @@
         <table class="exec-table">
           <thead>
             <tr>
+              <th style="text-align:center;">수집일자</th>
               <th>업체명</th>
               <th style="text-align:center;">국산/수입</th>
               <th style="text-align:left;">제조사</th>
@@ -826,7 +845,7 @@
 
   </main>
 
-  <script src="competitor_trend_data.js"></script>
+  <script src="competitor_trend_data.js?v=202611170945"></script>
   <script>
     let stockOriginMode = 'all';
     let selectedPfMode = 'origin';
@@ -834,10 +853,68 @@
     let endDateStr = '';
     let calYear = 2026;
     let calMonth = 11; // 1-12
-    let clickStage = 0; // 0: start new single-day selection, 1: allow range selection
+    let clickStage = 0;
 
     function fmt(n) { return Number(n || 0).toLocaleString(); }
-    function getRecords() { return Array.isArray(window.COMPETITOR_TREND_DATA) ? window.COMPETITOR_TREND_DATA : []; }
+
+    // PowerShell ConvertTo-Json 배열/객체 방어적 언래핑 헬퍼
+    function unwrapArray(val) {
+      if (Array.isArray(val)) return val;
+      if (val && Array.isArray(val.value)) return val.value;
+      if (val && typeof val === 'object' && val.date) return [val];
+      return [];
+    }
+
+    function getRecords() {
+      return unwrapArray(window.COMPETITOR_TREND_DATA);
+    }
+
+    function getAllRawVehicles() {
+      return unwrapArray(window.COMPETITOR_RAW_PREVIEW);
+    }
+
+    // 현재 선택된 조회기간(startDateStr ~ endDateStr)에 해당하는 RAW 매물만 필터링
+    function getPeriodRawVehicles() {
+      const all = getAllRawVehicles();
+      if (!startDateStr || !endDateStr) return all;
+      const filtered = all.filter(v => {
+        const d = v.collectedDate || '';
+        return d >= startDateStr && d <= endDateStr;
+      });
+      return filtered.length > 0 ? filtered : all;
+    }
+
+    function updateQuickPresetLabels() {
+      const records = getRecords();
+      if (records.length >= 2) {
+        const latest = records[records.length - 1].date;
+        const prev   = records[records.length - 2].date;
+        const tBtn = document.getElementById('presetTodayBtn');
+        const yBtn = document.getElementById('presetYesterdayBtn');
+        const cBtn = document.getElementById('presetCombinedBtn');
+        if (tBtn) tBtn.textContent = `오늘 (${latest.slice(5)})`;
+        if (yBtn) yBtn.textContent = `어제 (${prev.slice(5)})`;
+        if (cBtn) cBtn.textContent = `어제+오늘 합산 (${prev.slice(5)}~${latest.slice(5)})`;
+      }
+    }
+
+    function syncPresetActiveButtons() {
+      const records = getRecords();
+      const latest = records.length ? records[records.length - 1].date : '';
+      const prev   = records.length >= 2 ? records[records.length - 2].date : latest;
+
+      document.querySelectorAll('.quick-date-btn').forEach(b => b.classList.remove('active'));
+      if (startDateStr === latest && endDateStr === latest) {
+        const btn = document.getElementById('presetTodayBtn');
+        if (btn) btn.classList.add('active');
+      } else if (startDateStr === prev && endDateStr === prev && prev !== latest) {
+        const btn = document.getElementById('presetYesterdayBtn');
+        if (btn) btn.classList.add('active');
+      } else if (startDateStr === prev && endDateStr === latest && prev !== latest) {
+        const btn = document.getElementById('presetCombinedBtn');
+        if (btn) btn.classList.add('active');
+      }
+    }
 
     function initDefaultDates() {
       const records = getRecords();
@@ -855,41 +932,8 @@
       }
       document.getElementById('startDateInput').value = startDateStr;
       document.getElementById('endDateInput').value = endDateStr;
-    }
-
-    // 시각적 월간 달력 렌더링
-    function renderVisualCalendar() {
-      const records = getRecords();
-      const dataDateSet = new Set(records.map(r => r.date));
-      document.getElementById('calMonthTitle').textContent = `${calYear}년 ${String(calMonth).padStart(2, '0')}월`;
-
-      const dows = ['일', '월', '화', '수', '목', '금', '토'];
-      let html = dows.map(d => `<div class="cal-dow">${d}</div>`).join('');
-
-      const firstDay = new Date(calYear, calMonth - 1, 1).getDay();
-      const daysInMonth = new Date(calYear, calMonth, 0).getDate();
-
-      for (let i = 0; i < firstDay; i++) {
-        html += `<div class="cal-day empty"></div>`;
-      }
-
-      for (let day = 1; day <= daysInMonth; day++) {
-        const dStr = `${calYear}-${String(calMonth).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-        const hasData = dataDateSet.has(dStr);
-        const isEdge = (dStr === startDateStr || dStr === endDateStr);
-        const inRange = (dStr >= startDateStr && dStr <= endDateStr);
-
-        const cls = [
-          'cal-day',
-          hasData ? 'has-data' : '',
-          inRange ? 'in-range' : '',
-          isEdge ? 'selected-edge' : ''
-        ].filter(Boolean).join(' ');
-
-        html += `<div class="${cls}" data-date="${dStr}" title="${dStr}${hasData ? ' (수집 데이터 있음)' : ''}">${day}일</div>`;
-      }
-
-      document.getElementById('visualCalendarGrid').innerHTML = html;
+      updateQuickPresetLabels();
+      syncPresetActiveButtons();
     }
 
     // Ⅰ. 상단 전체 등록대수 카드 및 추이 차트 (조회기간 무관)
@@ -974,7 +1018,10 @@
       // 일자별 전체 등록대수 누적 변화 기록표 렌더링
       const histBody = document.getElementById('dailyStockHistoryTableBody');
       if (histBody) {
-        histBody.innerHTML = [...records].reverse().map(r => {
+        histBody.innerHTML = [...records].reverse().map((r, idx) => {
+          const dayBadge = idx === 0
+            ? `<span style="display:inline-block;margin-left:6px;padding:2px 7px;border-radius:5px;background:#dcfce7;color:#15803d;font-size:12px;font-weight:800;">오늘 최신</span>`
+            : `<span style="display:inline-block;margin-left:6px;padding:2px 7px;border-radius:5px;background:#f1f5f9;color:#475569;font-size:12px;font-weight:700;">어제/이전</span>`;
           const fmtDiff = d => {
             const n = Number(d || 0);
             if (n > 0) return `<span style="color:#e11d48;font-size:13px;margin-left:6px;">(▲+${fmt(n)})</span>`;
@@ -983,7 +1030,7 @@
           };
           return `
             <tr>
-              <td><strong>${r.date}</strong></td>
+              <td><strong>${r.date}</strong>${dayBadge}</td>
               <td>
                 <strong style="color:#c2410c;font-size:16.5px;">${fmt(r.daangnCarsCount)}대</strong>${fmtDiff(r.daangnDiff)}
                 <div style="font-size:13px;color:#64748b;margin-top:2px;">국산 ${fmt(r.daangnDomesticCount)} / 수입 ${fmt(r.daangnImportedCount)}</div>
@@ -1044,11 +1091,7 @@
     }
 
     // Ⅱ. 달력에서 선택한 시작일 ~ 종료일 데이터 집계 및 표시
-    // - 전체광고대수: 조회기간의 전체광고대수의 평균대수
-    // - 신규등록대수 / 신규판매대수: 조회기간 내 합계
-    // - 판매회전율: 조회기간 내 신규판매대수 ÷ 조회기간 전체광고대수의 평균대수 × 100
-    // - 평균 광고가격: 조회기간 평균 광고가격
-    function renderFlowSection() {
+    function renderFlowSection(isUserSearch) {
       const records = getRecords();
       if (!records.length) return;
 
@@ -1068,12 +1111,21 @@
       const eNew = sum('encarNewCount'),  eSold = sum('encarSoldCount');
       const kbNew = sum('kbNewCount'),    kbSold = sum('kbSoldCount');
 
-      const rangeLabel = startDateStr === endDateStr
-        ? `${startDateStr} (1일 기준)`
-        : `${startDateStr} ~ ${endDateStr} (조회기간 ${days}일 기준)`;
+      const latestDate = records[records.length - 1].date;
+      const prevDate   = records.length >= 2 ? records[records.length - 2].date : '';
+      let modeTag = '';
+      if (startDateStr === latestDate && endDateStr === latestDate) modeTag = '오늘 단독 조회';
+      else if (startDateStr === prevDate && endDateStr === prevDate) modeTag = '어제 단독 조회';
+      else if (startDateStr === prevDate && endDateStr === latestDate) modeTag = '어제 + 오늘 합산 조회';
+      else modeTag = `기간 조회 (${days}일)`;
 
+      const rangeLabel = startDateStr === endDateStr
+        ? `${startDateStr} (${modeTag} · 1일 기준)`
+        : `${startDateStr} ~ ${endDateStr} (${modeTag} · ${days}일 기준)`;
+
+      const statusPrefix = isUserSearch ? `✅ [조회 완료] ` : `현재 조회된 기간: `;
       document.getElementById('selectedPeriodNotice').innerHTML =
-        `현재 조회된 기간: <strong style="color:#ffedd5;">${rangeLabel}</strong> 결과값 표시 중`;
+        `${statusPrefix}<strong style="color:#ffedd5;font-size:15.5px;">${rangeLabel}</strong> (하단 Ⅱ·Ⅲ·Ⅳ 영역 모두 연동 반영됨)`;
       document.getElementById('flowSectionTitle').textContent =
         `[${rangeLabel}] 평균 전체광고대수 · 신규등록 · 신규판매 · 판매회전율 · 평균광고가격`;
 
@@ -1202,11 +1254,114 @@
           <td style="font-weight:800;">${fmt(agg.kb.avgPrice)}만원</td>
         </tr>
       `;
+
+      // 선택 기간 내 일자별 상세 분해 비교표 (어제 / 오늘 / 합산·평균 모두 표시)
+      const breakdownEl = document.getElementById('periodDailyBreakdownTable');
+      if (breakdownEl) {
+        const dayRowsHtml = slice.map(r => {
+          const isToday = r.date === latestDate;
+          const badge = isToday
+            ? `<span style="margin-left:6px;padding:2px 6px;border-radius:4px;background:#dcfce7;color:#15803d;font-size:12px;">오늘</span>`
+            : `<span style="margin-left:6px;padding:2px 6px;border-radius:4px;background:#f1f5f9;color:#475569;font-size:12px;">어제</span>`;
+          const dTurn = r.daangnCarsCount > 0 ? ((r.daangnSoldCount / r.daangnCarsCount) * 100).toFixed(2) : '0.00';
+          const kTurn = r.kcarDirectCount > 0 ? ((r.kcarSoldCount / r.kcarDirectCount) * 100).toFixed(2) : '0.00';
+          const eTurn = r.encarPersonalCount > 0 ? ((r.encarSoldCount / r.encarPersonalCount) * 100).toFixed(2) : '0.00';
+          const kbTurn = r.kbDirectCount > 0 ? ((r.kbSoldCount / r.kbDirectCount) * 100).toFixed(2) : '0.00';
+          return `
+            <tr>
+              <td><strong>${r.date}</strong>${badge}</td>
+              <td>
+                <strong>${fmt(r.daangnCarsCount)}대</strong> ·
+                <span style="color:#e11d48;font-weight:700;">신규 +${fmt(r.daangnNewCount)}</span> ·
+                <span style="color:#2563eb;font-weight:700;">판매 ${fmt(r.daangnSoldCount)}</span> ·
+                <span>회전율 ${dTurn}%</span> ·
+                <span>${fmt(r.daangnAvgPrice)}만원</span>
+              </td>
+              <td>
+                <strong>${fmt(r.kcarDirectCount)}대</strong> ·
+                <span style="color:#e11d48;font-weight:700;">신규 +${fmt(r.kcarNewCount)}</span> ·
+                <span style="color:#2563eb;font-weight:700;">판매 ${fmt(r.kcarSoldCount)}</span> ·
+                <span>회전율 ${kTurn}%</span> ·
+                <span>${fmt(r.kcarAvgPrice)}만원</span>
+              </td>
+              <td>
+                <strong>${fmt(r.encarPersonalCount)}대</strong> ·
+                <span style="color:#e11d48;font-weight:700;">신규 +${fmt(r.encarNewCount)}</span> ·
+                <span style="color:#2563eb;font-weight:700;">판매 ${fmt(r.encarSoldCount)}</span> ·
+                <span>회전율 ${eTurn}%</span> ·
+                <span>${fmt(r.encarAvgPrice)}만원</span>
+              </td>
+              <td>
+                <strong>${fmt(r.kbDirectCount)}대</strong> ·
+                <span style="color:#e11d48;font-weight:700;">신규 +${fmt(r.kbNewCount)}</span> ·
+                <span style="color:#2563eb;font-weight:700;">판매 ${fmt(r.kbSoldCount)}</span> ·
+                <span>회전율 ${kbTurn}%</span> ·
+                <span>${fmt(r.kbAvgPrice)}만원</span>
+              </td>
+            </tr>
+          `;
+        }).join('');
+
+        const totalRowHtml = `
+          <tr style="background:#fff7ed;border-top:2px solid #fdba74;">
+            <td style="background:#ffedd5;color:#9a3412;"><strong>📊 선택기간 종합 (${days}일 합산/평균)</strong></td>
+            <td>
+              <strong style="color:#c2410c;">평균 ${fmt(agg.daangn.avgTotal)}대</strong> ·
+              <span style="color:#e11d48;font-weight:800;">신규합계 +${fmt(agg.daangn.newCnt)}</span> ·
+              <span style="color:#2563eb;font-weight:800;">판매합계 ${fmt(agg.daangn.soldCnt)}</span> ·
+              <strong>회전율 ${agg.daangn.turnPct}%</strong> ·
+              <span>평균 ${fmt(agg.daangn.avgPrice)}만원</span>
+            </td>
+            <td>
+              <strong style="color:#1e3a8a;">평균 ${fmt(agg.kcar.avgTotal)}대</strong> ·
+              <span style="color:#e11d48;font-weight:800;">신규합계 +${fmt(agg.kcar.newCnt)}</span> ·
+              <span style="color:#2563eb;font-weight:800;">판매합계 ${fmt(agg.kcar.soldCnt)}</span> ·
+              <strong>회전율 ${agg.kcar.turnPct}%</strong> ·
+              <span>평균 ${fmt(agg.kcar.avgPrice)}만원</span>
+            </td>
+            <td>
+              <strong style="color:#dc2626;">평균 ${fmt(agg.encar.avgTotal)}대</strong> ·
+              <span style="color:#e11d48;font-weight:800;">신규합계 +${fmt(agg.encar.newCnt)}</span> ·
+              <span style="color:#2563eb;font-weight:800;">판매합계 ${fmt(agg.encar.soldCnt)}</span> ·
+              <strong>회전율 ${agg.encar.turnPct}%</strong> ·
+              <span>평균 ${fmt(agg.encar.avgPrice)}만원</span>
+            </td>
+            <td>
+              <strong style="color:#b45309;">평균 ${fmt(agg.kb.avgTotal)}대</strong> ·
+              <span style="color:#e11d48;font-weight:800;">신규합계 +${fmt(agg.kb.newCnt)}</span> ·
+              <span style="color:#2563eb;font-weight:800;">판매합계 ${fmt(agg.kb.soldCnt)}</span> ·
+              <strong>회전율 ${agg.kb.turnPct}%</strong> ·
+              <span>평균 ${fmt(agg.kb.avgPrice)}만원</span>
+            </td>
+          </tr>
+        `;
+        breakdownEl.innerHTML = dayRowsHtml + totalRowHtml;
+      }
     }
 
-    // Ⅲ. 회사별 포트폴리오 시각 그래프 렌더링
+    // 조회기간에 맞는 포트폴리오 객체 선택 (오늘 / 어제 / 어제+오늘 합산)
+    function getActivePortfolioData() {
+      const byDate = window.COMPETITOR_PORTFOLIO_BY_DATE || {};
+      if (startDateStr && endDateStr) {
+        if (startDateStr === endDateStr && byDate[startDateStr]) {
+          return byDate[startDateStr];
+        }
+        if (startDateStr < endDateStr && byDate['ALL']) {
+          return byDate['ALL'];
+        }
+      }
+      return window.COMPETITOR_PORTFOLIO_DATA || byDate['ALL'] || {};
+    }
+
+    // Ⅲ. 회사별 포트폴리오 시각 그래프 렌더링 (조회기간 연동)
     function renderPortfolioSection() {
-      const pf = window.COMPETITOR_PORTFOLIO_DATA || {};
+      const pf = getActivePortfolioData();
+      const rangeTxt = startDateStr === endDateStr ? `${startDateStr}` : `${startDateStr} ~ ${endDateStr} 합산`;
+      const pfTitleEl = document.getElementById('portfolioSectionTitle');
+      if (pfTitleEl && startDateStr) {
+        pfTitleEl.textContent = `[${rangeTxt}] 회사별 직거래 포트폴리오 비교 (국산·수입 / 차종별 / 판매가격 / 지역 / 인기모델)`;
+      }
+
       const companies = [
         { key: 'daangn', title: '1. 당근중고차 (추정)', color: '#ff6f0f', data: pf.daangn },
         { key: 'kcar',   title: '2. 케이카 직거래', color: '#1e3a8a', data: pf.kcar },
@@ -1311,28 +1466,69 @@
       }).join('');
     }
 
-    function applyDateRange(s, e) {
+    // 조회기간 변경 적용 (Ⅱ.실적 + Ⅲ.포트폴리오 + Ⅳ.RAW매물검색 모두 연동 갱신)
+    function applyDateRange(s, e, isUserSearch) {
       startDateStr = s <= e ? s : e;
       endDateStr = s <= e ? e : s;
       document.getElementById('startDateInput').value = startDateStr;
       document.getElementById('endDateInput').value = endDateStr;
-      renderFlowSection();
+      syncPresetActiveButtons();
+      renderFlowSection(isUserSearch);
+      renderPortfolioSection();
+      updateRawTabCounts();
+      filterAndRenderRawTable(true);
+
+      if (isUserSearch) {
+        ['sectionFlowBlock', 'sectionPortfolioBlock', 'sectionRawBlock'].forEach(id => {
+          const el = document.getElementById(id);
+          if (el) {
+            el.style.transition = 'box-shadow 0.25s ease';
+            el.style.boxShadow = '0 0 0 3px #f97316';
+            setTimeout(() => { el.style.boxShadow = ''; }, 900);
+          }
+        });
+      }
     }
 
-    // [조회하기] 버튼 클릭 시 하단 결과 갱신
+    // [조회하기] 버튼 클릭 시 하단 결과 전체 갱신
     document.getElementById('executeSearchBtn').addEventListener('click', () => {
-      document.querySelectorAll('.quick-date-btn').forEach(b => b.classList.remove('active'));
       const s = document.getElementById('startDateInput').value;
       const e = document.getElementById('endDateInput').value;
-      if (s && e) applyDateRange(s, e);
+      if (s && e) applyDateRange(s, e, true);
     });
 
-    document.getElementById('presetLatestDayBtn').addEventListener('click', function() {
-      document.querySelectorAll('.quick-date-btn').forEach(b => b.classList.remove('active'));
-      this.classList.add('active');
+    // 달력 날짜 변경 시에도 즉시 반영 가능하도록 지원
+    document.getElementById('startDateInput').addEventListener('change', () => {
+      const s = document.getElementById('startDateInput').value;
+      const e = document.getElementById('endDateInput').value;
+      if (s && e) applyDateRange(s, e, true);
+    });
+    document.getElementById('endDateInput').addEventListener('change', () => {
+      const s = document.getElementById('startDateInput').value;
+      const e = document.getElementById('endDateInput').value;
+      if (s && e) applyDateRange(s, e, true);
+    });
+
+    // 오늘 (11-17) 단독 조회
+    document.getElementById('presetTodayBtn').addEventListener('click', function() {
       const records = getRecords();
       const latest = records.length ? records[records.length - 1].date : new Date().toISOString().slice(0, 10);
-      applyDateRange(latest, latest);
+      applyDateRange(latest, latest, true);
+    });
+
+    // 어제 (11-16) 단독 조회
+    document.getElementById('presetYesterdayBtn').addEventListener('click', function() {
+      const records = getRecords();
+      const prev = records.length >= 2 ? records[records.length - 2].date : (records.length ? records[0].date : new Date().toISOString().slice(0, 10));
+      applyDateRange(prev, prev, true);
+    });
+
+    // 어제 + 오늘 합산 조회
+    document.getElementById('presetCombinedBtn').addEventListener('click', function() {
+      const records = getRecords();
+      const first = records.length >= 2 ? records[records.length - 2].date : (records.length ? records[0].date : new Date().toISOString().slice(0, 10));
+      const latest = records.length ? records[records.length - 1].date : first;
+      applyDateRange(first, latest, true);
     });
 
     document.getElementById('preset7DaysBtn').addEventListener('click', function() {
@@ -1342,7 +1538,7 @@
       const latest = records.length ? records[records.length - 1].date : new Date().toISOString().slice(0, 10);
       const d = new Date(latest + 'T00:00:00');
       d.setDate(d.getDate() - 6);
-      applyDateRange(d.toISOString().slice(0, 10), latest);
+      applyDateRange(d.toISOString().slice(0, 10), latest, true);
     });
 
     document.getElementById('preset30DaysBtn').addEventListener('click', function() {
@@ -1352,7 +1548,7 @@
       const latest = records.length ? records[records.length - 1].date : new Date().toISOString().slice(0, 10);
       const d = new Date(latest + 'T00:00:00');
       d.setDate(d.getDate() - 29);
-      applyDateRange(d.toISOString().slice(0, 10), latest);
+      applyDateRange(d.toISOString().slice(0, 10), latest, true);
     });
 
     document.getElementById('stockOriginTabs').addEventListener('click', e => {
@@ -1373,17 +1569,13 @@
       renderPortfolioSection();
     });
 
-    // Ⅳ. 업체별 RAW 매물 상세 검색 로직 (매물ID 제외, 4개사 전수 검색 + 원본 링크)
+    // Ⅳ. 업체별 RAW 매물 상세 검색 로직 (조회기간 연동, 매물ID 제외, 4개사 전수 검색 + 원본 링크)
     let selectedRawPlat = 'ALL';
     let rawVisibleLimit = 200;
     let lastFilteredRawList = [];
 
-    function getRawVehicles() {
-      return Array.isArray(window.COMPETITOR_RAW_PREVIEW) ? window.COMPETITOR_RAW_PREVIEW : [];
-    }
-
     function updateRawTabCounts() {
-      const all = getRawVehicles();
+      const all = getPeriodRawVehicles();
       const counts = { ALL: all.length, '당근중고차': 0, '케이카직거래': 0, '엔카닷컴개인': 0, 'KB차차차개인': 0 };
       all.forEach(v => { if (counts[v.platform] !== undefined) counts[v.platform]++; });
       const labels = {
@@ -1401,24 +1593,30 @@
 
     function filterAndRenderRawTable(resetLimit) {
       if (resetLimit) rawVisibleLimit = 200;
-      const all = getRawVehicles();
+      const all = getPeriodRawVehicles();
       const originVal = document.getElementById('rawOriginSelect').value;
       const bandVal = document.getElementById('rawPriceBandSelect').value;
       const kw = document.getElementById('rawKeywordInput').value.trim().toLowerCase();
+
+      const rangeTxt = startDateStr === endDateStr ? `${startDateStr}` : `${startDateStr} ~ ${endDateStr} 합산`;
+      const rawTitleEl = document.getElementById('rawSectionTitle');
+      if (rawTitleEl && startDateStr) {
+        rawTitleEl.textContent = `[${rangeTxt}] 업체별 개별 매물 RAW 데이터 상세 검색`;
+      }
 
       lastFilteredRawList = all.filter(v => {
         if (selectedRawPlat !== 'ALL' && v.platform !== selectedRawPlat) return false;
         if (originVal !== 'ALL' && v.originType !== originVal) return false;
         if (bandVal !== 'ALL' && v.priceBand !== bandVal) return false;
         if (kw) {
-          const hay = `${v.platform} ${v.manufacturer} ${v.model} ${v.fullTitle} ${v.region} ${v.year}`.toLowerCase();
+          const hay = `${v.collectedDate || ''} ${v.platform} ${v.manufacturer} ${v.model} ${v.fullTitle} ${v.region} ${v.year}`.toLowerCase();
           if (!hay.includes(kw)) return false;
         }
         return true;
       });
 
       document.getElementById('rawSearchSummaryText').innerHTML =
-        `검색 조건에 일치하는 매물 총 <strong style="color:#0f172a;">${fmt(lastFilteredRawList.length)}대</strong> (현재 화면에 상위 ${fmt(Math.min(rawVisibleLimit, lastFilteredRawList.length))}대 표시 중)`;
+        `조회기간(<strong style="color:#c2410c;">${rangeTxt}</strong>) 및 검색 조건에 일치하는 매물 총 <strong style="color:#0f172a;">${fmt(lastFilteredRawList.length)}대</strong> (현재 화면에 상위 ${fmt(Math.min(rawVisibleLimit, lastFilteredRawList.length))}대 표시 중)`;
 
       const badgeColorMap = {
         '당근중고차': 'background:rgba(255,111,15,0.14);color:#c2410c;',
@@ -1430,6 +1628,7 @@
       const slice = lastFilteredRawList.slice(0, rawVisibleLimit);
       document.getElementById('rawVehicleTableBody').innerHTML = slice.map(v => `
         <tr>
+          <td style="text-align:center;font-weight:700;color:#475569;">${v.collectedDate || '-'}</td>
           <td><span style="padding:4px 9px;border-radius:6px;font-size:13px;font-weight:800;${badgeColorMap[v.platform] || ''}">${v.platform}</span></td>
           <td style="text-align:center;font-weight:700;">${v.originType}</td>
           <td style="text-align:left;font-weight:700;">${v.manufacturer}</td>
@@ -1450,7 +1649,7 @@
       document.getElementById('mobileRawCardsWrap').innerHTML = slice.map(v => `
         <div class="m-raw-card">
           <div style="display:flex;justify-content:space-between;align-items:center;">
-            <span style="padding:4px 9px;border-radius:6px;font-size:12.5px;font-weight:800;${badgeColorMap[v.platform] || ''}">${v.platform} · ${v.originType}</span>
+            <span style="padding:4px 9px;border-radius:6px;font-size:12.5px;font-weight:800;${badgeColorMap[v.platform] || ''}">${v.collectedDate || ''} · ${v.platform} · ${v.originType}</span>
             <span style="font-size:18px;font-weight:800;color:#0f172a;">${fmt(v.priceManwon)}만원</span>
           </div>
           <div style="font-size:16px;font-weight:800;color:#0f172a;">[${v.manufacturer}] ${v.fullTitle}</div>
@@ -1466,7 +1665,7 @@
     }
 
     function renderDbArchiveSection() {
-      const archives = Array.isArray(window.COMPETITOR_DB_ARCHIVE) ? window.COMPETITOR_DB_ARCHIVE : [];
+      const archives = unwrapArray(window.COMPETITOR_DB_ARCHIVE);
       const tbody = document.getElementById('dbArchiveTableBody');
       if (!tbody) return;
       tbody.innerHTML = [...archives].reverse().map(a => `
@@ -1527,8 +1726,9 @@
     });
 
     document.getElementById('rawDownloadFilteredBtn').addEventListener('click', () => {
-      const header = '업체명,국산수입구분,제조사,모델명,전체차량명,연식,주행거리_km,판매가격_만원,가격대구간,지역,판매상태,매물링크';
+      const header = '수집일자,업체명,국산수입구분,제조사,모델명,전체차량명,연식,주행거리_km,판매가격_만원,가격대구간,지역,판매상태,매물링크';
       const rows = lastFilteredRawList.map(v => [
+        `"${v.collectedDate || ''}"`,
         `"${v.platform}"`,
         `"${v.originType}"`,
         `"${String(v.manufacturer || '').replace(/"/g, '""')}"`,
@@ -1547,14 +1747,14 @@
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `filtered_vehicles_${selectedRawPlat}_${new Date().toISOString().slice(0, 10)}.csv`;
+      a.download = `filtered_vehicles_${selectedRawPlat}_${startDateStr}_${endDateStr}.csv`;
       a.click();
       URL.revokeObjectURL(url);
     });
 
     initDefaultDates();
     renderStockSection();
-    renderFlowSection();
+    renderFlowSection(false);
     renderPortfolioSection();
     updateRawTabCounts();
     filterAndRenderRawTable(true);

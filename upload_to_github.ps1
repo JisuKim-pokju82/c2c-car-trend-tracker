@@ -26,6 +26,7 @@ $baseTreeSha = $commitInfo.tree.sha
 $filesToUpload = @(
     "README.md",
     "collect_competitor_trend.ps1",
+    "rebuild_bundle_from_raw.ps1",
     "register_windows_task.ps1",
     "upload_to_github.ps1",
     "competitor_trend.html",

@@ -1,24 +1,24 @@
 [
-    {
-        "date":  "2026-11-16",
-        "updatedAt":  "2026-11-16 16:36:21",
-        "rawCsvPath":  "raw_data/raw_vehicles_2026-11-16.csv",
-        "daangnUrlPath":  "raw_data/daangn_sitemap_urls_2026-11-16.csv",
-        "vehicleCount":  4388,
-        "daangnCount":  1482,
-        "kcarCount":  340,
-        "encarCount":  2534,
-        "kbCount":  32
-    },
-    {
-        "date":  "2026-11-17",
-        "updatedAt":  "2026-11-17 09:16:22",
-        "rawCsvPath":  "raw_data/raw_vehicles_2026-11-17.csv",
-        "daangnUrlPath":  "raw_data/daangn_sitemap_urls_2026-11-17.csv",
-        "vehicleCount":  13552,
-        "daangnCount":  10666,
-        "kcarCount":  342,
-        "encarCount":  2512,
-        "kbCount":  32
-    }
+  {
+    "date": "2026-11-16",
+    "updatedAt": "2026-11-16 16:36:21",
+    "rawCsvPath": "raw_data/raw_vehicles_2026-11-16.csv",
+    "daangnUrlPath": "raw_data/daangn_sitemap_urls_2026-11-16.csv",
+    "vehicleCount": 4388,
+    "daangnCount": 1482,
+    "kcarCount": 340,
+    "encarCount": 2534,
+    "kbCount": 32
+  },
+  {
+    "date": "2026-11-17",
+    "updatedAt": "2026-11-17 09:16:22",
+    "rawCsvPath": "raw_data/raw_vehicles_2026-11-17.csv",
+    "daangnUrlPath": "raw_data/daangn_sitemap_urls_2026-11-17.csv",
+    "vehicleCount": 13552,
+    "daangnCount": 10666,
+    "kcarCount": 342,
+    "encarCount": 2512,
+    "kbCount": 32
+  }
 ]

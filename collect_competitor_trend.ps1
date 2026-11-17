@@ -782,8 +782,8 @@ for ($i = 0; $i -lt $sortedRecords.Count; $i++) {
 }
 
 $utf8NoBom = New-Object System.Text.UTF8Encoding($false)
-$jsonOutput = ConvertTo-Json -InputObject $sortedRecords -Depth 6
-if ($sortedRecords.Count -eq 1 -and -not $jsonOutput.TrimStart().StartsWith("[")) {
+$jsonOutput = $sortedRecords | ConvertTo-Json -Depth 6
+if (-not $jsonOutput.TrimStart().StartsWith("[")) {
     $jsonOutput = "[`r`n" + $jsonOutput + "`r`n]"
 }
 [System.IO.File]::WriteAllText($JsonPath, $jsonOutput, $utf8NoBom)
@@ -857,8 +857,8 @@ $manifestFiltered += [pscustomobject][ordered]@{
     kbCount       = $kbNormItems.Count
 }
 $sortedManifest = @($manifestFiltered | Sort-Object date)
-$manifestJson = ConvertTo-Json -InputObject $sortedManifest -Depth 4
-if ($sortedManifest.Count -eq 1 -and -not $manifestJson.TrimStart().StartsWith("[")) {
+$manifestJson = $sortedManifest | ConvertTo-Json -Depth 4
+if (-not $manifestJson.TrimStart().StartsWith("[")) {
     $manifestJson = "[`r`n" + $manifestJson + "`r`n]"
 }
 [System.IO.File]::WriteAllText($ManifestPath, $manifestJson, $utf8NoBom)
@@ -884,6 +884,11 @@ window.COMPETITOR_RAW_TOTAL_COUNT = $($allRawVehicles.Count);
 window.COMPETITOR_DB_ARCHIVE = $manifestJson;
 "@
 [System.IO.File]::WriteAllText($JsPath, $jsContent, $utf8NoBom)
+
+$rebuildScript = Join-Path $WorkDir "rebuild_bundle_from_raw.ps1"
+if (Test-Path $rebuildScript) {
+    try { & $rebuildScript } catch { Write-Warning "Rebuild bundle warning: $_" }
+}
 
 Write-Host "[$Timestamp] Completed! Total RAW Vehicles Saved: $($allRawVehicles.Count) (+ Daangn Sitemap: $($daangnSitemapIds.Count))" -ForegroundColor Cyan
 Write-Host "  - RAW Vehicles CSV : $rawCsvToday"
