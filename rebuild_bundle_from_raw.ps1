@@ -158,11 +158,13 @@ function Build-FourPlatformPortfolio([object[]]$list, [string]$upd) {
 
 $portfolioByDate = [ordered]@{}
 $itemsAll = @()
+$latestDayItems = @()
 $latestPf = $null
 foreach ($rf in $rawFiles) {
     $dStr = ($rf.BaseName -replace '^raw_vehicles_', '')
     $dayItems = @(Parse-RawCsv $rf.FullName)
     $itemsAll += $dayItems
+    $latestDayItems = $dayItems
     $dayPf = Build-FourPlatformPortfolio $dayItems $dStr
     $portfolioByDate[$dStr] = $dayPf
     $latestPf = $dayPf
@@ -242,7 +244,7 @@ if (-not $manifestJson.TrimStart().StartsWith("[")) {
 [System.IO.File]::WriteAllText((Join-Path $DbDir "db_manifest.json"), $manifestJson, $utf8NoBom)
 $pfLatestJson = $latestPf | ConvertTo-Json -Depth 6
 $pfByDateJson = $portfolioByDate | ConvertTo-Json -Depth 7
-$rawAllJson   = $itemsAll | ConvertTo-Json -Depth 4 -Compress
+$rawAllJson   = $latestDayItems | ConvertTo-Json -Depth 4 -Compress
 
 $latestUpdated = if ($records.Count -gt 0) { $records[$records.Count - 1].updatedAt } else { (Get-Date).ToString("yyyy-MM-dd HH:mm:ss") }
 $jsContent = @"
