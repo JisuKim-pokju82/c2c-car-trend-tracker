@@ -2,17 +2,18 @@ name: Daily 4-Platform C2C Competitor Tracker (Cloud 08:00 KST)
 
 on:
   schedule:
-    # 다중 분산 스케줄 (ubuntu-latest 고속 풀 사용 + 07:17 / 07:37 / 07:52 / 08:07 / 08:23 KST 다중 안전망)
-    - cron: '17 22 * * *'
-    - cron: '37 22 * * *'
-    - cron: '52 22 * * *'
-    - cron: '7 23 * * *'
-    - cron: '23 23 * * *'
-    - cron: '*/5 * * * *'
+    # ubuntu-latest 고속 러너 + 오전 08:00 이전 완료를 보장하는 6단계 다중 분산 스케줄 (KST 06:47, 07:12, 07:32, 07:48, 08:03, 08:22)
+    # 첫 실행 성공 시 이후 스케줄은 10초 내 자동 스킵되어 중복 커밋이 발생하지 않습니다.
+    - cron: '47 21 * * *'
+    - cron: '12 22 * * *'
+    - cron: '32 22 * * *'
+    - cron: '48 22 * * *'
+    - cron: '3 23 * * *'
+    - cron: '22 23 * * *'
   workflow_dispatch:
     inputs:
       force:
-        description: 'Force full re-collection even if today file exists'
+        description: 'Force full re-collection'
         required: false
         default: 'false'
 
@@ -29,10 +30,6 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-
-      - name: Prepare Headless Browser Helper
-        run: |
-          pip install --quiet playwright || pip install --quiet --break-system-packages playwright || true
 
       - name: Run 4-Platform RAW & Portfolio Collector
         shell: pwsh
