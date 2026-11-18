@@ -8,6 +8,8 @@ $ErrorActionPreference = 'Stop'
 
 $WorkDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 if (-not $WorkDir) { $WorkDir = (Get-Location).Path }
+$TempDir = [System.IO.Path]::GetTempPath()
+$CurlBin = if (Get-Command curl.exe -ErrorAction SilentlyContinue) { "curl.exe" } else { "curl" }
 
 $SnapshotDir = Join-Path $WorkDir "snapshots"
 $RawDir      = Join-Path $WorkDir "raw_data"
@@ -297,8 +299,8 @@ $allRawVehicles = New-Object System.Collections.Generic.List[object]
 Write-Host "1. Collecting Daangn Used Cars RAW & Sitemap..." -ForegroundColor Yellow
 $daangnSitemapIds = New-Object System.Collections.Generic.List[string]
 try {
-    $tempGz = Join-Path $env:TEMP "daangn_cars_sitemap_$($PID).xml.gz"
-    curl.exe -s -L -A "Mozilla/5.0" "https://www.daangn.com/kr/cars/sitemap-detail.xml.gz" -o $tempGz
+    $tempGz = Join-Path $TempDir "daangn_cars_sitemap_$($PID).xml.gz"
+    & $CurlBin -s -L --max-time 30 -A "Mozilla/5.0" "https://www.daangn.com/kr/cars/sitemap-detail.xml.gz" -o $tempGz
     if (Test-Path $tempGz) {
         $fs = [System.IO.File]::OpenRead($tempGz)
         $gz = New-Object System.IO.Compression.GZipStream($fs, [System.IO.Compression.CompressionMode]::Decompress)
@@ -544,25 +546,53 @@ $encarImpItems = New-Object System.Collections.Generic.List[object]
 
 try {
     $uaEncar = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"
-    $resDom = curl.exe -s -L -A $uaEncar -H "Accept-Language: ko-KR,ko;q=0.9" -H "Referer: http://www.encar.com/" "https://api.encar.com/search/car/list/general?count=true&q=(And.Hidden.N._.CarType.Y._.Separation.A.)" | ConvertFrom-Json
+    $resDom = & $CurlBin -s -L --max-time 25 -A $uaEncar -H "Accept-Language: ko-KR,ko;q=0.9" -H "Referer: http://www.encar.com/" "https://api.encar.com/search/car/list/general?count=true&q=(And.Hidden.N._.CarType.Y._.Separation.A.)" | ConvertFrom-Json
     $encarPersonalDom = [int]$resDom.Count
     for ($offset = 0; $offset -le $encarPersonalDom; $offset += 500) {
         $u = "https://api.encar.com/search/car/list/general?count=true&q=(And.Hidden.N._.CarType.Y._.Separation.A.)&sr=%7CModifiedDate%7C$offset%7C500"
-        $b = curl.exe -s -L -A $uaEncar -H "Accept-Language: ko-KR,ko;q=0.9" -H "Referer: http://www.encar.com/" $u | ConvertFrom-Json
+        $b = & $CurlBin -s -L --max-time 25 -A $uaEncar -H "Accept-Language: ko-KR,ko;q=0.9" -H "Referer: http://www.encar.com/" $u | ConvertFrom-Json
         if ($b.SearchResults) { $encarDomItems.AddRange($b.SearchResults) }
     }
 
-    $resImp = curl.exe -s -L -A $uaEncar -H "Accept-Language: ko-KR,ko;q=0.9" -H "Referer: http://www.encar.com/" "https://api.encar.com/search/car/list/general?count=true&q=(And.Hidden.N._.CarType.N._.Separation.A.)" | ConvertFrom-Json
+    $resImp = & $CurlBin -s -L --max-time 25 -A $uaEncar -H "Accept-Language: ko-KR,ko;q=0.9" -H "Referer: http://www.encar.com/" "https://api.encar.com/search/car/list/general?count=true&q=(And.Hidden.N._.CarType.N._.Separation.A.)" | ConvertFrom-Json
     $encarPersonalImp = [int]$resImp.Count
     for ($offset = 0; $offset -le $encarPersonalImp; $offset += 500) {
         $u = "https://api.encar.com/search/car/list/general?count=true&q=(And.Hidden.N._.CarType.N._.Separation.A.)&sr=%7CModifiedDate%7C$offset%7C500"
-        $b = curl.exe -s -L -A $uaEncar -H "Accept-Language: ko-KR,ko;q=0.9" -H "Referer: http://www.encar.com/" $u | ConvertFrom-Json
+        $b = & $CurlBin -s -L --max-time 25 -A $uaEncar -H "Accept-Language: ko-KR,ko;q=0.9" -H "Referer: http://www.encar.com/" $u | ConvertFrom-Json
         if ($b.SearchResults) { $encarImpItems.AddRange($b.SearchResults) }
     }
 
-    $resTotal = curl.exe -s -L -A $uaEncar -H "Accept-Language: ko-KR,ko;q=0.9" -H "Referer: http://www.encar.com/" "https://api.encar.com/search/car/list/general?count=true&q=(And.Hidden.N._.CarType.A.)" | ConvertFrom-Json
+    $resTotal = & $CurlBin -s -L --max-time 25 -A $uaEncar -H "Accept-Language: ko-KR,ko;q=0.9" -H "Referer: http://www.encar.com/" "https://api.encar.com/search/car/list/general?count=true&q=(And.Hidden.N._.CarType.A.)" | ConvertFrom-Json
     $encarAllTotal = [int]$resTotal.Count
 } catch { Write-Warning "Encar error: $_" }
+
+$cloudBrowserCache = $null
+if ($encarPersonalDom -eq 0 -and $env:GITHUB_ACTIONS -eq "true") {
+    $pyHelper = Join-Path $WorkDir "cloud_browser_fetch.py"
+    $cloudJsonOut = Join-Path $TempDir "kr_cloud_fetch_$($PID).json"
+    if (Test-Path $pyHelper) {
+        try {
+            Write-Host "   [Cloud] Attempting real Headless Chrome fetch for Encar & KB..." -ForegroundColor Cyan
+            python3 $pyHelper $cloudJsonOut
+            if (Test-Path $cloudJsonOut) {
+                $cloudBrowserCache = [System.IO.File]::ReadAllText($cloudJsonOut, [System.Text.Encoding]::UTF8) | ConvertFrom-Json
+                Remove-Item $cloudJsonOut -Force -ErrorAction SilentlyContinue
+                if ($cloudBrowserCache.encar_dom -and $cloudBrowserCache.encar_dom.Count) {
+                    $encarPersonalDom = [int]$cloudBrowserCache.encar_dom.Count
+                    if ($cloudBrowserCache.encar_dom.SearchResults) { $encarDomItems.AddRange($cloudBrowserCache.encar_dom.SearchResults) }
+                }
+                if ($cloudBrowserCache.encar_imp -and $cloudBrowserCache.encar_imp.Count) {
+                    $encarPersonalImp = [int]$cloudBrowserCache.encar_imp.Count
+                    if ($cloudBrowserCache.encar_imp.SearchResults) { $encarImpItems.AddRange($cloudBrowserCache.encar_imp.SearchResults) }
+                }
+                if ($cloudBrowserCache.encar_all_count) {
+                    $encarAllTotal = [int]$cloudBrowserCache.encar_all_count
+                }
+                Write-Host "   [Cloud Chrome] Encar Dom=$encarPersonalDom, Imp=$encarPersonalImp" -ForegroundColor Green
+            }
+        } catch { Write-Warning "Cloud Chrome helper warning: $_" }
+    }
+}
 
 $encarPersonalTotal = $encarPersonalDom + $encarPersonalImp
 $encarNormItems = New-Object System.Collections.Generic.List[object]
@@ -618,15 +648,28 @@ $kbNormItems = New-Object System.Collections.Generic.List[object]
 
 try {
     $uaKb = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"
-    $kbOptRaw = curl.exe -s -L --compressed -A $uaKb -H "Accept-Language: ko-KR,ko;q=0.9" -H "Referer: https://www.kbchachacha.com/" "https://www.kbchachacha.com/public/search/optionSale.json"
+    $kbOptRaw = & $CurlBin -s -L --compressed --max-time 25 -A $uaKb -H "Accept-Language: ko-KR,ko;q=0.9" -H "Referer: https://www.kbchachacha.com/" "https://www.kbchachacha.com/public/search/optionSale.json"
     $kbOpt = $kbOptRaw | ConvertFrom-Json
     $kbDirectTotal = [int]$kbOpt.optionSale.result.directYn
     $kbAllTotal    = [int]$kbOpt.optionSale.result.total
 
-    $tempKbHtml = Join-Path $env:TEMP "kb_direct_raw_$($PID).html"
-    curl.exe -s -L --compressed -A $uaKb -H "Accept-Language: ko-KR,ko;q=0.9" -H "Referer: https://www.kbchachacha.com/" "https://www.kbchachacha.com/public/search/list.empty?page=1&sort=-orderDate&directYn=Y" -o $tempKbHtml
+    $tempKbHtml = Join-Path $TempDir "kb_direct_raw_$($PID).html"
+    & $CurlBin -s -L --compressed --max-time 25 -A $uaKb -H "Accept-Language: ko-KR,ko;q=0.9" -H "Referer: https://www.kbchachacha.com/" "https://www.kbchachacha.com/public/search/list.empty?page=1&sort=-orderDate&directYn=Y" -o $tempKbHtml
     $kbHtml = [System.IO.File]::ReadAllText($tempKbHtml, [System.Text.Encoding]::UTF8)
     Remove-Item $tempKbHtml -Force -ErrorAction SilentlyContinue
+} catch { Write-Warning "KB curl error: $_" }
+
+if ($kbDirectTotal -le 0 -and $null -ne $cloudBrowserCache -and $cloudBrowserCache.kb_opt) {
+    try {
+        $kbDirectTotal = [int]$cloudBrowserCache.kb_opt.optionSale.result.directYn
+        $kbAllTotal    = [int]$cloudBrowserCache.kb_opt.optionSale.result.total
+        $kbHtml        = [string]$cloudBrowserCache.kb_html
+        Write-Host "   [Cloud Chrome] KB Direct=$kbDirectTotal" -ForegroundColor Green
+    } catch {}
+}
+
+try {
+    if (-not $kbHtml) { $kbHtml = "" }
 
     $cardBlocks = $kbHtml -split '<div class="area\s*"'
     $seenKb = @{}
