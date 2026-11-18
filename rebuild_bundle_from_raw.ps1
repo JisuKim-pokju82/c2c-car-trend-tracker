@@ -208,8 +208,38 @@ foreach ($r in $records) {
 [System.IO.File]::WriteAllLines($CsvPath, $csvLines, $utf8Bom)
 [System.IO.File]::WriteAllLines((Join-Path $DbDir "c2c_daily_summary_db.csv"), $csvLines, $utf8Bom)
 
-Write-Host "4. Writing competitor_trend_data.js..." -ForegroundColor Cyan
-$manifestJson = [System.IO.File]::ReadAllText((Join-Path $DbDir "db_manifest.json"), [System.Text.Encoding]::UTF8)
+Write-Host "4. Rebuilding db_manifest.json from all raw_vehicles_20*.csv files and writing competitor_trend_data.js..." -ForegroundColor Cyan
+$recTimeMap = @{}
+foreach ($r in $records) {
+    if ($r.date -and $r.updatedAt) { $recTimeMap[$r.date] = [string]$r.updatedAt }
+}
+
+$rebuiltManifest = New-Object System.Collections.Generic.List[object]
+foreach ($rf in $rawFiles) {
+    $dStr = ($rf.BaseName -replace '^raw_vehicles_', '')
+    $dPf = $portfolioByDate[$dStr]
+    $updStr = if ($recTimeMap.ContainsKey($dStr)) { $recTimeMap[$dStr] } else { $rf.LastWriteTime.ToString("yyyy-MM-dd HH:mm:ss") }
+    $dCnt  = if ($dPf -and $dPf.daangn) { [int]$dPf.daangn.sampleSize } else { 0 }
+    $kCnt  = if ($dPf -and $dPf.kcar)   { [int]$dPf.kcar.sampleSize }   else { 0 }
+    $eCnt  = if ($dPf -and $dPf.encar)  { [int]$dPf.encar.sampleSize }  else { 0 }
+    $kbCnt = if ($dPf -and $dPf.kb)     { [int]$dPf.kb.sampleSize }     else { 0 }
+    $rebuiltManifest.Add([pscustomobject][ordered]@{
+        date          = $dStr
+        updatedAt     = $updStr
+        rawCsvPath    = "raw_data/raw_vehicles_$($dStr).csv"
+        daangnUrlPath = "raw_data/daangn_sitemap_urls_$($dStr).csv"
+        vehicleCount  = ($dCnt + $kCnt + $eCnt + $kbCnt)
+        daangnCount   = $dCnt
+        kcarCount     = $kCnt
+        encarCount    = $eCnt
+        kbCount       = $kbCnt
+    })
+}
+$manifestJson = $rebuiltManifest | ConvertTo-Json -Depth 4
+if (-not $manifestJson.TrimStart().StartsWith("[")) {
+    $manifestJson = "[`r`n" + $manifestJson + "`r`n]"
+}
+[System.IO.File]::WriteAllText((Join-Path $DbDir "db_manifest.json"), $manifestJson, $utf8NoBom)
 $pfLatestJson = $latestPf | ConvertTo-Json -Depth 6
 $pfByDateJson = $portfolioByDate | ConvertTo-Json -Depth 7
 $rawAllJson   = $itemsAll | ConvertTo-Json -Depth 4 -Compress

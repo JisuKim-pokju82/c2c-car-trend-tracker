@@ -1005,12 +1005,11 @@ $manifestList = @()
 if (Test-Path $ManifestPath) {
     try {
         $mParsed = [System.IO.File]::ReadAllText($ManifestPath, [System.Text.Encoding]::UTF8) | ConvertFrom-Json
-        $mUnwrapped = if ($null -ne $mParsed.value) { $mParsed.value } else { $mParsed }
-        foreach ($item in $mUnwrapped) {
-            if ($null -ne $item.value) {
-                foreach ($sub in $item.value) { if ($sub.date) { $manifestList += $sub } }
-            } elseif ($item.date) {
-                $manifestList += $item
+        foreach ($elem in @($mParsed)) {
+            if ($null -ne $elem -and $null -ne $elem.PSObject.Properties['value']) {
+                foreach ($sub in @($elem.value)) { if ($null -ne $sub -and $sub.date) { $manifestList += $sub } }
+            } elseif ($null -ne $elem -and $elem.date) {
+                $manifestList += $elem
             }
         }
     } catch { $manifestList = @() }
