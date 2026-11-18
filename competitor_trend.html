@@ -662,9 +662,12 @@
           * [디스클레이머] 선택한 조회기간에 수집된 상세 매물 RAW 데이터(엔카·케이카·KB 전수, 당근 전국 46개 거점 표본) 기준 분포입니다.
         </div>
       </section>
+    </div>
 
-      <!-- Ⅳ. 개별 매물 RAW 상세 검색 -->
-      <section class="section-block" id="sectionRawBlock">
+    <!-- =================================================================== -->
+    <!-- Ⅳ. 개별 매물 RAW 상세 검색 (조회기간 무관 · 최종 업데이트 날짜 고정) -->
+    <!-- =================================================================== -->
+    <section class="section-block" id="sectionRawBlock">
         <div class="section-header">
           <h2 class="section-title" id="rawSectionTitle">Ⅳ. 업체별 개별 매물 RAW 검색</h2>
           <div class="big-tabs" id="rawPlatformTabs">
@@ -729,10 +732,9 @@
         </div>
 
         <div class="disclaimer-box">
-          * [디스클레이머] 선택한 조회기간 내 수집된 매물 상세 목록이며, 우측 [매물 보기] 클릭 시 각 플랫폼의 실제 매물 상세 페이지로 이동합니다.
+          * [디스클레이머] 조회기간 선택과 무관하게 항상 최종 업데이트 일자 기준 최신 매물 목록이 표시되며(과거 일자별 전체 원본은 하단 Ⅴ번 보관소에서 다운로드 가능), 우측 [매물 보기] 클릭 시 실제 매물 상세 페이지로 이동합니다.
         </div>
       </section>
-    </div>
 
     <!-- =================================================================== -->
     <!-- Ⅴ. 데이터 아카이브 (일자별 수집 CSV & 마스터 DB) -->
@@ -794,14 +796,23 @@
     function getRecords() { return unwrapArray(window.COMPETITOR_TREND_DATA); }
     function getAllRawVehicles() { return unwrapArray(window.COMPETITOR_RAW_PREVIEW); }
 
-    function getPeriodRawVehicles() {
+    function getLatestRawDate() {
       const all = getAllRawVehicles();
-      if (!startDateStr || !endDateStr) return all;
-      const filtered = all.filter(v => {
-        const d = v.collectedDate || '';
-        return d >= startDateStr && d <= endDateStr;
-      });
-      return filtered.length > 0 ? filtered : all;
+      let maxD = '';
+      for (let i = 0; i < all.length; i++) {
+        const d = all[i].collectedDate || '';
+        if (d > maxD) maxD = d;
+      }
+      if (maxD) return maxD;
+      const records = getRecords();
+      return records.length > 0 ? (records[records.length - 1].date || '') : '';
+    }
+
+    function getLatestRawVehicles() {
+      const all = getAllRawVehicles();
+      const latestDate = getLatestRawDate();
+      if (!latestDate) return all;
+      return all.filter(v => (v.collectedDate || '') === latestDate);
     }
 
     // 페이지 진입 시 오늘자(최신 수집일) 조회 데이터를 기본값으로 설정
@@ -1177,8 +1188,6 @@
       document.getElementById('endDateInput').value = endDateStr;
       renderFlowSection();
       renderPortfolioSection();
-      updateRawTabCounts();
-      filterAndRenderRawTable(true);
     }
 
     document.getElementById('executeSearchBtn').addEventListener('click', () => {
@@ -1211,7 +1220,7 @@
     let lastFilteredRawList = [];
 
     function updateRawTabCounts() {
-      const all = getPeriodRawVehicles();
+      const all = getLatestRawVehicles();
       const counts = { ALL: all.length, '당근중고차': 0, '케이카직거래': 0, '엔카닷컴개인': 0, 'KB차차차개인': 0 };
       all.forEach(v => { if (counts[v.platform] !== undefined) counts[v.platform]++; });
       const labels = {
@@ -1229,15 +1238,15 @@
 
     function filterAndRenderRawTable(resetLimit) {
       if (resetLimit) rawVisibleLimit = 200;
-      const all = getPeriodRawVehicles();
+      const all = getLatestRawVehicles();
       const originVal = document.getElementById('rawOriginSelect').value;
       const bandVal = document.getElementById('rawPriceBandSelect').value;
       const kw = document.getElementById('rawKeywordInput').value.trim().toLowerCase();
 
-      const rangeTxt = startDateStr === endDateStr ? `${startDateStr}` : `${startDateStr} ~ ${endDateStr}`;
+      const latestDate = getLatestRawDate();
       const rawTitleEl = document.getElementById('rawSectionTitle');
-      if (rawTitleEl && startDateStr) {
-        rawTitleEl.textContent = `Ⅳ. 업체별 개별 매물 RAW 검색 [${rangeTxt}]`;
+      if (rawTitleEl && latestDate) {
+        rawTitleEl.textContent = `Ⅳ. 업체별 개별 매물 RAW 검색 [${latestDate}]`;
       }
 
       lastFilteredRawList = all.filter(v => {
@@ -1367,7 +1376,7 @@
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `filtered_vehicles_${selectedRawPlat}_${startDateStr}_${endDateStr}.csv`;
+      a.download = `filtered_vehicles_${selectedRawPlat}_${getLatestRawDate() || 'latest'}.csv`;
       a.click();
       URL.revokeObjectURL(url);
     });
