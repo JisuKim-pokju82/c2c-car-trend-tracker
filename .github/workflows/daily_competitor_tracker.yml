@@ -2,29 +2,46 @@ name: Daily 4-Platform C2C Competitor Tracker (Cloud 08:00 KST)
 
 on:
   schedule:
-    # 정각(:00) 글로벌 큐 병목을 피하기 위해 한국시간 07:35 (UTC 22:35) 선발 실행 -> 08:00 전 완료 보장
-    - cron: '35 22 * * *'
-    # 보조 안전망: 한국시간 08:05 (UTC 23:05) 재확인 실행
-    - cron: '5 23 * * *'
+    # 다중 분산 스케줄 (ubuntu-latest 고속 풀 사용 + 07:17 / 07:37 / 07:52 / 08:07 / 08:23 KST 다중 안전망)
+    - cron: '17 22 * * *'
+    - cron: '37 22 * * *'
+    - cron: '52 22 * * *'
+    - cron: '7 23 * * *'
+    - cron: '23 23 * * *'
+    - cron: '*/5 * * * *'
   workflow_dispatch:
+    inputs:
+      force:
+        description: 'Force full re-collection even if today file exists'
+        required: false
+        default: 'false'
 
 permissions:
   contents: write
 
 jobs:
   collect-and-commit:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
+    env:
+      TZ: Asia/Seoul
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
+      - name: Prepare Headless Browser Helper
+        run: |
+          pip install --quiet playwright || pip install --quiet --break-system-packages playwright || true
+
       - name: Run 4-Platform RAW & Portfolio Collector
         shell: pwsh
         run: |
-          tzutil /s "Korea Standard Time"
-          pwsh -NoProfile -ExecutionPolicy Bypass -File "./collect_competitor_trend.ps1"
+          if ("${{ github.event.inputs.force }}" -eq "true") {
+            pwsh -NoProfile -File "./collect_competitor_trend.ps1" -Force
+          } else {
+            pwsh -NoProfile -File "./collect_competitor_trend.ps1"
+          }
 
       - name: Commit & Push Updated RAW Data & Dashboard Bundle
         shell: pwsh
@@ -45,5 +62,5 @@ jobs:
             }
             git push origin main
           } else {
-            Write-Host "No new changes to commit."
+            Write-Host "Today's 4-platform data is already up to date."
           }
