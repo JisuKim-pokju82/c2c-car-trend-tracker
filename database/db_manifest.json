@@ -1,13 +1,13 @@
 [
 {
-  "date": "2026-11-18",
-  "updatedAt": "2026-11-18 09:07:14",
-  "rawCsvPath": "raw_data/raw_vehicles_2026-11-18.csv",
-  "daangnUrlPath": "raw_data/daangn_sitemap_urls_2026-11-18.csv",
-  "vehicleCount": 3130,
-  "daangnCount": 280,
-  "kcarCount": 343,
-  "encarCount": 2502,
-  "kbCount": 5
+    "date":  "2026-11-18",
+    "updatedAt":  "2026-11-18 08:46:29",
+    "rawCsvPath":  "raw_data/raw_vehicles_2026-11-18.csv",
+    "daangnUrlPath":  "raw_data/daangn_sitemap_urls_2026-11-18.csv",
+    "vehicleCount":  13583,
+    "daangnCount":  10733,
+    "kcarCount":  343,
+    "encarCount":  2502,
+    "kbCount":  5
 }
 ]

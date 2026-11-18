@@ -27,8 +27,9 @@ $TodayYmd  = $Now.ToString("yyyyMMdd")
 $Timestamp = $Now.ToString("yyyy-MM-dd HH:mm:ss")
 
 $TodayRawLockPath = Join-Path $RawDir "raw_vehicles_$($TodayDate).csv"
-if ((Test-Path $TodayRawLockPath) -and (-not $Force)) {
+if ((Test-Path $TodayRawLockPath) -and (-not $Force -or $env:GITHUB_ACTIONS -eq "true")) {
     $isCompleteToday = $false
+    $isKoreanAutoToday = $false
     if (Test-Path $JsonPath) {
         try {
             $chkRaw = [System.IO.File]::ReadAllText($JsonPath, [System.Text.Encoding]::UTF8) | ConvertFrom-Json
@@ -36,6 +37,7 @@ if ((Test-Path $TodayRawLockPath) -and (-not $Force)) {
                 $rec = if ($null -ne $el -and $null -ne $el.PSObject.Properties['value']) { $el.value } else { $el }
                 foreach ($r in @($rec)) {
                     if ($null -ne $r -and $r.date -eq $TodayDate -and [int]$r.daangnCarsCount -gt 0 -and [int]$r.kcarDirectCount -gt 0 -and [int]$r.encarPersonalCount -gt 0 -and [int]$r.kbDirectCount -gt 0) {
+                        if ($r.source -ne "cloud_geo_fallback") { $isKoreanAutoToday = $true }
                         if ($env:GITHUB_ACTIONS -eq "true" -or $r.source -ne "cloud_geo_fallback") {
                             $isCompleteToday = $true
                         }
@@ -44,10 +46,14 @@ if ((Test-Path $TodayRawLockPath) -and (-not $Force)) {
             }
         } catch {}
     }
-    if ($isCompleteToday) {
+    if ($isKoreanAutoToday -and $env:GITHUB_ACTIONS -eq "true") {
+        Write-Host "[$Timestamp] Today's full Korean-IP 4-platform dataset ($TodayDate) is already present. Protecting it from partial overseas overwrite." -ForegroundColor Cyan
+        exit 0
+    }
+    if ($isCompleteToday -and (-not $Force)) {
         Write-Host "[$Timestamp] Today's 4-platform RAW data ($TodayRawLockPath) is already collected and verified complete. Skipping re-collection." -ForegroundColor Cyan
         exit 0
-    } else {
+    } elseif (-not $Force) {
         Write-Host "[$Timestamp] Existing RAW file found for $TodayDate, but 4-platform counts were incomplete. Re-collecting full dataset..." -ForegroundColor Yellow
     }
 }
