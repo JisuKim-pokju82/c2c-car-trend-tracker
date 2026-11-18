@@ -16,7 +16,7 @@ $WorkDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 if (-not $WorkDir) { $WorkDir = (Get-Location).Path }
 $TodayDate = ([DateTimeOffset]::UtcNow.ToOffset([TimeSpan]::FromHours(9))).ToString("yyyy-MM-dd")
 
-# 1. Sync data, scripts, and dashboard HTML via Git Data API (fast multi-file commit, non-forced)
+# 1. Sync bulk data, scripts, and dashboard HTML via Git Data API (excluding competitor_trend.json, which is committed via Contents API PUT below to fire a real GitHub push event)
 $refInfo = Invoke-RestMethod -Uri "https://api.github.com/repos/$Owner/$Repo/git/ref/heads/main" -Headers $headers -Method Get
 $baseCommitSha = $refInfo.object.sha
 $commitInfo = Invoke-RestMethod -Uri "https://api.github.com/repos/$Owner/$Repo/git/commits/$baseCommitSha" -Headers $headers -Method Get
@@ -28,10 +28,11 @@ $filesToUpload = @(
     "cloud_browser_fetch.py",
     "rebuild_bundle_from_raw.ps1",
     "register_windows_task.ps1",
+    "run_scheduled_sync.ps1",
+    "run_hidden.vbs",
     "upload_to_github.ps1",
     "competitor_trend.html",
     "competitor_trend.csv",
-    "competitor_trend.json",
     "competitor_trend_data.js",
     "raw_data/raw_vehicles_$($TodayDate).csv",
     "raw_data/raw_vehicles_latest.csv",
@@ -68,9 +69,10 @@ foreach ($relPath in $filesToUpload) {
 $treeBody = @{ base_tree = $baseTreeSha; tree = $treeItems } | ConvertTo-Json -Depth 5 -Compress
 $newTree = Invoke-RestMethod -Uri "https://api.github.com/repos/$Owner/$Repo/git/trees" -Headers $headers -Method Post -ContentType "application/json" -Body $treeBody
 
+$didBulkPatch = $false
 if ($newTree.sha -ne $baseTreeSha) {
     $commitBody = @{
-        message = "chore(data): sync daily C2C competitor trend & RAW data ($TodayDate)"
+        message = "chore(data): sync daily C2C RAW & bundle ($TodayDate)"
         tree    = $newTree.sha
         parents = @($baseCommitSha)
     } | ConvertTo-Json -Compress
@@ -78,33 +80,50 @@ if ($newTree.sha -ne $baseTreeSha) {
 
     $refUpdateBody = @{ sha = $newCommit.sha; force = $false } | ConvertTo-Json -Compress
     Invoke-RestMethod -Uri "https://api.github.com/repos/$Owner/$Repo/git/refs/heads/main" -Headers $headers -Method Patch -ContentType "application/json" -Body $refUpdateBody | Out-Null
-    Write-Host "Successfully synced ($TodayDate) data & dashboard to GitHub ($($newCommit.sha))!" -ForegroundColor Green
-} else {
-    Write-Host "GitHub main branch is already up to date ($baseCommitSha)." -ForegroundColor Cyan
+    $didBulkPatch = $true
+    Write-Host "Synced ($TodayDate) bulk files to GitHub ($($newCommit.sha))!" -ForegroundColor Green
 }
 
-# 2. Ensure .github/workflows/daily_competitor_tracker.yml is committed via Contents API PUT
-#    (Contents API triggers GitHub's push event so Actions Cron Scheduler officially registers cron '0 23 * * *')
-$wfRel = ".github/workflows/daily_competitor_tracker.yml"
+# 2. Commit competitor_trend.json via official Contents API PUT so GitHub receives a standard push event
+$jsonRel  = "competitor_trend.json"
+$jsonFull = Join-Path $WorkDir $jsonRel
+if (Test-Path $jsonFull) {
+    $jBytes = [System.IO.File]::ReadAllBytes($jsonFull)
+    $jB64   = [Convert]::ToBase64String($jBytes)
+    $remJ   = $null
+    try { $remJ = Invoke-RestMethod -Uri "https://api.github.com/repos/$Owner/$Repo/contents/$jsonRel" -Headers $headers -Method Get } catch {}
+    $remJB64 = if ($remJ -and $remJ.content) { ($remJ.content -replace '\s+', '') } else { "" }
+    if ($remJB64 -ne $jB64) {
+        $putJ = [ordered]@{
+            message = "chore(data): update daily C2C summary JSON ($TodayDate)"
+            content = $jB64
+            branch  = "main"
+        }
+        if ($remJ -and $remJ.sha) { $putJ["sha"] = $remJ.sha }
+        $resJ = Invoke-RestMethod -Uri "https://api.github.com/repos/$Owner/$Repo/contents/$jsonRel" -Headers $headers -Method Put -ContentType "application/json" -Body ($putJ | ConvertTo-Json -Compress)
+        Write-Host "Updated competitor_trend.json via Contents API ($($resJ.commit.sha))!" -ForegroundColor Green
+    }
+}
+
+# 3. Ensure .github/workflows/daily_competitor_tracker.yml is registered via Contents API PUT
+#    (Also re-touches workflow schedule registration if a low-level ref patch occurred above)
+$wfRel  = ".github/workflows/daily_competitor_tracker.yml"
 $wfFull = Join-Path $WorkDir ($wfRel -replace '/', '\')
 if (Test-Path $wfFull) {
     $wfBytes = [System.IO.File]::ReadAllBytes($wfFull)
     $wfB64   = [Convert]::ToBase64String($wfBytes)
     $remoteWf = $null
-    try {
-        $remoteWf = Invoke-RestMethod -Uri "https://api.github.com/repos/$Owner/$Repo/contents/$wfRel" -Headers $headers -Method Get
-    } catch {}
-
+    try { $remoteWf = Invoke-RestMethod -Uri "https://api.github.com/repos/$Owner/$Repo/contents/$wfRel" -Headers $headers -Method Get } catch {}
     $remoteCleanB64 = if ($remoteWf -and $remoteWf.content) { ($remoteWf.content -replace '\s+', '') } else { "" }
+
     if ($remoteCleanB64 -ne $wfB64) {
         $putBody = [ordered]@{
-            message = "ci(schedule): register daily 08:00 KST (23:00 UTC) 4-platform cloud workflow"
+            message = "ci(schedule): register daily 08:00 KST 4-platform cloud workflow"
             content = $wfB64
             branch  = "main"
         }
         if ($remoteWf -and $remoteWf.sha) { $putBody["sha"] = $remoteWf.sha }
-        $putJson = $putBody | ConvertTo-Json -Compress
-        $putRes = Invoke-RestMethod -Uri "https://api.github.com/repos/$Owner/$Repo/contents/$wfRel" -Headers $headers -Method Put -ContentType "application/json" -Body $putJson
+        $putRes = Invoke-RestMethod -Uri "https://api.github.com/repos/$Owner/$Repo/contents/$wfRel" -Headers $headers -Method Put -ContentType "application/json" -Body ($putBody | ConvertTo-Json -Compress)
         Write-Host "Registered workflow schedule via Contents API ($($putRes.commit.sha))!" -ForegroundColor Cyan
     }
 }
