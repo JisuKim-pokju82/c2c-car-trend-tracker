@@ -24,34 +24,60 @@ def main():
             browser = p.chromium.launch(
                 executable_path=chrome_bin if os.path.exists(chrome_bin) else None,
                 headless=True,
-                args=["--no-sandbox", "--disable-blink-features=AutomationControlled", "--disable-dev-shm-usage"]
+                args=[
+                    "--headless=new",
+                    "--no-sandbox",
+                    "--disable-blink-features=AutomationControlled",
+                    "--disable-dev-shm-usage",
+                    "--window-size=1440,900"
+                ]
             )
             ctx = browser.new_context(
                 locale="ko-KR",
                 timezone_id="Asia/Seoul",
                 viewport={"width": 1440, "height": 900},
-                user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"
+                user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
+                extra_http_headers={
+                    "sec-ch-ua": '"Google Chrome";v="131", "Chromium";v="131", "Not_A Brand";v="24"',
+                    "sec-ch-ua-mobile": "?0",
+                    "sec-ch-ua-platform": '"Windows"',
+                    "Accept-Language": "ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7"
+                }
             )
-            ctx.add_init_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined});")
+            ctx.add_init_script("""
+                Object.defineProperty(navigator, 'webdriver', {get: () => undefined});
+                window.chrome = { runtime: {} };
+                Object.defineProperty(navigator, 'languages', {get: () => ['ko-KR', 'ko', 'en-US', 'en']});
+                Object.defineProperty(navigator, 'plugins', {get: () => [1, 2, 3, 4, 5]});
+            """)
             page = ctx.new_page()
 
-            # 1. Warm up www.encar.com, then open api.encar.com directly so JS challenge completes on same origin
+            captured_api = []
+            def on_resp(resp):
+                if "api.encar.com/search/car/list" in resp.url:
+                    try:
+                        captured_api.append((resp.status, resp.url, resp.text()[:200]))
+                    except Exception:
+                        pass
+            page.on("response", on_resp)
+
             try:
-                page.goto("http://www.encar.com/index.do", wait_until="domcontentloaded", timeout=20000)
-                page.wait_for_timeout(1500)
+                page.goto("https://car.encar.com/list/car?page=1", wait_until="domcontentloaded", timeout=25000)
+                page.wait_for_timeout(5000)
+                print(f"[cloud_browser_fetch] car.encar.com captured_api count={len(captured_api)}, sample={captured_api[:1]}", file=sys.stderr)
             except Exception as e0:
-                print(f"[cloud_browser_fetch] www.encar.com warmup note: {e0}", file=sys.stderr)
+                print(f"[cloud_browser_fetch] car.encar.com warmup note: {e0}", file=sys.stderr)
 
             try:
                 first_url = "https://api.encar.com/search/car/list/general?count=true&q=(And.Hidden.N._.CarType.Y._.Separation.A.)&sr=%7CModifiedDate%7C0%7C500"
                 page.goto(first_url, wait_until="domcontentloaded", timeout=25000)
 
                 ready_json = False
-                last_txt = ""
-                for _ in range(24):
+                last_html = ""
+                for _ in range(30):
                     try:
                         txt = page.evaluate("() => document.body ? document.body.innerText.trim() : ''")
-                        last_txt = txt
+                        last_html = page.evaluate("() => document.documentElement ? document.documentElement.innerHTML.slice(0, 260) : ''")
                         if txt.startswith("{") and '"Count"' in txt:
                             ready_json = True
                             break
@@ -60,9 +86,9 @@ def main():
                     page.wait_for_timeout(500)
 
                 if not ready_json:
-                    print(f"[cloud_browser_fetch] api.encar.com did not resolve to JSON; url={page.url}, title={page.title()}, body={last_txt[:200]}", file=sys.stderr)
+                    clean_snip = last_html.replace("\n", " ").replace("\r", " ")
+                    print(f"[cloud_browser_fetch] api.encar.com non-JSON html={clean_snip}", file=sys.stderr)
                 else:
-                    # Now we are on https://api.encar.com (same-origin!) with valid session cookies!
                     encar_data = page.evaluate("""async () => {
                         const getJson = async (path) => {
                             const r = await fetch(path, { credentials: 'include' });
@@ -93,7 +119,7 @@ def main():
                     result["encar_imp_items"] = encar_data.get("impItems", [])
                     result["encar_all_count"] = encar_data.get("allCount", 0)
             except Exception as e:
-                print(f"[cloud_browser_fetch] Encar same-origin fetch note: {e}", file=sys.stderr)
+                print(f"[cloud_browser_fetch] Encar fetch note: {e}", file=sys.stderr)
 
             browser.close()
     except Exception as e:
