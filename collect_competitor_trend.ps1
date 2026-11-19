@@ -573,7 +573,7 @@ try {
 } catch { Write-Warning "Encar error: $_" }
 
 $cloudBrowserCache = $null
-if ($encarPersonalDom -eq 0 -and $env:GITHUB_ACTIONS -eq "true") {
+if ($encarPersonalDom -eq 0 -and ($env:GITHUB_ACTIONS -eq "true" -or $env:GCP_CLOUD_RUN -eq "true")) {
     $pyHelper = Join-Path $WorkDir "cloud_browser_fetch.py"
     $cloudJsonOut = Join-Path $TempDir "kr_cloud_fetch_$($PID).json"
     if (Test-Path $pyHelper) {
