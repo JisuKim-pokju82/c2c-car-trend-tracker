@@ -26,8 +26,9 @@ $TodayDate = $Now.ToString("yyyy-MM-dd")
 $TodayYmd  = $Now.ToString("yyyyMMdd")
 $Timestamp = $Now.ToString("yyyy-MM-dd HH:mm:ss")
 
+$IsCloudRunner = ($env:GITHUB_ACTIONS -eq "true" -or $env:GCP_CLOUD_RUN -eq "true")
 $TodayRawLockPath = Join-Path $RawDir "raw_vehicles_$($TodayDate).csv"
-if ((Test-Path $TodayRawLockPath) -and (-not $Force -or $env:GITHUB_ACTIONS -eq "true")) {
+if ((Test-Path $TodayRawLockPath) -and (-not $Force -or $IsCloudRunner)) {
     $isCompleteToday = $false
     $isKoreanAutoToday = $false
     if (Test-Path $JsonPath) {
@@ -38,7 +39,7 @@ if ((Test-Path $TodayRawLockPath) -and (-not $Force -or $env:GITHUB_ACTIONS -eq 
                 foreach ($r in @($rec)) {
                     if ($null -ne $r -and $r.date -eq $TodayDate -and [int]$r.daangnCarsCount -gt 0 -and [int]$r.kcarDirectCount -gt 0 -and [int]$r.encarPersonalCount -gt 0 -and [int]$r.kbDirectCount -gt 0) {
                         if ($r.source -ne "cloud_geo_fallback") { $isKoreanAutoToday = $true }
-                        if ($env:GITHUB_ACTIONS -eq "true" -or $r.source -ne "cloud_geo_fallback") {
+                        if ($IsCloudRunner -or $r.source -ne "cloud_geo_fallback") {
                             $isCompleteToday = $true
                         }
                     }
@@ -46,8 +47,8 @@ if ((Test-Path $TodayRawLockPath) -and (-not $Force -or $env:GITHUB_ACTIONS -eq 
             }
         } catch {}
     }
-    if ($isKoreanAutoToday -and $env:GITHUB_ACTIONS -eq "true") {
-        Write-Host "[$Timestamp] Today's full Korean-IP 4-platform dataset ($TodayDate) is already present. Protecting it from partial overseas overwrite." -ForegroundColor Cyan
+    if ($isKoreanAutoToday -and $IsCloudRunner) {
+        Write-Host "[$Timestamp] Today's full ISP 4-platform dataset ($TodayDate) is already present. Protecting it from cloud overwrite." -ForegroundColor Cyan
         exit 0
     }
     if ($isCompleteToday -and (-not $Force)) {
@@ -573,7 +574,7 @@ try {
 } catch { Write-Warning "Encar error: $_" }
 
 $cloudBrowserCache = $null
-if ($encarPersonalDom -eq 0 -and ($env:GITHUB_ACTIONS -eq "true" -or $env:GCP_CLOUD_RUN -eq "true")) {
+if ($encarPersonalDom -eq 0 -and $env:GITHUB_ACTIONS -eq "true") {
     $pyHelper = Join-Path $WorkDir "cloud_browser_fetch.py"
     $cloudJsonOut = Join-Path $TempDir "kr_cloud_fetch_$($PID).json"
     if (Test-Path $pyHelper) {
@@ -760,8 +761,8 @@ $kbTurnoverPct = if ($kbDirectTotal -gt 0) { [math]::Round(($kbSoldToday / $kbDi
 $recordSource = "auto"
 if ($daangnTotal -le 0 -or $kcarTotalCount -le 0 -or $encarPersonalTotal -le 0 -or $kbDirectTotal -le 0) {
     $countMsg = "Daangn=$daangnTotal, KCar=$kcarTotalCount, Encar=$encarPersonalTotal, KB=$kbDirectTotal"
-    if ($env:GITHUB_ACTIONS -eq "true" -and $daangnTotal -gt 0 -and $kcarTotalCount -gt 0) {
-        Write-Warning "[$Timestamp] Overseas GitHub runner Geo-IP blocked on domestic-only platform(s) ($countMsg). Carrying forward latest verified Encar/KB baseline so PC-OFF 08:00 AM update still succeeds!"
+    if ($IsCloudRunner -and $daangnTotal -gt 0 -and $kcarTotalCount -gt 0) {
+        Write-Warning "[$Timestamp] Cloud datacenter IP blocked on ASN-filtered platform(s) ($countMsg). Saving live Daangn/KCar/KB counts and carrying forward latest verified Encar baseline so PC-OFF 08:00 AM update always succeeds!"
         $recordSource = "cloud_geo_fallback"
         $prevLatestRec = $null
         if (Test-Path $JsonPath) {
