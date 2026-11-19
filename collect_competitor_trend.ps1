@@ -583,11 +583,17 @@ if ($encarPersonalDom -eq 0 -and ($env:GITHUB_ACTIONS -eq "true" -or $env:GCP_CL
             if (Test-Path $cloudJsonOut) {
                 $cloudBrowserCache = [System.IO.File]::ReadAllText($cloudJsonOut, [System.Text.Encoding]::UTF8) | ConvertFrom-Json
                 Remove-Item $cloudJsonOut -Force -ErrorAction SilentlyContinue
-                if ($cloudBrowserCache.encar_dom -and $cloudBrowserCache.encar_dom.Count) {
+                if ($cloudBrowserCache.encar_dom_count) {
+                    $encarPersonalDom = [int]$cloudBrowserCache.encar_dom_count
+                    if ($cloudBrowserCache.encar_dom_items) { $encarDomItems.AddRange(@($cloudBrowserCache.encar_dom_items)) }
+                } elseif ($cloudBrowserCache.encar_dom -and $cloudBrowserCache.encar_dom.Count) {
                     $encarPersonalDom = [int]$cloudBrowserCache.encar_dom.Count
                     if ($cloudBrowserCache.encar_dom.SearchResults) { $encarDomItems.AddRange($cloudBrowserCache.encar_dom.SearchResults) }
                 }
-                if ($cloudBrowserCache.encar_imp -and $cloudBrowserCache.encar_imp.Count) {
+                if ($cloudBrowserCache.encar_imp_count) {
+                    $encarPersonalImp = [int]$cloudBrowserCache.encar_imp_count
+                    if ($cloudBrowserCache.encar_imp_items) { $encarImpItems.AddRange(@($cloudBrowserCache.encar_imp_items)) }
+                } elseif ($cloudBrowserCache.encar_imp -and $cloudBrowserCache.encar_imp.Count) {
                     $encarPersonalImp = [int]$cloudBrowserCache.encar_imp.Count
                     if ($cloudBrowserCache.encar_imp.SearchResults) { $encarImpItems.AddRange($cloudBrowserCache.encar_imp.SearchResults) }
                 }
