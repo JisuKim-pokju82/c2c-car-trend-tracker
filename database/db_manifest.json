@@ -53,5 +53,16 @@
         "kcarCount":  349,
         "encarCount":  2533,
         "kbCount":  39
+    },
+    {
+        "date":  "2026-11-21",
+        "updatedAt":  "2026-11-21 03:43:03",
+        "rawCsvPath":  "raw_data/raw_vehicles_2026-11-21.csv",
+        "daangnUrlPath":  "raw_data/daangn_sitemap_urls_2026-11-21.csv",
+        "vehicleCount":  14635,
+        "daangnCount":  11722,
+        "kcarCount":  353,
+        "encarCount":  2521,
+        "kbCount":  39
     }
 ]
