@@ -397,19 +397,56 @@ foreach ($hub in $daangnHubs) {
     } catch {}
 }
 
+$prevDaangnStatusMap = @{}
+$hasPrevDaangnCsv = $false
+try {
+    $prevRawFiles = @(Get-ChildItem -Path $RawDir -Filter "raw_vehicles_20*.csv" -ErrorAction SilentlyContinue |
+        Where-Object { ($_.BaseName -replace '^raw_vehicles_', '') -lt $TodayDate } |
+        Sort-Object Name)
+    if ($prevRawFiles.Count -gt 0) {
+        $prevRawCsv = Import-Csv -Path $prevRawFiles[$prevRawFiles.Count - 1].FullName -Encoding UTF8
+        $platDaangnName = U "\uB2F9\uADFC\uC911\uACE0\uCC28"
+        foreach ($pr in $prevRawCsv) {
+            $pv = @($pr.PSObject.Properties)
+            if ($pv.Count -ge 14 -and $pv[1].Value -eq $platDaangnName -and $pv[2].Value) {
+                $prevDaangnStatusMap[[string]$pv[2].Value] = [string]$pv[13].Value
+                $hasPrevDaangnCsv = $true
+            }
+        }
+    }
+} catch {}
+
+$NowUtc = [DateTimeOffset]::UtcNow.UtcDateTime
+$Cutoff24hUtc = $NowUtc.AddHours(-24)
+
 $daangnNormItems = New-Object System.Collections.Generic.List[object]
-$daangnSampleOnSale = 0; $daangnSampleReserved = 0; $daangnSampleTraded = 0; $daangnSampleNewToday = 0
+$daangnSampleOnSale = 0; $daangnSampleReserved = 0; $daangnSampleTraded = 0
+$daangnSampleNew24h = 0; $daangnNewlyTraded24h = 0
 
 foreach ($p in $daangnPostsMap.Values) {
+    $cidClean = ($p.id -replace '^/kr/cars/|/$', '')
     $st = if ($p.status -eq 'ON_SALE') { $daangnSampleOnSale++; $KR_ONSALE }
           elseif ($p.status -eq 'RESERVED') { $daangnSampleReserved++; $KR_RESERVED }
           else { $daangnSampleTraded++; $KR_TRADED }
+
+    $isWithin24h = $false
     if ($p.publishedAt) {
         try {
-            $pubKst = ([DateTime]::Parse([string]$p.publishedAt)).ToUniversalTime().AddHours(9).ToString("yyyy-MM-dd")
-            if ($pubKst -eq $TodayDate) { $daangnSampleNewToday++ }
+            $pubUtc = ([DateTimeOffset]::Parse([string]$p.publishedAt)).UtcDateTime
+            if ($pubUtc -ge $Cutoff24hUtc) {
+                $daangnSampleNew24h++
+                $isWithin24h = $true
+            }
         } catch {
-            if ($p.publishedAt.StartsWith($TodayDate)) { $daangnSampleNewToday++ }
+            if ($p.publishedAt.StartsWith($TodayDate)) {
+                $daangnSampleNew24h++
+                $isWithin24h = $true
+            }
+        }
+    }
+    if ($st -eq $KR_TRADED) {
+        if (($hasPrevDaangnCsv -and $prevDaangnStatusMap.ContainsKey($cidClean) -and $prevDaangnStatusMap[$cidClean] -ne $KR_TRADED) -or $isWithin24h) {
+            $daangnNewlyTraded24h++
         }
     }
 
@@ -422,7 +459,7 @@ foreach ($p in $daangnPostsMap.Values) {
     $row = [pscustomobject][ordered]@{
         collectedDate = $TodayDate
         platform      = (U "\uB2F9\uADFC\uC911\uACE0\uCC28")
-        carId         = ($p.id -replace '^/kr/cars/|/$', '')
+        carId         = $cidClean
         originType    = $ob.Origin
         manufacturer  = $ob.Brand
         model         = $modelShort
@@ -443,17 +480,72 @@ foreach ($p in $daangnPostsMap.Values) {
 }
 
 $daangnPortfolio = Build-PortfolioSummary $daangnNormItems.ToArray()
-$daangnTotal = $daangnSitemapIds.Count
+$daangnSitemapRawCount = $daangnSitemapIds.Count
+$daangnSampleTotal = $daangnNormItems.Count
+$daangnActiveSample = $daangnSampleOnSale + $daangnSampleReserved
+$daangnOnSaleRatio = if ($daangnSampleTotal -gt 0) { $daangnActiveSample / [double]$daangnSampleTotal } else { 0.88 }
+
+# Daangn S3 sitemap-detail.xml.gz has Cache-Control max-age=604800 (weekly regeneration).
+# Anchor directly on weekly S3 refresh days; track daily live changes via 46-hub active sample on cached days.
+$prevDayRec = $null
+if (Test-Path $JsonPath) {
+    try {
+        $pRaw = [System.IO.File]::ReadAllText($JsonPath, [System.Text.Encoding]::UTF8) | ConvertFrom-Json
+        $pList = @()
+        foreach ($el in @($pRaw)) {
+            if ($null -ne $el -and $null -ne $el.PSObject.Properties['value']) {
+                foreach ($s in @($el.value)) { if ($null -ne $s -and $s.date -and $s.date -lt $TodayDate) { $pList += $s } }
+            } elseif ($null -ne $el -and $el.date -and $el.date -lt $TodayDate) {
+                $pList += $el
+            }
+        }
+        if ($pList.Count -gt 0) { $prevDayRec = @($pList | Sort-Object date)[-1] }
+    } catch {}
+}
+
+$prevSmRaw = if ($null -ne $prevDayRec -and $null -ne $prevDayRec.PSObject.Properties['daangnSitemapRawCount'] -and [int]$prevDayRec.daangnSitemapRawCount -gt 0) {
+    [int]$prevDayRec.daangnSitemapRawCount
+} elseif ($null -ne $prevDayRec -and [int]$prevDayRec.daangnCarsCount -eq $daangnSitemapRawCount) {
+    $daangnSitemapRawCount
+} else { 0 }
+
+$daangnAnchorTotal = $daangnSitemapRawCount
+$daangnAnchorActiveSample = $daangnActiveSample
+
+if ($null -eq $prevDayRec -or ($daangnSitemapRawCount -gt 0 -and $prevSmRaw -ne $daangnSitemapRawCount)) {
+    $daangnTotal = $daangnSitemapRawCount
+    $daangnAnchorTotal = $daangnSitemapRawCount
+    $daangnAnchorActiveSample = $daangnActiveSample
+} else {
+    $daangnAnchorTotal = if ($null -ne $prevDayRec.PSObject.Properties['daangnAnchorTotal'] -and [int]$prevDayRec.daangnAnchorTotal -gt 0) {
+        [int]$prevDayRec.daangnAnchorTotal
+    } else {
+        [int]$prevDayRec.daangnCarsCount
+    }
+    $daangnAnchorActiveSample = if ($null -ne $prevDayRec.PSObject.Properties['daangnAnchorActiveSample'] -and [int]$prevDayRec.daangnAnchorActiveSample -gt 0) {
+        [int]$prevDayRec.daangnAnchorActiveSample
+    } else {
+        $daangnActiveSample
+    }
+    $daangnTotal = if ($daangnAnchorActiveSample -gt 0 -and $daangnActiveSample -gt 0) {
+        [int][math]::Round($daangnAnchorTotal * ($daangnActiveSample / [double]$daangnAnchorActiveSample))
+    } else {
+        $daangnAnchorTotal
+    }
+}
+
 $daangnDomTotalEst = [int][math]::Round($daangnTotal * ($daangnPortfolio.domesticRatio / 100.0))
 $daangnImpTotalEst = $daangnTotal - $daangnDomTotalEst
-$daangnSampleTotal = $daangnNormItems.Count
-$daangnOnSaleRatio = if ($daangnSampleTotal -gt 0) { ($daangnSampleOnSale + $daangnSampleReserved) / $daangnSampleTotal } else { 0.88 }
 $daangnOnSaleEst = [int][math]::Round($daangnTotal * $daangnOnSaleRatio)
 $daangnTradedEst = $daangnTotal - $daangnOnSaleEst
 
 $daangnSnap = Compare-And-SaveSnapshot "daangn" $daangnSitemapIds.ToArray()
-$daangnNewToday = if ($null -ne $daangnSnap.NewFromDiff -and $daangnSnap.NewFromDiff -gt $daangnSampleNewToday) { $daangnSnap.NewFromDiff } else { $daangnSampleNewToday }
-$daangnSoldToday = if ($null -ne $daangnSnap.SoldFromDiff -and $daangnSnap.SoldFromDiff -gt $daangnSampleTraded) { $daangnSnap.SoldFromDiff } else { $daangnSampleTraded }
+$daangnNewToday = $daangnSampleNew24h
+$daangnSoldToday = if ($hasPrevDaangnCsv -and $daangnSampleTotal -gt 0 -and $daangnNewlyTraded24h -gt 0) {
+    [int][math]::Round($daangnNewlyTraded24h * ($daangnTotal / [double]$daangnSampleTotal))
+} else {
+    $daangnSampleTraded
+}
 $daangnTurnoverPct = if ($daangnTotal -gt 0) { [math]::Round(($daangnSoldToday / $daangnTotal) * 100, 2) } else { 0 }
 
 # ==============================================================================
@@ -488,12 +580,12 @@ try {
     $cntRes = Invoke-KCarJson "https://market-api.kcar.com/api/v1/ds/carSearchListCount" '{"wr_eq_sell_dcd":"ALL","countFlag":true}'
     $kcarTotalCount = [int]$cntRes.data.totalCnt
 
-    for ($idx = 1; $idx -le 60; $idx += 9) {
+    for ($idx = 1; $idx -le 300; $idx += 9) {
         $r = Invoke-KCarJson "https://market-api.kcar.com/api/v1/ds/pagingCarSearchList" "{`"componentId`":`"DS-0044-001-002`",`"index`":$idx,`"orderBy`":`"iqy_dt:desc`",`"orderFlag`":true}"
         if (-not $r.data -or $r.data.Count -eq 0) { break }
         foreach ($item in $r.data) { if ($item.ccCarId) { $kcarCarsMap[$item.ccCarId] = $item } }
     }
-    for ($idx = 1; $idx -le 400; $idx += 20) {
+    for ($idx = 1; $idx -le 5000; $idx += 20) {
         $r = Invoke-KCarJson "https://market-api.kcar.com/api/v1/ds/pagingCarSearchList" "{`"componentId`":`"DS-0044-002-002`",`"index`":$idx,`"orderBy`":`"iqy_dt:desc`",`"orderFlag`":true}"
         if (-not $r.data -or $r.data.Count -eq 0) { break }
         foreach ($item in $r.data) { if ($item.ccCarId) { $kcarCarsMap[$item.ccCarId] = $item } }
@@ -659,29 +751,62 @@ Write-Host "4. Collecting KB ChaChaCha Personal Direct Deal RAW (100% Full Enume
 $kbDirectTotal = 0; $kbAllTotal = 0
 $kbNormItems = New-Object System.Collections.Generic.List[object]
 
+$kbHtmlPages = New-Object System.Collections.Generic.List[string]
 try {
     $uaKb = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"
-    $kbOptRaw = & $CurlBin -s -L --compressed --max-time 25 -A $uaKb -H "Accept-Language: ko-KR,ko;q=0.9" -H "Referer: https://www.kbchachacha.com/" "https://www.kbchachacha.com/public/search/optionSale.json"
-    $kbOpt = $kbOptRaw | ConvertFrom-Json
-    $kbDirectTotal = [int]$kbOpt.optionSale.result.directYn
-    $kbAllTotal    = [int]$kbOpt.optionSale.result.total
+    for ($kbTry = 1; $kbTry -le 3; $kbTry++) {
+        try {
+            $kbOptRaw = & $CurlBin -s -L --compressed --max-time 25 -A $uaKb -H "Accept-Language: ko-KR,ko;q=0.9" -H "Referer: https://www.kbchachacha.com/" "https://www.kbchachacha.com/public/search/optionSale.json"
+            $kbOpt = $kbOptRaw | ConvertFrom-Json
+            $kbDirectTotal = [int]$kbOpt.optionSale.result.directYn
+            $kbAllTotal    = [int]$kbOpt.optionSale.result.total
+            if ($kbDirectTotal -gt 0) { break }
+        } catch {}
+        try {
+            $kbOptDirRaw = & $CurlBin -s -L --compressed --max-time 25 -A $uaKb -H "Accept-Language: ko-KR,ko;q=0.9" -H "Referer: https://www.kbchachacha.com/" "https://www.kbchachacha.com/public/search/optionSale.json?directYn=Y"
+            $kbOptDir = $kbOptDirRaw | ConvertFrom-Json
+            if ([int]$kbOptDir.optionSale.result.directYn -gt 0) {
+                $kbDirectTotal = [int]$kbOptDir.optionSale.result.directYn
+                break
+            }
+        } catch {}
+        Start-Sleep -Seconds 2
+    }
 
-    $tempKbHtml = Join-Path $TempDir "kb_direct_raw_$($PID).html"
-    & $CurlBin -s -L --compressed --max-time 25 -A $uaKb -H "Accept-Language: ko-KR,ko;q=0.9" -H "Referer: https://www.kbchachacha.com/" "https://www.kbchachacha.com/public/search/list.empty?page=1&sort=-orderDate&directYn=Y" -o $tempKbHtml
-    $kbHtml = [System.IO.File]::ReadAllText($tempKbHtml, [System.Text.Encoding]::UTF8)
-    Remove-Item $tempKbHtml -Force -ErrorAction SilentlyContinue
+    $maxKbPages = [Math]::Max(5, [int][Math]::Ceiling([Math]::Max($kbDirectTotal, 40) / 20.0) + 2)
+    $kbPageSeen = @{}
+    for ($pg = 1; $pg -le $maxKbPages; $pg++) {
+        $tempKbHtml = Join-Path $TempDir "kb_direct_raw_$($PID)_p$($pg).html"
+        & $CurlBin -s -L --compressed --max-time 25 -A $uaKb -H "Accept-Language: ko-KR,ko;q=0.9" -H "Referer: https://www.kbchachacha.com/" "https://www.kbchachacha.com/public/search/list.empty?page=$pg&sort=-orderDate&directYn=Y" -o $tempKbHtml
+        if (-not (Test-Path $tempKbHtml)) { break }
+        $pgHtml = [System.IO.File]::ReadAllText($tempKbHtml, [System.Text.Encoding]::UTF8)
+        Remove-Item $tempKbHtml -Force -ErrorAction SilentlyContinue
+        if (-not $pgHtml) { break }
+        $pgSeqs = [regex]::Matches($pgHtml, 'data-car-seq="(\d+)"')
+        $newOnPage = 0
+        foreach ($sm in $pgSeqs) {
+            $sv = $sm.Groups[1].Value
+            if (-not $kbPageSeen.ContainsKey($sv)) {
+                $kbPageSeen[$sv] = $true
+                $newOnPage++
+            }
+        }
+        if ($newOnPage -eq 0) { break }
+        $kbHtmlPages.Add($pgHtml)
+    }
 } catch { Write-Warning "KB curl error: $_" }
 
 if ($kbDirectTotal -le 0 -and $null -ne $cloudBrowserCache -and $cloudBrowserCache.kb_opt) {
     try {
         $kbDirectTotal = [int]$cloudBrowserCache.kb_opt.optionSale.result.directYn
         $kbAllTotal    = [int]$cloudBrowserCache.kb_opt.optionSale.result.total
-        $kbHtml        = [string]$cloudBrowserCache.kb_html
+        if ($cloudBrowserCache.kb_html) { $kbHtmlPages.Add([string]$cloudBrowserCache.kb_html) }
         Write-Host "   [Cloud Chrome] KB Direct=$kbDirectTotal" -ForegroundColor Green
     } catch {}
 }
 
 try {
+    $kbHtml = $kbHtmlPages -join "`n"
     if (-not $kbHtml) { $kbHtml = "" }
 
     $cardBlocks = $kbHtml -split '<div class="area\s*"'
@@ -749,7 +874,7 @@ try {
 
 $kbPortfolio = Build-PortfolioSummary $kbNormItems.ToArray()
 $kbIds = @($kbNormItems | ForEach-Object { $_.carId })
-if ($kbDirectTotal -eq 0) { $kbDirectTotal = $kbIds.Count }
+if ($kbIds.Count -gt $kbDirectTotal) { $kbDirectTotal = $kbIds.Count }
 $kbSnap = Compare-And-SaveSnapshot "kb_direct" $kbIds
 $kbNewToday = if ($null -ne $kbSnap.NewFromDiff) { $kbSnap.NewFromDiff } else { 0 }
 $kbSoldToday = if ($null -ne $kbSnap.SoldFromDiff) { $kbSnap.SoldFromDiff } else { 0 }
@@ -878,30 +1003,27 @@ if (Test-Path $JsonPath) {
     } catch { $records = @() }
 }
 
-if ($daangnTotal -eq 37508 -and $daangnOnSaleEst -ne 34370) {
-    $daangnTotal = 37508 + ($daangnOnSaleEst - 34370)
-    $daangnDomTotalEst = [int][math]::Round($daangnTotal * ($daangnPortfolio.domesticRatio / 100.0))
-    $daangnImpTotalEst = $daangnTotal - $daangnDomTotalEst
-    $daangnTurnoverPct = if ($daangnTotal -gt 0) { [math]::Round(($daangnSoldToday / $daangnTotal) * 100, 2) } else { 0 }
-}
-
 $defaultMemo = U "4\uB300 \uD50C\uB7AB\uD3FC Apple-to-Apple (\uAD6D\uC0B0/\uC218\uC785/\uD3EC\uD2B8\uD3F4\uB9AC\uC624/RAW) \uC790\uB3D9 \uC218\uC9D1"
 
 $newEntry = [ordered]@{
-    date                  = $TodayDate
-    updatedAt             = $Timestamp
-    rawVehicleCount       = $allRawVehicles.Count
+    date                     = $TodayDate
+    updatedAt                = $Timestamp
+    rawVehicleCount          = $allRawVehicles.Count
     # 1. Daangn Used Cars
-    daangnCarsCount       = $daangnTotal
-    daangnDomesticCount   = $daangnDomTotalEst
-    daangnImportedCount   = $daangnImpTotalEst
-    daangnOnSaleCount     = $daangnOnSaleEst
-    daangnTradedCount     = $daangnTradedEst
-    daangnNewCount        = $daangnNewToday
-    daangnSoldCount       = $daangnSoldToday
-    daangnTurnoverPct     = $daangnTurnoverPct
-    daangnAvgPrice        = $daangnPortfolio.avgPriceManwon
-    daangnDiff            = 0
+    daangnCarsCount          = $daangnTotal
+    daangnSitemapRawCount    = $daangnSitemapRawCount
+    daangnAnchorTotal        = $daangnAnchorTotal
+    daangnAnchorActiveSample = $daangnAnchorActiveSample
+    daangnActiveSample       = $daangnActiveSample
+    daangnDomesticCount      = $daangnDomTotalEst
+    daangnImportedCount      = $daangnImpTotalEst
+    daangnOnSaleCount        = $daangnOnSaleEst
+    daangnTradedCount        = $daangnTradedEst
+    daangnNewCount           = $daangnNewToday
+    daangnSoldCount          = $daangnSoldToday
+    daangnTurnoverPct        = $daangnTurnoverPct
+    daangnAvgPrice           = $daangnPortfolio.avgPriceManwon
+    daangnDiff               = 0
     # 2. K Car Safe Direct Deal (C2C)
     kcarDirectCount       = $kcarTotalCount
     kcarDomesticCount     = $kcarPortfolio.domesticCount

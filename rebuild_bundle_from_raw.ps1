@@ -125,8 +125,11 @@ function Parse-RawCsv([string]$csvPath) {
     return $list
 }
 
-Write-Host "1. Combining all raw_vehicles_20*.csv files into master DB..." -ForegroundColor Cyan
-$masterDbPath = Join-Path $DbDir "c2c_vehicle_master_db.csv"
+Write-Host "1. Combining all raw_vehicles_20*.csv files into master DB (full ZIP + rolling <30MB CSV)..." -ForegroundColor Cyan
+Add-Type -AssemblyName System.IO.Compression
+Add-Type -AssemblyName System.IO.Compression.FileSystem
+$masterDbPath    = Join-Path $DbDir "c2c_vehicle_master_db.csv"
+$masterDbZipPath = Join-Path $DbDir "c2c_vehicle_master_db.zip"
 $rawFiles = @(Get-ChildItem -Path $RawDir -Filter "raw_vehicles_20*.csv" | Sort-Object Name)
 $combinedLines = New-Object System.Collections.Generic.List[string]
 for ($fIdx = 0; $fIdx -lt $rawFiles.Count; $fIdx++) {
@@ -137,8 +140,27 @@ for ($fIdx = 0; $fIdx -lt $rawFiles.Count; $fIdx++) {
 
 $utf8Bom   = New-Object System.Text.UTF8Encoding($true)
 $utf8NoBom = New-Object System.Text.UTF8Encoding($false)
-[System.IO.File]::WriteAllLines($masterDbPath, $combinedLines, $utf8Bom)
-Write-Host "   Master DB lines written: $($combinedLines.Count)" -ForegroundColor Green
+
+# Write full cumulative CSV into c2c_vehicle_master_db.zip (~6-7 MB compressed)
+if (Test-Path $masterDbZipPath) { Remove-Item $masterDbZipPath -Force }
+$zipFs = [System.IO.File]::Open($masterDbZipPath, [System.IO.FileMode]::Create)
+$zipArchive = New-Object System.IO.Compression.ZipArchive($zipFs, [System.IO.Compression.ZipArchiveMode]::Create, $false)
+$zipEntry = $zipArchive.CreateEntry("c2c_vehicle_master_db.csv", [System.IO.Compression.CompressionLevel]::Optimal)
+$entryStream = $zipEntry.Open()
+$sw = New-Object System.IO.StreamWriter($entryStream, $utf8Bom)
+foreach ($ln in $combinedLines) { $sw.WriteLine($ln) }
+$sw.Flush(); $sw.Close(); $entryStream.Close(); $zipArchive.Dispose(); $zipFs.Close()
+
+# Write rolling latest 5 days into c2c_vehicle_master_db.csv (<30 MB so GitHub REST API /git/blobs never returns HTTP 422)
+$rollingFiles = if ($rawFiles.Count -gt 5) { @($rawFiles | Select-Object -Last 5) } else { $rawFiles }
+$rollingLines = New-Object System.Collections.Generic.List[string]
+for ($rIdx = 0; $rIdx -lt $rollingFiles.Count; $rIdx++) {
+    $rFileLines = [System.IO.File]::ReadAllLines($rollingFiles[$rIdx].FullName, [System.Text.Encoding]::UTF8)
+    $sIdx = if ($rIdx -eq 0) { 0 } else { 1 }
+    for ($i = $sIdx; $i -lt $rFileLines.Length; $i++) { $rollingLines.Add($rFileLines[$i]) }
+}
+[System.IO.File]::WriteAllLines($masterDbPath, $rollingLines, $utf8Bom)
+Write-Host "   Full ZIP lines: $($combinedLines.Count) | Rolling CSV lines: $($rollingLines.Count)" -ForegroundColor Green
 
 Write-Host "2. Building date-specific and combined Portfolio objects..." -ForegroundColor Cyan
 $PLAT_DAANGN = U "\uB2F9\uADFC\uC911\uACE0\uCC28"

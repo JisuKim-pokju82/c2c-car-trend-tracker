@@ -22,7 +22,29 @@ $baseCommitSha = $refInfo.object.sha
 $commitInfo = Invoke-RestMethod -Uri "https://api.github.com/repos/$Owner/$Repo/git/commits/$baseCommitSha" -Headers $headers -Method Get
 $baseTreeSha = $commitInfo.tree.sha
 
-$filesToUpload = @(
+$remoteBlobShas = @{}
+try {
+    $remTree = Invoke-RestMethod -Uri "https://api.github.com/repos/$Owner/$Repo/git/trees/$($baseTreeSha)?recursive=1" -Headers $headers -Method Get
+    foreach ($t in @($remTree.tree)) {
+        if ($t.type -eq "blob" -and $t.path -and $t.sha) {
+            $remoteBlobShas[[string]$t.path] = [string]$t.sha
+        }
+    }
+} catch {}
+
+function Get-GitBlobSha([byte[]]$fileBytes) {
+    $prefix = [System.Text.Encoding]::ASCII.GetBytes("blob $($fileBytes.Length)`0")
+    $combined = New-Object byte[] ($prefix.Length + $fileBytes.Length)
+    [System.Buffer]::BlockCopy($prefix, 0, $combined, 0, $prefix.Length)
+    [System.Buffer]::BlockCopy($fileBytes, 0, $combined, $prefix.Length, $fileBytes.Length)
+    $sha1 = [System.Security.Cryptography.SHA1]::Create()
+    $hash = $sha1.ComputeHash($combined)
+    $sha1.Dispose()
+    return ([System.BitConverter]::ToString($hash) -replace '-', '').ToLowerInvariant()
+}
+
+$candidateSet = New-Object 'System.Collections.Generic.HashSet[string]'
+$staticFiles = @(
     "README.md",
     "collect_competitor_trend.ps1",
     "cloud_browser_fetch.py",
@@ -34,27 +56,41 @@ $filesToUpload = @(
     "competitor_trend.html",
     "competitor_trend.csv",
     "competitor_trend_data.js",
-    "raw_data/raw_vehicles_$($TodayDate).csv",
     "raw_data/raw_vehicles_latest.csv",
-    "raw_data/daangn_sitemap_urls_$($TodayDate).csv",
     "database/c2c_daily_summary_db.csv",
     "database/c2c_vehicle_master_db.csv",
+    "database/c2c_vehicle_master_db.zip",
     "database/db_manifest.json",
-    "snapshots/daangn_$($TodayDate).json",
     "snapshots/daangn_latest.json",
-    "snapshots/kcar_c2c_$($TodayDate).json",
     "snapshots/kcar_c2c_latest.json",
-    "snapshots/encar_personal_$($TodayDate).json",
     "snapshots/encar_personal_latest.json",
-    "snapshots/kb_direct_$($TodayDate).json",
     "snapshots/kb_direct_latest.json"
 )
+foreach ($sf in $staticFiles) { [void]$candidateSet.Add($sf) }
 
+# Include all dated raw_data and snapshots files so any previously unsynced day (e.g., if offline or retried) is synced automatically
+foreach ($rf in @(Get-ChildItem -Path (Join-Path $WorkDir "raw_data") -File -ErrorAction SilentlyContinue)) {
+    [void]$candidateSet.Add("raw_data/$($rf.Name)")
+}
+foreach ($snf in @(Get-ChildItem -Path (Join-Path $WorkDir "snapshots") -Filter "*.json" -File -ErrorAction SilentlyContinue)) {
+    [void]$candidateSet.Add("snapshots/$($snf.Name)")
+}
+
+$MaxBlobBytes = 36 * 1024 * 1024
 $treeItems = New-Object System.Collections.Generic.List[object]
-foreach ($relPath in $filesToUpload) {
+foreach ($relPath in $candidateSet) {
     $fullPath = Join-Path $WorkDir ($relPath -replace '/', '\')
     if (-not (Test-Path $fullPath)) { continue }
+    $fi = Get-Item -LiteralPath $fullPath
+    if ($fi.Length -gt $MaxBlobBytes) {
+        Write-Warning "Skipping $relPath ($([math]::Round($fi.Length / 1MB, 2)) MB > 36 MB GitHub REST API blob limit)."
+        continue
+    }
     $bytes = [System.IO.File]::ReadAllBytes($fullPath)
+    $localSha = Get-GitBlobSha $bytes
+    if ($remoteBlobShas.ContainsKey($relPath) -and $remoteBlobShas[$relPath] -eq $localSha) {
+        continue
+    }
     $b64 = [Convert]::ToBase64String($bytes)
     $blobBody = @{ content = $b64; encoding = "base64" } | ConvertTo-Json -Compress
     $blobRes = Invoke-RestMethod -Uri "https://api.github.com/repos/$Owner/$Repo/git/blobs" -Headers $headers -Method Post -ContentType "application/json" -Body $blobBody
@@ -66,22 +102,30 @@ foreach ($relPath in $filesToUpload) {
     })
 }
 
-$treeBody = @{ base_tree = $baseTreeSha; tree = $treeItems } | ConvertTo-Json -Depth 5 -Compress
-$newTree = Invoke-RestMethod -Uri "https://api.github.com/repos/$Owner/$Repo/git/trees" -Headers $headers -Method Post -ContentType "application/json" -Body $treeBody
-
 $didBulkPatch = $false
-if ($newTree.sha -ne $baseTreeSha) {
-    $commitBody = @{
-        message = "chore(data): sync daily C2C RAW & bundle ($TodayDate)"
-        tree    = $newTree.sha
-        parents = @($baseCommitSha)
-    } | ConvertTo-Json -Compress
-    $newCommit = Invoke-RestMethod -Uri "https://api.github.com/repos/$Owner/$Repo/git/commits" -Headers $headers -Method Post -ContentType "application/json" -Body $commitBody
+if ($treeItems.Count -gt 0) {
+    # Re-fetch latest HEAD right before committing to avoid non-fast-forward 422 if Cloud Actions pushed concurrently
+    $refLatest = Invoke-RestMethod -Uri "https://api.github.com/repos/$Owner/$Repo/git/ref/heads/main" -Headers $headers -Method Get
+    $latestCommitSha = $refLatest.object.sha
+    $latestCommitInfo = Invoke-RestMethod -Uri "https://api.github.com/repos/$Owner/$Repo/git/commits/$latestCommitSha" -Headers $headers -Method Get
+    $latestTreeSha = $latestCommitInfo.tree.sha
 
-    $refUpdateBody = @{ sha = $newCommit.sha; force = $false } | ConvertTo-Json -Compress
-    Invoke-RestMethod -Uri "https://api.github.com/repos/$Owner/$Repo/git/refs/heads/main" -Headers $headers -Method Patch -ContentType "application/json" -Body $refUpdateBody | Out-Null
-    $didBulkPatch = $true
-    Write-Host "Synced ($TodayDate) bulk files to GitHub ($($newCommit.sha))!" -ForegroundColor Green
+    $treeBody = @{ base_tree = $latestTreeSha; tree = $treeItems } | ConvertTo-Json -Depth 5 -Compress
+    $newTree = Invoke-RestMethod -Uri "https://api.github.com/repos/$Owner/$Repo/git/trees" -Headers $headers -Method Post -ContentType "application/json" -Body $treeBody
+
+    if ($newTree.sha -ne $latestTreeSha) {
+        $commitBody = @{
+            message = "chore(data): sync daily C2C RAW & bundle ($TodayDate)"
+            tree    = $newTree.sha
+            parents = @($latestCommitSha)
+        } | ConvertTo-Json -Compress
+        $newCommit = Invoke-RestMethod -Uri "https://api.github.com/repos/$Owner/$Repo/git/commits" -Headers $headers -Method Post -ContentType "application/json" -Body $commitBody
+
+        $refUpdateBody = @{ sha = $newCommit.sha; force = $false } | ConvertTo-Json -Compress
+        Invoke-RestMethod -Uri "https://api.github.com/repos/$Owner/$Repo/git/refs/heads/main" -Headers $headers -Method Patch -ContentType "application/json" -Body $refUpdateBody | Out-Null
+        $didBulkPatch = $true
+        Write-Host "Synced ($TodayDate) $($treeItems.Count) changed file(s) to GitHub ($($newCommit.sha))!" -ForegroundColor Green
+    }
 }
 
 # 2. Commit competitor_trend.json via official Contents API PUT so GitHub receives a standard push event
